@@ -12,21 +12,22 @@ from equitymux.config import DB_PATH
 _LOCK = threading.Lock()
 _INIT_LOCK = threading.Lock()
 _DB = Path(DB_PATH)
-_initialized = False
+_initialized_paths: set[str] = set()
 
 
 def _conn() -> sqlite3.Connection:
     # separate lock: callers already hold _LOCK (non-reentrant) — nesting would
-    # deadlock. _INIT_LOCK is only ever taken here.
-    global _initialized
+    # deadlock. _INIT_LOCK is only ever taken here. Init is tracked per resolved
+    # path so tests repointing _DB still get a schema on the new file.
     _DB.parent.mkdir(parents=True, exist_ok=True)
     c = sqlite3.connect(str(_DB), check_same_thread=False)
     c.row_factory = sqlite3.Row
-    if not _initialized:
+    key = str(_DB)
+    if key not in _initialized_paths:
         with _INIT_LOCK:
-            if not _initialized:
+            if key not in _initialized_paths:
                 _init_schema(c)
-                _initialized = True
+                _initialized_paths.add(key)
     return c
 
 
