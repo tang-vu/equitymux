@@ -78,6 +78,8 @@ class Pipeline:
         self.tournament.quote_candidates(intent, candidates)
         candidates = self.tournament.evaluate(intent, candidates, engine, state)
 
+        sm.transition(ExecState.POLICY_EVALUATION,
+                      note=f"{len(candidates)} candidates evaluated")
         eligible = [c for c in candidates
                     if c.status in (RouteStatus.ELIGIBLE, RouteStatus.REQUIRES_CONFIRMATION)]
         if not eligible:
@@ -120,6 +122,7 @@ class Pipeline:
                     "candidates": [self._cand(c) for c in candidates],
                     "selected": self._cand(selected)}
 
+        sm.transition(ExecState.READY, note="simulation passed; route executable")
         if not self.s.execution_enabled:
             sm.transition(ExecState.POLICY_REJECTED,
                           note="EXECUTION_ENABLED=false (system kill switch)")

@@ -64,6 +64,11 @@ class RouteTournament:
                          candidates: list[CandidateRoute]) -> None:
         """Attach executable quotes via the Agentic Wallet boundary."""
         if intent.notional is None or intent.side.value != "BUY":
+            reason = ("SELL_UNIMPLEMENTED" if intent.side.value != "BUY"
+                      else "NO_NOTIONAL")
+            for c in candidates:
+                c.status = RouteStatus.NO_QUOTE
+                c.reason_codes.append(reason)
             return
         from_token = QUOTE_ASSET_ADDR.get(intent.quote_asset.upper())
         if not from_token:
