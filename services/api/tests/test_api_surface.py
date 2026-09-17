@@ -77,6 +77,19 @@ def test_x402_501_without_payto(api_client, monkeypatch):
     assert r.status_code == 501
 
 
+def test_keeper_task_evaluate_intent_happy_path(api_client):
+    r = api_client.post("/api/agent/tasks",
+                        json={"kind": "EVALUATE_EQUITY_INTENT",
+                              "input": {"ticker": "NVDA", "notional": "10"}})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["status"] == "SUCCEEDED"
+    cands = body["output"]["candidates"]
+    assert len(cands) >= 1
+    assert {c["platform"] for c in cands} <= {"ondo", "xstocks", "bstock"}
+    assert body["output"]["note"] == "analysis only — no execution authority"
+
+
 def test_keeper_task_unsupported_kind_fails_honestly(api_client):
     r = api_client.post("/api/agent/tasks",
                         json={"kind": "DO_A_CRIME", "input": {}})
