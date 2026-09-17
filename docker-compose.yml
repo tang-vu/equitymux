@@ -8,7 +8,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.api
-    ports: ["8000:8000"]
+    ports: ["${API_PORT:-8000}:8000"]
     environment:
       DEMO_MODE: ${DEMO_MODE:-false}
       EXECUTION_ENABLED: "false"
@@ -26,7 +26,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.web
-    ports: ["3000:3000"]
+    ports: ["${WEB_PORT:-3000}:3000"]
     environment:
       EQUITYMUX_API: http://api:8000
     depends_on:

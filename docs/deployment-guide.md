@@ -28,6 +28,9 @@ keeper tasks. Mount a volume for persistence.
 the host for execution paths. Read paths (explore/routes/receipts) work
 without it. Do not enable `EXECUTION_ENABLED` on a shared host.
 
+Set `CORS_ORIGINS=https://<your-web-domain>` on the API host — the default
+only allows `http://localhost:3000`.
+
 ## Frontend hosting
 
 `apps/web` is a standard Next.js app. On Vercel:
@@ -38,6 +41,16 @@ without it. Do not enable `EXECUTION_ENABLED` on a shared host.
 
 `pnpm build` is green as of this commit (all routes static-prerendered;
 data fetched client-side through the rewrite).
+
+## Docker (verified)
+
+```bash
+docker compose up --build   # api :8000 + web :3000
+```
+
+Both images build clean; the api image was verified serving live BSC data
+(chainId 56, market status) in-container. `docker-compose.yml` wires
+`EQUITYMUX_API=http://api:8000` and persists SQLite at `api-data:/repo/data`.
 
 ## Contracts
 
