@@ -5,11 +5,13 @@ Checks, in order:
   2. BSC chainId 56 via RPC
   3. RWA platforms load (Ondo/xStocks/bStock type lists)
   4. NVDA resolves to >=1 BSC representation
-  5. token + reference prices load
+  5. token + reference prices load (with provenance source)
   6. underlying market state loads
-  7. Agentic Wallet: CLI installed, auth status, balance (if connected)
-  8. executable quote via `baw market-order quote` (if connected)
-  9. simulation via eth_call balance probe
+  7. token kline loads (reference-fallback path)
+  8. token audit surface responds (fail-closed when unsupported)
+  9. Agentic Wallet: CLI installed, auth status, balance (if connected)
+  10. executable quote via `baw market-order quote` (if connected)
+  11. simulation via eth_call balance probe
 
 Exit code 0 when all *required* checks pass; wallet-dependent checks report
 BLOCKED with the exact human action needed.

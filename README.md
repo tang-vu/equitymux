@@ -111,16 +111,24 @@ Natural language compiles to a machine-checkable policy:
 
 ```json
 {
-  "maxPremiumOverReferenceBps": 50,
-  "maxExpectedSlippageBps": 30,
-  "maxQuoteAgeSec": 30,
-  "minLiquidityUsd": "10000",
-  "marketMustBeOpen": true,
-  "allowedPlatforms": ["ondo", "xstocks", "bstock"],
-  "spotOnly": true,
-  "simulationRequired": true
+  "execution": {
+    "max_premium_bps": "50",
+    "max_slippage_bps": "30",
+    "require_simulation": true,
+    "allow_unlimited_approval": false
+  },
+  "reference": { "max_reference_age_s": 600, "require_reference_price": true },
+  "market_hours": { "allow_when_closed": true, "block_when_halted": true },
+  "representation": {
+    "allowed_platforms": ["ondo", "xstocks", "bstock"],
+    "require_security_audit": false
+  },
+  "confirmation": { "confirm_above_usd": "100" }
 }
 ```
+
+Unmatched sentences are reported verbatim as `uncompiledSentences` —
+nothing silently ignored.
 
 System ceilings (`.env`) cannot be loosened by any constitution. Candidates
 get explicit pass/fail reasons — never a black box.
