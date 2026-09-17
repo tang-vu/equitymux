@@ -261,7 +261,30 @@ class CanonicalEquityGraph:
                         r.reference_price_source = f"peer:{ref.platform.value}"
                         r.source_evidence.append(
                             f"peer-reference:{ref.token_address}")
+            for r in reps:
+                if r.reference_price_usd is None:
+                    self._kline_reference(r, chain_id)
         return reps
+
+    def _kline_reference(self, rep: TokenizedRepresentation, chain_id: int) -> None:
+        """Last-resort reference: the token's own daily kline close.
+
+        Weaker than an equity reference (it measures the token's last trade,
+        not the underlying stock) — provenance `kline:close` keeps that honest.
+        """
+        try:
+            data = self.client.token_kline(chain_id, rep.token_address, interval="1d", limit=2)
+        except (ProviderError, KeyError, TypeError):
+            return
+        infos = data.get("klineInfos") or []
+        if not infos:
+            return
+        close = _dec_or_none(infos[-1][4] if len(infos[-1]) > 4 else None)
+        if close is not None:
+            rep.reference_price_usd = close
+            rep.reference_price_source = "kline:close"
+            rep.reference_observed_at = _now_iso()
+            rep.source_evidence.append("kline-reference:1d-close")
 
     def underlyings(self, chain_id: int = BSC) -> list[dict]:
         """All BSC-listed underlyings across platforms — for the explorer index."""

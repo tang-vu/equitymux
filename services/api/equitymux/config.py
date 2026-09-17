@@ -4,12 +4,14 @@ Safety model: even a permissive user Constitution can never exceed the
 system-level ceilings defined here. EXECUTION_ENABLED defaults to False and indeed
 the default value of MAX_MAINNET_NOTIONAL_USD is small on purpose.
 """
+import os
 from functools import lru_cache
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+# Layout-derived root; EQUITYMUX_REPO_ROOT overrides for non-standard deploys.
+REPO_ROOT = Path(os.environ.get("EQUITYMUX_REPO_ROOT") or Path(__file__).resolve().parents[3])
 DX_DIR = REPO_ROOT / "dx"
 FIXTURES_DIR = REPO_ROOT / "fixtures"
 DB_PATH = REPO_ROOT / "data" / "equitymux.db"

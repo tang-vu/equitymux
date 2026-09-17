@@ -72,7 +72,19 @@ Every entry below was recorded at the moment it happened
   `IndexError` when the package is copied to `/app/equitymux` inside a
   naive Dockerfile.
 - **Fix applied:** `Dockerfile.api` preserves the `services/api/equitymux`
-  depth under `/repo`. `REPO_ROOT` should become env-overridable.
+  depth under `/repo`, and `REPO_ROOT` is now env-overridable via
+  `EQUITYMUX_REPO_ROOT` for non-standard layouts.
+
+## Issue 9 — `stockInfo.price` gap can outlive peer fallback
+
+- **Observed:** the bStock `stockInfo.price=null` gap (Issue 2) leaves a
+  representation with no reference when no same-ticker peer exists on
+  another platform — the rep then fails `require_reference_price` closed
+  even though the token itself trades.
+- **Fix applied:** last-resort `token/kline` 1d close reference with
+  provenance `kline:close`. Weaker than an equity reference (token price,
+  not stock price) so it ranks below `stockInfo` and `peer:*` sources;
+  the source label is carried into the receipt so consumers can weight it.
 
 ## What went well
 

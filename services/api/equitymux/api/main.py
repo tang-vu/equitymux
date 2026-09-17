@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import uuid
+from contextlib import asynccontextmanager
 from typing import Any
 
 import structlog
@@ -28,7 +29,15 @@ from equitymux.services.pipeline import Pipeline
 
 log = structlog.get_logger()
 settings = get_settings()
-app = FastAPI(title="EquityMux", version="0.1.0",
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    persistence.init_db()
+    yield
+
+
+app = FastAPI(title="EquityMux", version="0.1.0", lifespan=lifespan,
               description="The intent and execution router for tokenized stocks")
 app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origin_list,
                    allow_methods=["*"], allow_headers=["*"])
@@ -36,11 +45,6 @@ app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origin_list,
 pipeline = Pipeline(settings)
 wallet = AgenticWallet(settings)
 rpc = BscRpc(settings)
-
-
-@app.on_event("startup")
-def _startup() -> None:
-    persistence.init_db()
 
 
 # ---------- meta ----------

@@ -8,8 +8,9 @@ from equitymux.services.graph import CanonicalEquityGraph
 class FakeClient:
     """Deterministic stand-in for BinancePublicClient — no network."""
 
-    def __init__(self, missing_ref_platforms=()):
+    def __init__(self, missing_ref_platforms=(), kline_close=None):
         self.missing_ref = set(missing_ref_platforms)
+        self.kline_close = kline_close
         self.calls = {"rwa_dynamic": 0}
 
     def stock_list(self, type_id):
@@ -49,6 +50,12 @@ class FakeClient:
     def market_status(self):
         return {"marketStatus": "regular"}
 
+    def token_kline(self, chain_id, contract, interval="1d", limit=30):
+        if self.kline_close is None:
+            return {}
+        return {"klineInfos": [[1, "1", "2", "0.5", str(self.kline_close), "10", 2]],
+                "decimals": 18}
+
 
 def test_discover_all_platforms_parallel():
     g = CanonicalEquityGraph(client=FakeClient())
@@ -74,6 +81,16 @@ def test_no_peer_reference_stays_none():
     reps = g.discover("NVDA")
     assert reps[0].reference_price_usd is None
     assert reps[0].reference_price_source is None
+
+
+def test_kline_reference_last_resort():
+    g = CanonicalEquityGraph(client=FakeClient(missing_ref_platforms={"bstock"},
+                                             kline_close="179.90"),
+                             platforms={"bstock"})
+    reps = g.discover("NVDA")
+    assert reps[0].reference_price_usd == Decimal("179.90")
+    assert reps[0].reference_price_source == "kline:close"
+    assert "kline-reference:1d-close" in reps[0].source_evidence
 
 
 def test_stockinfo_source_marked():
