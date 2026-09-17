@@ -55,6 +55,17 @@ def test_sell_intent_detected():
     assert i.notional == Decimal(50)
 
 
+def test_intent_unknown_ticker_passes_to_discovery():
+    assert parse_intent("buy $10 of NFLX").ticker == "NFLX"
+    assert parse_intent("buy ABB").ticker == "ABB"  # not stemmed to AB
+
+
+def test_intent_platform_suffix_resolves_underlying():
+    assert parse_intent("buy NVDAx").ticker == "NVDA"
+    assert parse_intent("buy 5 NVDAB shares").ticker == "NVDA"
+    assert parse_intent("sell TSLAon").ticker == "TSLA"
+
+
 def test_intent_constraints_extracted():
     i = parse_intent("Buy $25 of NVIDIA, no more than 40 bps, slippage 30 bps")
     assert i.constraints["maxPremiumBps"] == 40
