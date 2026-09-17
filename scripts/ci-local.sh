@@ -29,6 +29,8 @@ step "api: pytest"
 
 if [ "${1:-}" != "--skip-contracts" ]; then
   step "contracts: forge test"
+  # foundryup installs to ~/.foundry/bin which isn't always on PATH
+  command -v forge >/dev/null || export PATH="$HOME/.foundry/bin:$PATH"
   (cd packages/contracts && forge test)
 fi
 
