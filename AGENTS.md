@@ -33,12 +33,14 @@ docker compose up --build          # containerized demo
 ## Gotchas learned the hard way
 
 - `REPO_ROOT = config.py parents[3]` — package must sit at
-  `<root>/services/api/equitymux` (Docker preserves this layout).
+  `<root>/services/api/equitymux`, or set `EQUITYMUX_REPO_ROOT`
+  (Docker preserves the layout under `/repo`).
 - Dev proxy: `next dev` reads `EQUITYMUX_API` at start; restart it if the
   API port changes. `/api/health` returns `service=equitymux-api` —
   fingerprint-check before trusting proxied data.
-- `services/keeper/agent` is a standalone package (`pnpm install
-  --ignore-workspace`), not a workspace member.
+- `services/keeper/agent` is standalone — its own `pnpm-workspace.yaml`
+  scopes `allowBuilds` (esbuild); run `pnpm install` inside it, not
+  `--ignore-workspace` (which skips that config).
 - `packages/contracts/lib/forge-std` is a git submodule — clone with
   `--recurse-submodules`.
 - `baw`/`bag` CLIs and Foundry live at `/root/.local/bin` and

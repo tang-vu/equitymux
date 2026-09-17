@@ -73,7 +73,7 @@ export default function Explorer() {
             <div className="mono text-[11px] text-[var(--color-ink-3)] break-all">{r.token_address}</div>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <Field k="token price" v={fmt(r.token_price_usd)} />
-              <Field k="reference" v={fmt(r.reference_price_usd) + (r.reference_price_source?.startsWith("peer:") ? ` (${r.reference_price_source})` : "")} />
+              <Field k="reference" v={fmt(r.reference_price_usd) + (r.reference_price_source && r.reference_price_source !== "stockInfo" ? ` (${r.reference_price_source})` : "")} />
               <Field k="shares/token" v={r.shares_per_token} />
               <Field k="decimals" v={String(r.decimals)} />
               <Field k="holders" v={r.liquidity.holders?.toLocaleString() ?? "—"} />
