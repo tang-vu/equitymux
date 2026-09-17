@@ -28,7 +28,7 @@ representation — then proves it with a cryptographic receipt.
 - **Receipts are independently verifiable**: canonical JSON + sha256 with a
   cross-language parity vector (Python ⇄ TypeScript); the UI re-computes the
   hash client-side AND via `GET /api/receipts/{id}/verify`.
-- 72 Python tests + 8 frontend tests + 4 Foundry tests, all green.
+- 75 Python tests + 8 frontend tests + 4 Foundry tests, all green.
   `verify:live` reproduces every read-only claim with no credentials.
 - Fail-closed defaults: `EXECUTION_ENABLED=false`, system ceilings the
   constitution cannot loosen. Clean checkout verified end-to-end

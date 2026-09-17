@@ -12,8 +12,9 @@ minutes. Stage timestamps assume a connected wallet (obtained before filming).
 - Terminal page: type `Buy $10 of NVIDIA`.
 - Pipeline stages animate: intent resolved → NVDA, constitution compiled.
 - Open Constitution page: show the compiled policy —
-  `maxPremiumOverReferenceBps`, `marketMustBeOpen`, `simulationRequired`,
-  `spotOnly`. Line: *"The LLM interprets. The constitution decides."*
+  `execution.max_premium_bps`, `market_hours.allow_when_closed`,
+  `execution.require_simulation`, `representation.allowed_platforms`.
+  Line: *"The LLM interprets. The constitution decides."*
 
 ## 0:55–1:45 — Discovery & route tournament
 - Routes page: three candidates with live evidence —
@@ -34,7 +35,9 @@ minutes. Stage timestamps assume a connected wallet (obtained before filming).
 - Order polls to `FINISHED` (never report success at orderId).
 - `eth_getTransactionReceipt` + portfolio delta shown.
 - Receipts page: canonical JSON, `receiptHash` = sha256, links to
-  policy hash, intent hash, execution tx hash.
+  policy hash, intent hash, execution tx hash. Click **verify hash** —
+  the browser recomputes sha256 over canonical JSON AND the server
+  re-verifies independently. Or `pnpm verify:receipt` on the CLI.
 - Optional: `ReceiptRegistry.commit` tx on BscScan — on-chain evidence
   notary (holds no funds).
 

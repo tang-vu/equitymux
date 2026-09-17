@@ -75,6 +75,7 @@ def _candidate_view(c: CandidateRoute | None) -> dict | None:
         "sharesPerToken": rep.shares_per_token,
         "tokenPriceUsd": rep.token_price_usd,
         "referencePriceUsd": rep.reference_price_usd,
+        "referencePriceSource": rep.reference_price_source,
         "impliedSharePriceUsd": rep.implied_share_price_usd,
         "premiumBps": c.premium_bps,
         "expectedSlippageBps": c.expected_slippage_bps,

@@ -49,7 +49,7 @@ equitymux/
 | Command | Purpose |
 |---|---|
 | `pnpm dev:api` / `pnpm dev:web` | local stack |
-| `pnpm test:api` | 72 backend tests (offline) |
+| `pnpm test:api` | 75 backend tests (offline) |
 | `pnpm test:web` | 8 vitest tests (canonical parity) |
 | `pnpm test:contracts` | forge tests |
 | `pnpm verify:live` | live read-only checks |
