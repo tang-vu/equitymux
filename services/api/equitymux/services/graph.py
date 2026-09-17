@@ -245,7 +245,9 @@ class CanonicalEquityGraph:
                     return found
                 with ThreadPoolExecutor(max_workers=4) as ex:
                     return list(ex.map(adapter.enrich, found))
-            except ProviderError:
+            except Exception:
+                # one platform's failure must not take down the whole graph —
+                # other platforms' representations remain valid evidence
                 return []
 
         with ThreadPoolExecutor(max_workers=len(self.adapters) or 1) as ex:
