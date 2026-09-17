@@ -109,6 +109,5 @@ def record_issue(
 def _append(path: Path, obj: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     line = json.dumps(obj, separators=(",", ":"), default=str)
-    with _LOCK:
-        with path.open("a", encoding="utf-8") as f:
-            f.write(line + "\n")
+    with _LOCK, path.open("a", encoding="utf-8") as f:
+        f.write(line + "\n")

@@ -56,12 +56,11 @@ def evaluate_equity_intent(inp: dict[str, Any], pipeline) -> dict:
     constitution = (PortfolioConstitution.model_validate_json(row["canonical_json"])
                     if row else PortfolioConstitution())
     from equitymux.policy.engine import DeterministicPolicyEngine
-    from equitymux.services.tournament import RouteTournament
     engine = DeterministicPolicyEngine(constitution, pipeline.s)
     tournament = pipeline.tournament
-    cands = tournament.build_candidates(intent, [  # noqa: SLF001
+    cands = tournament.build_candidates(intent, [
         _rep_from_dump(r) for r in reps])
-    tournament.evaluate(intent, cands, engine, PortfolioState())  # noqa: SLF001
+    tournament.evaluate(intent, cands, engine, PortfolioState())
     return {
         "ticker": ticker,
         "market": data["market"],

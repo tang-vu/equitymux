@@ -7,17 +7,18 @@ a new adapter, never an engine rewrite.
 from __future__ import annotations
 
 import time
-from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from abc import ABC
+from concurrent.futures import ThreadPoolExecutor
+from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 
 from equitymux.domain.mathx import dec
 from equitymux.domain.models import (
+    PLATFORM_TYPE_ID,
     Attestation,
     LiquiditySnapshot,
     MarketState,
     Platform,
-    PLATFORM_TYPE_ID,
     TokenizedRepresentation,
 )
 from equitymux.providers.binance_public import BinancePublicClient
@@ -47,7 +48,7 @@ _REASON_TO_STATE = {
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def _dec_or_none(v) -> Decimal | None:
@@ -102,12 +103,33 @@ class RepresentationAdapter(ABC):
         )
 
     def enrich(self, rep: TokenizedRepresentation) -> TokenizedRepresentation:
-        """Attach price/reference/market/issuer/liquidity evidence."""
-        try:
-            dyn = self.client.rwa_dynamic(rep.chain_id, rep.token_address)
+        """Attach price/reference/market/issuer/liquidity evidence.
+
+        The four upstream calls are independent and one of them
+        (token/dynamic/info) is 4-10s — run them concurrently (DX issue #3).
+        """
+        out: dict[str, dict] = {}
+
+        def fetch(name: str, fn):
+            try:
+                out[name] = fn()
+            except ProviderError:
+                out[name] = {}
+
+        cid, addr = rep.chain_id, rep.token_address
+        with ThreadPoolExecutor(max_workers=4) as ex:
+            futs = [
+                ex.submit(fetch, "dyn", lambda: self.client.rwa_dynamic(cid, addr)),
+                ex.submit(fetch, "status", lambda: self.client.asset_market_status(cid, addr)),
+                ex.submit(fetch, "meta", lambda: self.client.rwa_meta(cid, addr)),
+                ex.submit(fetch, "tokdyn", lambda: self.client.token_dynamic(cid, addr)),
+            ]
+            for f in futs:
+                f.result()
+
+        dyn = out.get("dyn") or {}
+        if dyn:
             rep.source_evidence.append("rwa/dynamic/v2")
-        except ProviderError:
-            dyn = {}
         token_info = dyn.get("tokenInfo") or {}
         stock_info = dyn.get("stockInfo") or {}
         status_info = dyn.get("statusInfo") or {}
@@ -115,6 +137,8 @@ class RepresentationAdapter(ABC):
 
         rep.token_price_usd = _dec_or_none(token_info.get("price"))
         rep.reference_price_usd = _dec_or_none(stock_info.get("price"))
+        if rep.reference_price_usd is not None:
+            rep.reference_price_source = "stockInfo"
         rep.reference_observed_at = _now_iso()
         mult = _dec_or_none(token_info.get("sharesMultiplier"))
         if mult and mult > 0:
@@ -134,26 +158,21 @@ class RepresentationAdapter(ABC):
             rep.next_close_time = status_info.get("nextCloseTime")
 
         # per-asset status is authoritative over the dynamic bundle when present
-        try:
-            st = self.client.asset_market_status(rep.chain_id, rep.token_address)
+        st = out.get("status") or {}
+        if st:
             rep.source_evidence.append("rwa/asset/market/status")
-            if st:
-                state2, code2 = _market_state(st)
-                rep.market_state = state2
-                rep.market_reason_code = code2 or rep.market_reason_code
-                rep.market_reason_msg = st.get("reasonMsg") or rep.market_reason_msg
-                rep.next_open_time = st.get("nextOpenTime") or rep.next_open_time
-                rep.next_close_time = st.get("nextCloseTime") or rep.next_close_time
-                rep.issuer_status = code2
-        except ProviderError:
-            pass
+            state2, code2 = _market_state(st)
+            rep.market_state = state2
+            rep.market_reason_code = code2 or rep.market_reason_code
+            rep.market_reason_msg = st.get("reasonMsg") or rep.market_reason_msg
+            rep.next_open_time = st.get("nextOpenTime") or rep.next_open_time
+            rep.next_close_time = st.get("nextCloseTime") or rep.next_close_time
+            rep.issuer_status = code2
 
         # issuer metadata + attestation
-        try:
-            meta = self.client.rwa_meta(rep.chain_id, rep.token_address)
+        meta = out.get("meta") or {}
+        if meta:
             rep.source_evidence.append("rwa/meta")
-        except ProviderError:
-            meta = {}
         if meta:
             rep.underlying_name = (meta.get("companyInfo") or {}).get("companyName") or meta.get("name")
             daily, monthly = meta.get("dailyAttestationReports"), meta.get("monthlyAttestationReports")
@@ -165,14 +184,11 @@ class RepresentationAdapter(ABC):
             )
 
         # on-chain liquidity evidence (best-effort; endpoint is slow)
-        try:
-            td = self.client.token_dynamic(rep.chain_id, rep.token_address)
-            if td:
-                rep.source_evidence.append("market/token/dynamic/info")
-                rep.liquidity.volume_24h_buy_usd = _dec_or_none(td.get("volume24hBuy"))
-                rep.liquidity.volume_24h_sell_usd = _dec_or_none(td.get("volume24hSell"))
-        except ProviderError:
-            pass
+        td = out.get("tokdyn") or {}
+        if td:
+            rep.source_evidence.append("market/token/dynamic/info")
+            rep.liquidity.volume_24h_buy_usd = _dec_or_none(td.get("volume24hBuy"))
+            rep.liquidity.volume_24h_sell_usd = _dec_or_none(td.get("volume24hSell"))
         return rep
 
     def get_reference(self, rep: TokenizedRepresentation) -> Decimal | None:
@@ -213,14 +229,58 @@ class CanonicalEquityGraph:
 
     def discover(self, ticker: str, chain_id: int = BSC,
                  enrich: bool = True) -> list[TokenizedRepresentation]:
+        """Discover + enrich representations across all adapters in parallel.
+
+        After enrichment, representations missing a reference price inherit the
+        same-ticker peer's reference (the underlying price is shared across
+        wrappers) — provenance is marked `peer:<platform>`; a rep with no peer
+        reference stays None and fails `require_reference_price` closed.
+        """
         reps: list[TokenizedRepresentation] = []
+
+        def _one(adapter) -> list[TokenizedRepresentation]:
+            try:
+                found = adapter.discover(ticker, chain_id)
+                if not enrich:
+                    return found
+                with ThreadPoolExecutor(max_workers=4) as ex:
+                    return list(ex.map(adapter.enrich, found))
+            except ProviderError:
+                return []
+
+        with ThreadPoolExecutor(max_workers=len(self.adapters) or 1) as ex:
+            for batch in ex.map(_one, self.adapters):
+                reps.extend(batch)
+
+        if enrich:
+            ref = next((r for r in reps if r.reference_price_usd is not None), None)
+            if ref:
+                for r in reps:
+                    if r.reference_price_usd is None:
+                        r.reference_price_usd = ref.reference_price_usd
+                        r.reference_price_source = f"peer:{ref.platform.value}"
+                        r.source_evidence.append(
+                            f"peer-reference:{ref.token_address}")
+        return reps
+
+    def underlyings(self, chain_id: int = BSC) -> list[dict]:
+        """All BSC-listed underlyings across platforms — for the explorer index."""
+        by_ticker: dict[str, dict] = {}
         for adapter in self.adapters:
             try:
-                for rep in adapter.discover(ticker, chain_id):
-                    reps.append(adapter.enrich(rep) if enrich else rep)
+                for item in self.client.stock_list(adapter.type_id):
+                    if str(item.get("chainId")) != str(chain_id):
+                        continue
+                    t = item.get("ticker", "").upper()
+                    e = by_ticker.setdefault(t, {"ticker": t, "name": item.get("name"),
+                                                 "platforms": {}, "count": 0})
+                    e["platforms"][adapter.platform.value] = {
+                        "symbol": item.get("symbol"),
+                        "tokenAddress": item.get("contractAddress")}
+                    e["count"] += 1
             except ProviderError:
                 continue
-        return reps
+        return sorted(by_ticker.values(), key=lambda e: (-e["count"], e["ticker"]))
 
     def underlying_market(self) -> dict:
         return self.client.market_status()

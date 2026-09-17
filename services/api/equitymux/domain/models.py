@@ -68,6 +68,7 @@ class TokenizedRepresentation(BaseModel):
     shares_per_token: Decimal  # `multiplier` — NEVER assume 1.0
     token_price_usd: Decimal | None = None  # on-chain price per token
     reference_price_usd: Decimal | None = None  # stock price per share
+    reference_price_source: str | None = None  # "stockInfo" | "peer:<platform>"
     reference_observed_at: str | None = None
     market_state: MarketState = MarketState.UNKNOWN
     market_reason_code: str | None = None

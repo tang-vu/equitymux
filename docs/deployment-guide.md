@@ -51,11 +51,29 @@ DEPLOYER_PRIVATE_KEY=... forge script script/Deploy.s.sol \
 
 The registry holds no funds; committing receipts is optional evidence.
 
+### Testnet dry-run (verified)
+
+`forge script script/Deploy.s.sol --rpc-url https://bsc-testnet.publicnode.com`
+simulates cleanly on chain 97: **343,595 gas ≈ 0.0000344 tBNB**. The command
+regenerates artifacts under `broadcast/Deploy.s.sol/97/dry-run/` (gitignored).
+
+A throwaway deployer was generated for the testnet deploy:
+`0x0e93E8235E020173De7B33d99fDfCcE887C501FA` (balance 0 — key never committed).
+**Human action:** fund it at https://www.bnbchain.org/en/testnet-faucet
+(captcha-gated), then broadcast:
+
+```bash
+DEPLOYER_PRIVATE_KEY=<never-committed> forge script script/Deploy.s.sol \
+  --rpc-url https://bsc-testnet.publicnode.com --broadcast
+```
+
 ## Keeper (BNB Agent Studio)
 
 ```bash
 cd services/keeper
-bag init equitymux-keeper   # or use studio.toml directly
+bag doctor                          # scaffold verified (canonical bag layout)
+cd agent && pnpm install && pnpm build
+cd .. && bag wallet new             # throwaway keystore → .studio/wallets
 bag erc8004 register --endpoint <public-url>
 bag deploy --provider aws
 ```

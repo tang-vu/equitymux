@@ -15,7 +15,14 @@ const LAYERS = [
 export default function AgentOps() {
   const qc = useQueryClient();
   const { data } = useQuery({ queryKey: ["agent"], queryFn: () => api<any>("/agent/identity") });
+  const x402 = useQuery({ queryKey: ["x402"], queryFn: () => api<any>("/agent/x402") });
   const [input, setInput] = useState('{"ticker": "NVDA", "notional": "10"}');
+  const paid = useMutation({
+    mutationFn: () => api<any>("/agent/tasks/paid", {
+      method: "POST",
+      body: JSON.stringify({ kind: "EVALUATE_EQUITY_INTENT", input: JSON.parse(input) }),
+    }),
+  });
   const task = useMutation({
     mutationFn: () => api<any>("/agent/tasks", {
       method: "POST",
@@ -61,6 +68,36 @@ export default function AgentOps() {
           </div>
         </div>
 
+        <div className="space-y-5">
+        <div className="panel p-5">
+          <h2 className="text-sm font-medium mb-3">x402 payment surface</h2>
+          <div className="space-y-2 text-xs mono">
+            <Row k="status" v={x402.data?.x402?.status ?? "…"} />
+            <Row k="payTo" v={x402.data?.x402?.payToConfigured ? "configured" : "not configured"} />
+            <Row k="scheme" v={x402.data?.x402?.scheme ?? "exact"} />
+            <Row k="asset" v={x402.data?.x402?.asset ?? "USDC (BSC)"} />
+          </div>
+          <button
+            className="mt-3 text-xs px-3 py-1.5 rounded border border-[var(--color-edge)] hover:border-[var(--color-accent)] disabled:opacity-50"
+            disabled={paid.isPending}
+            onClick={() => paid.mutate()}
+          >
+            {paid.isPending ? "probing…" : "probe POST /api/agent/tasks/paid"}
+          </button>
+          {paid.isError && (
+            <p className="mt-2 text-xs text-[var(--color-warn)]">{(paid.error as Error).message}</p>
+          )}
+          {paid.data && (
+            <pre className="mt-2 text-[11px] mono overflow-auto max-h-40 bg-[var(--color-bg)] rounded-lg p-3">
+              {JSON.stringify(paid.data, null, 2)}
+            </pre>
+          )}
+          <p className="mt-3 text-[11px] text-[var(--color-ink-3)]">
+            Honest status: challenge surface implemented; settlement verification is
+            intentionally not claimed until wired to a real x402 facilitator.
+          </p>
+        </div>
+
         <div className="panel p-5">
           <h2 className="text-sm font-medium mb-3">Authorization boundary</h2>
           <div className="space-y-2">
@@ -74,6 +111,7 @@ export default function AgentOps() {
               </div>
             ))}
           </div>
+        </div>
         </div>
       </div>
 

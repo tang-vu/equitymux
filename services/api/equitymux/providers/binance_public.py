@@ -11,9 +11,9 @@ hitting the network — and callers can always tell, because every model carries
 from __future__ import annotations
 
 import json
+import threading
 import time
 import uuid
-from pathlib import Path
 from typing import Any
 
 import httpx
@@ -40,10 +40,38 @@ TOKEN_AUDIT = "/bapi/defi/v1/public/wallet-direct/security/token/audit"
 WWW_PATHS = {RWA_LIST, RWA_META, RWA_MARKET_STATUS, RWA_ASSET_STATUS, RWA_DYNAMIC_V2, TOKEN_KLINE}
 
 
+class _TTLCache:
+    """Thread-safe in-process cache — short TTLs so evidence stays fresh."""
+
+    def __init__(self):
+        self._d: dict[str, tuple[float, Any]] = {}
+        self._lock = threading.Lock()
+
+    def get(self, key: str) -> Any | None:
+        with self._lock:
+            hit = self._d.get(key)
+            if hit and hit[0] > time.time():
+                return hit[1]
+            return None
+
+    def set(self, key: str, value: Any, ttl_s: float) -> None:
+        with self._lock:
+            self._d[key] = (time.time() + ttl_s, value)
+
+
 class BinancePublicClient:
     def __init__(self, settings: Settings | None = None):
         self.s = settings or get_settings()
         self._fixtures = FIXTURES_DIR / "rwa"
+        self._cache = _TTLCache()
+
+    def _cached(self, key: str, ttl_s: float, fn):
+        hit = self._cache.get(key)
+        if hit is not None:
+            return hit
+        out = fn()
+        self._cache.set(key, out, ttl_s)
+        return out
 
     # ---------- transport ----------
     def _get(self, path: str, params: dict[str, Any] | None = None, *, module: str) -> dict:
@@ -130,30 +158,35 @@ class BinancePublicClient:
                     pass
             return out
         params = {} if platform_type is None else {"type": platform_type}
-        return (self._get(RWA_LIST, params, module="rwa").get("data")) or []
+        return self._cached(f"stock-list:{platform_type}", 60, lambda:
+                            (self._get(RWA_LIST, params, module="rwa").get("data")) or [])
 
     def rwa_meta(self, chain_id: int, contract: str) -> dict:
         if self.s.demo_mode:
             return self._fixture_by_suffix("rwa-meta-", contract).get("data") or {}
-        return self._get(RWA_META, {"chainId": str(chain_id), "contractAddress": contract},
-                         module="rwa").get("data") or {}
+        return self._cached(f"meta:{chain_id}:{contract}", 120, lambda:
+                            self._get(RWA_META, {"chainId": str(chain_id), "contractAddress": contract},
+                                      module="rwa").get("data") or {})
 
     def market_status(self) -> dict:
         if self.s.demo_mode:
             return self._fixture("market-status.json").get("data") or {}
-        return self._get(RWA_MARKET_STATUS, module="rwa").get("data") or {}
+        return self._cached("market-status", 15, lambda:
+                            self._get(RWA_MARKET_STATUS, module="rwa").get("data") or {})
 
     def asset_market_status(self, chain_id: int, contract: str) -> dict:
         if self.s.demo_mode:
             return self._fixture_by_suffix("asset-status-", contract).get("data") or {}
-        return self._get(RWA_ASSET_STATUS, {"chainId": str(chain_id), "contractAddress": contract},
-                         module="rwa").get("data") or {}
+        return self._cached(f"asset-status:{chain_id}:{contract}", 15, lambda:
+                            self._get(RWA_ASSET_STATUS, {"chainId": str(chain_id), "contractAddress": contract},
+                                      module="rwa").get("data") or {})
 
     def rwa_dynamic(self, chain_id: int, contract: str) -> dict:
         if self.s.demo_mode:
             return self._fixture_by_suffix("rwa-dynamic-", contract).get("data") or {}
-        return self._get(RWA_DYNAMIC_V2, {"chainId": str(chain_id), "contractAddress": contract},
-                         module="rwa").get("data") or {}
+        return self._cached(f"dyn:{chain_id}:{contract}", 10, lambda:
+                            self._get(RWA_DYNAMIC_V2, {"chainId": str(chain_id), "contractAddress": contract},
+                                      module="rwa").get("data") or {})
 
     def token_kline(self, chain_id: int, contract: str, interval: str = "1d", limit: int = 30) -> dict:
         if self.s.demo_mode:
@@ -168,8 +201,9 @@ class BinancePublicClient:
                 return self._fixture_by_suffix("token-dynamic-", contract).get("data") or {}
             except FixtureMissingError:
                 return {}
-        return self._get(TOKEN_DYNAMIC, {"chainId": str(chain_id), "contractAddress": contract},
-                         module="market").get("data") or {}
+        return self._cached(f"tokdyn:{chain_id}:{contract}", 15, lambda:
+                            self._get(TOKEN_DYNAMIC, {"chainId": str(chain_id), "contractAddress": contract},
+                                      module="market").get("data") or {})
 
     def token_search(self, chain_id: int, keyword: str) -> dict:
         if self.s.demo_mode:

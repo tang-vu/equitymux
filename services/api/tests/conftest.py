@@ -41,7 +41,7 @@ def rep_xstocks() -> TokenizedRepresentation:
     return TokenizedRepresentation(
         underlying_ticker="NVDA", platform=Platform.XSTOCKS, chain_id=56,
         token_address="0xc845b2894dbddd03858fd2d643b4ef725fe0849d",
-        token_symbol="NVDAx", decimals=18, shares_per_token=Decimal("1"),
+        token_symbol="NVDAx", decimals=18, shares_per_token=Decimal(1),
         token_price_usd=Decimal("181.10"), reference_price_usd=Decimal("180.20"),
         market_state=MarketState.CLOSED, market_reason_code="MARKET_CLOSED",
     )
@@ -62,13 +62,13 @@ def rep_bstock() -> TokenizedRepresentation:
 @pytest.fixture
 def intent() -> EquityIntent:
     return EquityIntent(raw="Buy $10 of NVIDIA", ticker="NVDA",
-                        notional=Decimal("10"), quote_asset="USDC")
+                        notional=Decimal(10), quote_asset="USDC")
 
 
 @pytest.fixture
 def state() -> PortfolioState:
-    return PortfolioState(quote_balance=Decimal("100"),
-                          total_value_usd=Decimal("200"))
+    return PortfolioState(quote_balance=Decimal(100),
+                          total_value_usd=Decimal(200))
 
 
 @pytest.fixture

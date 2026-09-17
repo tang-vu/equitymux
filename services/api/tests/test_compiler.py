@@ -1,7 +1,7 @@
 from decimal import Decimal
 
-from equitymux.policy.compiler import compile_policy, compile_with_report, uncovered_fragments
-from equitymux.policy.schema import constitution_hash, canonical_json, PortfolioConstitution
+from equitymux.policy.compiler import compile_policy, compile_with_report
+from equitymux.policy.schema import PortfolioConstitution, canonical_json, constitution_hash
 
 TEXT = """
 My Constitution:
@@ -21,17 +21,17 @@ Autonomous rebalances may spend at most $50 per day.
 
 def test_full_example_compiles():
     c, applied = compile_policy(TEXT)
-    assert c.reserve.min_quote_reserve == Decimal("100")
-    assert c.concentration.max_single_underlying_pct == Decimal("20")
-    assert c.execution.max_premium_bps == Decimal("50")
-    assert c.execution.max_slippage_bps == Decimal("30")
+    assert c.reserve.min_quote_reserve == Decimal(100)
+    assert c.concentration.max_single_underlying_pct == Decimal(20)
+    assert c.execution.max_premium_bps == Decimal(50)
+    assert c.execution.max_slippage_bps == Decimal(30)
     assert c.execution.require_simulation is True
-    assert c.market_hours.max_premium_bps_when_closed == Decimal("20")
+    assert c.market_hours.max_premium_bps_when_closed == Decimal(20)
     assert c.reference.max_reference_age_s == 600
     assert set(c.representation.allowed_platforms) == {"ondo", "bstock"}
     assert c.representation.require_security_audit is True
-    assert c.confirmation.confirm_above_usd == Decimal("100")
-    assert c.automation.max_autonomous_daily_usd == Decimal("50")
+    assert c.confirmation.confirm_above_usd == Decimal(100)
+    assert c.automation.max_autonomous_daily_usd == Decimal(50)
     assert len(applied) >= 10
 
 
@@ -50,7 +50,7 @@ def test_hash_stable_and_canonical():
 
 def test_hash_changes_on_edit():
     c1 = PortfolioConstitution()
-    c2 = PortfolioConstitution(execution={"max_premium_bps": Decimal("1")})
+    c2 = PortfolioConstitution(execution={"max_premium_bps": Decimal(1)})
     assert constitution_hash(c1) != constitution_hash(c2)
 
 

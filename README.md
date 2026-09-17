@@ -14,6 +14,10 @@ verifiable **Execution Receipt**.
 
 Built for the **BNB Hack: Tokenized Stocks Edition**.
 
+[![ci](https://github.com/tang-vu/equitymux/actions/workflows/ci.yml/badge.svg)](https://github.com/tang-vu/equitymux/actions/workflows/ci.yml)
+
+![EquityMux Terminal — live](docs/demo/home.png)
+
 ---
 
 ## The problem
@@ -77,10 +81,18 @@ pnpm dev:web          # http://localhost:3000
 **Judge fast path:**
 
 ```bash
-pnpm test:api         # 56 backend tests (fixtures, offline)
-pnpm test:contracts   # Foundry receipt-registry tests
+pnpm test:api         # 68 backend tests (fixtures, offline)
+pnpm test:web         # 8 frontend tests — canonical-JSON/hash parity vector
+pnpm test:contracts   # Foundry receipt-registry tests (4, incl. fuzz)
 pnpm verify:live      # read-only live checks — no tx, no wallet needed
 pnpm dx:summary       # real DX events recorded during development
+./scripts/ci-local.sh # the whole pipeline locally
+```
+
+Or fully containerized:
+
+```bash
+docker compose up --build   # api :8000 + web :3000, execution off by default
 ```
 
 `verify:live` hits the real Binance public APIs and BSC RPC. It executes
@@ -124,12 +136,13 @@ fresh quote, passing simulation, constitution pass, and human confirmation.
 
 | Component | Status |
 |---|---|
-| RWA discovery (3 platforms, BSC) | ✅ verified live |
-| Constitution + policy engine | ✅ 56 tests |
-| Route tournament | ✅ tested |
-| Receipt registry contract | ✅ forge tests pass |
+| RWA discovery (3 platforms, BSC) | ✅ verified live — 510 underlyings indexed |
+| Constitution + policy engine | ✅ 68 tests |
+| Route tournament | ✅ tested; live run scored all 3 NVDA reps with explicit reasons |
+| Receipt registry contract | ✅ forge tests pass; testnet deploy simulated (343,595 gas) |
+| Keeper (BNB Agent Studio) | ✅ canonical `bag` scaffold — `bag doctor` PASS, tsc clean |
 | Agentic Wallet execution | ⏸ blocked — wallet signin required |
-| Agent Studio keeper | 🏗 local runtime; ERC-8004 registration pending deploy |
+| Deploy (web+api) | ⏸ host choice pending; Dockerfiles + compose verified |
 
 See `docs/research/integration-matrix.md` for the honest, per-feature matrix.
 

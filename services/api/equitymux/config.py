@@ -35,6 +35,11 @@ class Settings(BaseSettings):
     # --- BSC RPC (read-only verification + simulation fallback) ---
     bsc_rpc_urls: str = "https://bsc-dataseed.binance.org,https://bsc-dataseed1.defibit.io,https://bsc-dataseed1.ninicoin.io"
 
+    # --- x402 payment surface (keeper tasks) ---
+    # When set, POST /api/agent/tasks/paid answers 402 with an x402 `accepts`
+    # challenge addressed to this wallet. Empty = surface defined but unpaid.
+    x402_payto_address: str = ""
+
     # --- execution kill switches (system ceiling, never relaxed by user policy) ---
     execution_enabled: bool = False
     require_simulation: bool = True

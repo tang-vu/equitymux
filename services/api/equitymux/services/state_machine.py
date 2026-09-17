@@ -2,7 +2,7 @@
 """
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from equitymux.domain.models import ExecState
 
@@ -39,7 +39,7 @@ class ExecutionStateMachine:
         self.state = ExecState.INTENT_RECEIVED
         self.history: list[dict] = [{
             "state": self.state.value,
-            "at": datetime.now(timezone.utc).isoformat(),
+            "at": datetime.now(UTC).isoformat(),
             "note": "intent accepted",
         }]
 
@@ -48,7 +48,7 @@ class ExecutionStateMachine:
             raise InvalidTransition(f"{self.state.value} -> {to.value} not allowed")
         self.state = to
         self.history.append({"state": to.value,
-                             "at": datetime.now(timezone.utc).isoformat(),
+                             "at": datetime.now(UTC).isoformat(),
                              "note": note})
         return to
 

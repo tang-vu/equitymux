@@ -17,9 +17,9 @@ jobs:
       - name: Install deps
         run: uv sync --frozen || uv sync
       - name: Lint
-        run: uv run ruff check equitymux tests || true
+        run: uv run ruff check equitymux tests
       - name: Type check
-        run: uv run mypy equitymux --ignore-missing-imports || true
+        run: uv run mypy -p equitymux --no-incremental
       - name: Tests
         run: uv run pytest -q
 
@@ -36,9 +36,6 @@ jobs:
 
   frontend:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/web
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -48,15 +45,35 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-          cache-dependency-path: apps/web/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
       - name: Install
-        run: pnpm install --frozen-lockfile || pnpm install
+        run: pnpm install --frozen-lockfile
       - name: Type check
-        run: pnpm exec tsc --noEmit
+        run: pnpm --filter @equitymux/web typecheck
+      - name: Unit tests
+        run: pnpm --filter @equitymux/web test
       - name: Build
-        run: pnpm build
+        run: pnpm --filter @equitymux/web build
         env:
           EQUITYMUX_API: http://localhost:8000
+
+  keeper-agent:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/keeper/agent
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install (standalone package)
+        run: pnpm install --ignore-workspace
+      - name: Compile
+        run: pnpm build
 
   secrets-scan:
     runs-on: ubuntu-latest
@@ -64,5 +81,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: No private keys / mnemonics committed
         run: |
-          ! grep -rInE '-----BEGIN (RSA |EC |OPENSSH |PGP )?PRIVATE KEY' --exclude-dir=.git . || exit 1
-          ! grep -rInE '\b0x[0-9a-fA-F]{64}\b' --include='*.ts' --include='*.tsx' --include='*.py' --include='*.sol' --include='*.env*' . | grep -v '.env.example' | grep -vE '0x[0]{64}|spec|specification' || exit 1
+          ! grep -rInE -e '-----BEGIN (RSA |EC |OPENSSH |PGP )?PRIVATE KEY' --exclude-dir=.git --exclude-dir=node_modules . || exit 1
+          ! grep -rInE '\b0x[0-9a-fA-F]{64}\b' --include='*.ts' --include='*.tsx' --include='*.py' --include='*.sol' --include='*.env*' \
+              --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=lib --exclude-dir=out . \
+            | grep -v '.env.example' | grep -vE '0x[0]{64}|gitleaks:allow' || exit 1

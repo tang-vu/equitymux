@@ -6,7 +6,7 @@ from tests.conftest import cand
 
 
 def _receipt(rep_ondo, intent):
-    c = cand(rep_ondo, premium=Decimal("12"), slippage=Decimal("5"))
+    c = cand(rep_ondo, premium=Decimal(12), slippage=Decimal(5))
     return build_receipt(
         intent=intent, constitution_hash="0xabc",
         policy_checks=[{"rule": "x", "status": "PASS"}],

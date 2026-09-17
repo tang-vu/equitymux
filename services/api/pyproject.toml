@@ -29,6 +29,16 @@ asyncio_mode = "auto"
 line-length = 110
 target-version = "py312"
 
+[tool.ruff.lint]
+# Intentional patterns:
+#   BLE001 — broad except around best-effort probes (health, enrichment) is
+#            deliberate: a provider fault must never 500 the status surface.
+#   S110   — try/except/pass used for optional state transitions.
+#   SIM102 — nested ifs kept for readability of rule evaluation.
+#   UP031  — printf-style in a CLI summary script.
+#   PLW1510 — subprocess.run reads returncode deliberately (wallet CLI).
+ignore = ["BLE001", "S110", "SIM102", "UP031", "PLW1510"]
+
 [tool.mypy]
 python_version = "3.12"
 strict = false

@@ -1,5 +1,4 @@
 """Contract tests against recorded live fixtures (fetched 2026-09-17)."""
-import json
 from pathlib import Path
 
 import pytest
@@ -36,7 +35,7 @@ def test_nvda_on_all_platforms(fixture_payloads):
 
 def test_multiplier_present_and_not_one(fixture_payloads):
     d = fixture_payloads("stock-list-type1.json")
-    nvda = [i for i in d["data"] if i["ticker"] == "NVDA"][0]
+    nvda = next(i for i in d["data"] if i["ticker"] == "NVDA")
     from decimal import Decimal
     assert Decimal(nvda["multiplier"]) != Decimal(1)
 

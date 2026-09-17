@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import json
 import uuid
-from decimal import Decimal
 from typing import Any
 
 import structlog
@@ -14,12 +13,12 @@ from pydantic import BaseModel
 from equitymux.config import get_settings
 from equitymux.dx import recorder
 from equitymux.policy.compiler import compile_with_report
+from equitymux.policy.engine import PortfolioState
 from equitymux.policy.schema import (
     POLICY_COMPILER_VERSION,
     PortfolioConstitution,
     constitution_hash,
 )
-from equitymux.policy.engine import PortfolioState
 from equitymux.providers.baw import AgenticWallet
 from equitymux.providers.bsc_rpc import BscRpc
 from equitymux.providers.errors import ProviderError
@@ -132,6 +131,15 @@ def explore(ticker: str) -> dict:
         raise HTTPException(502, str(e))
 
 
+@app.get("/api/underlyings")
+def underlyings() -> dict:
+    """Every BSC-listed underlying across all platforms — explorer index."""
+    try:
+        return {"underlyings": pipeline.graph.underlyings()}
+    except ProviderError as e:
+        raise HTTPException(502, str(e))
+
+
 # ---------- intent / tournament ----------
 class RunIn(BaseModel):
     text: str | None = None
@@ -171,6 +179,35 @@ def receipt(receipt_id: str) -> dict:
     return r
 
 
+@app.get("/api/receipts/{receipt_id}/verify")
+def receipt_verify(receipt_id: str) -> dict:
+    """Recompute the canonical sha256 over the stored receipt and compare."""
+    from equitymux.services.receipts import receipt_hash
+    r = persistence.get_receipt(receipt_id)
+    if not r:
+        raise HTTPException(404, "receipt not found")
+    recomputed = receipt_hash(r)
+    return {"receiptId": receipt_id, "storedHash": r.get("receiptHash"),
+            "recomputedHash": recomputed, "match": recomputed == r.get("receiptHash"),
+            "method": "sha256(canonicalJson(receipt minus receiptHash))"}
+
+
+class VerifyIn(BaseModel):
+    receipt: dict[str, Any]
+
+
+@app.post("/api/receipts/verify")
+def receipt_verify_upload(body: VerifyIn) -> dict:
+    """Verify any receipt JSON — e.g. a file downloaded from the UI."""
+    from equitymux.services.receipts import receipt_hash
+    claimed = body.receipt.get("receiptHash") or body.receipt.get("receipt_hash")
+    if not claimed:
+        raise HTTPException(400, "receipt has no receiptHash field")
+    recomputed = receipt_hash(body.receipt)
+    return {"claimedHash": claimed, "recomputedHash": recomputed,
+            "match": recomputed == claimed}
+
+
 # ---------- agent / keeper ----------
 class TaskIn(BaseModel):
     kind: str = "EVALUATE_EQUITY_INTENT"
@@ -196,6 +233,55 @@ def submit_task(body: TaskIn) -> dict:
 @app.get("/api/agent/tasks")
 def agent_tasks() -> dict:
     return {"tasks": persistence.list_tasks()}
+
+
+@app.post("/api/agent/tasks/paid")
+def submit_task_paid(body: TaskIn):
+    """x402 surface: same task surface, payment-gated.
+
+    Without X-PAYMENT: answers HTTP 402 with an x402 `accepts` challenge
+    (scheme=exact, network=bsc, USDC). If X402_PAYTO_ADDRESS is unset the
+    surface responds 501 — the challenge cannot be issued honestly without a
+    settlement address. Payment *verification* (settlement) is labeled
+    PLANNED: it requires a connected payer wallet or facilitator.
+    """
+    from fastapi.responses import JSONResponse
+    if not settings.x402_payto_address:
+        raise HTTPException(
+            501, "x402 surface defined; X402_PAYTO_ADDRESS not configured — "
+                 "cannot issue a payment challenge without a settlement address")
+    # A real x402 payment would arrive in the X-PAYMENT header; verification is
+    # not yet wired to a facilitator — refuse to pretend it was paid.
+    accepts = [{
+        "scheme": "exact",
+        "network": "bsc",
+        "chainId": 56,
+        "maxAmountRequired": "10000",  # 0.01 USDC (6 decimals)
+        "asset": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+        "assetSymbol": "USDC",
+        "payTo": settings.x402_payto_address,
+        "resource": "/api/agent/tasks/paid",
+        "description": f"EquityMux keeper task: {body.kind} (analysis only)",
+        "maxTimeoutSeconds": 30,
+    }]
+    return JSONResponse(
+        status_code=402,
+        content={"x402Version": 1, "accepts": accepts, "error": None,
+                 "note": "payment verification not yet wired — challenge issued "
+                         "honestly; settlement requires a payer wallet"})
+
+
+@app.get("/api/agent/x402")
+def agent_x402_info() -> dict:
+    return {
+        "x402": {
+            "surface": "POST /api/agent/tasks/paid",
+            "challenge": "implemented",
+            "settlement": "planned — requires payer wallet or facilitator",
+            "payToConfigured": bool(settings.x402_payto_address),
+            "bawSupport": "baw x402-payment preview/sign available when wallet connected",
+        }
+    }
 
 
 @app.get("/api/agent/identity")

@@ -1,0 +1,25 @@
+# EquityMux web — Next.js standalone build (pnpm monorepo).
+FROM node:22-slim AS base
+RUN corepack enable && corepack prepare pnpm@11.24.0 --activate
+WORKDIR /repo
+
+FROM base AS deps
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY apps/web/package.json apps/web/
+RUN pnpm install --frozen-lockfile --filter @equitymux/web
+
+FROM base AS build
+COPY --from=deps /repo/node_modules ./node_modules
+COPY --from=deps /repo/apps/web/node_modules ./apps/web/node_modules
+COPY pnpm-workspace.yaml package.json ./
+COPY apps/web ./apps/web
+RUN pnpm --filter @equitymux/web build
+
+FROM node:22-slim AS run
+WORKDIR /app
+ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0
+COPY --from=build /repo/apps/web/.next/standalone ./
+COPY --from=build /repo/apps/web/.next/static ./apps/web/.next/static
+COPY --from=build /repo/apps/web/public ./apps/web/public
+EXPOSE 3000
+CMD ["node", "apps/web/server.js"]

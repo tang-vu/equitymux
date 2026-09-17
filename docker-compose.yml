@@ -1,0 +1,36 @@
+# EquityMux — api + web for a self-contained demo run.
+#   docker compose up --build
+# Web on :3000 proxies /api/* to the api service. Execution stays OFF by
+# default (EXECUTION_ENABLED=false); the Agentic Wallet CLI is not in the
+# image — real mainnet execution requires a host-authenticated baw.
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports: ["8000:8000"]
+    environment:
+      DEMO_MODE: ${DEMO_MODE:-false}
+      EXECUTION_ENABLED: "false"
+      X402_PAYTO_ADDRESS: ${X402_PAYTO_ADDRESS:-}
+    volumes:
+      - api-data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys;sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/health',timeout=4).status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports: ["3000:3000"]
+    environment:
+      EQUITYMUX_API: http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  api-data:

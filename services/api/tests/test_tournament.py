@@ -13,7 +13,7 @@ def test_candidates_get_premium_bps(intent, rep_ondo):
     out = t.build_candidates(intent, [rep_ondo])
     assert out[0].premium_bps is not None
     # implied share ~180.19 vs ref 180.20 -> slight discount, small |bps|
-    assert abs(out[0].premium_bps) < Decimal("10")
+    assert abs(out[0].premium_bps) < Decimal(10)
 
 
 def test_rejected_route_not_eligible(intent, rep_ondo, rep_bstock):
@@ -23,11 +23,11 @@ def test_rejected_route_not_eligible(intent, rep_ondo, rep_bstock):
     c1.simulation = SimulationRecord(status="PASS", method="m", timestamp="t")
     c2.simulation = SimulationRecord(status="PASS", method="m", timestamp="t")
     engine = DeterministicPolicyEngine(PortfolioConstitution(
-        execution={"max_premium_bps": Decimal("40")}))
+        execution={"max_premium_bps": Decimal(40)}))
     # stub scoring deps
     t.s = engine.s
     out = t.evaluate(intent, [c1, c2], engine,
-                     PortfolioState(quote_balance=Decimal("100")))
+                     PortfolioState(quote_balance=Decimal(100)))
     by_sym = {c.representation.token_symbol: c for c in out}
     assert by_sym["NVDAB"].status == RouteStatus.REJECTED
     assert "execution.max_premium" in by_sym["NVDAB"].reason_codes
@@ -41,10 +41,10 @@ def test_scoring_prefers_cheaper(intent, rep_ondo, rep_bstock):
     for c in (c1, c2):
         c.simulation = SimulationRecord(status="PASS", method="m", timestamp="t")
     engine = DeterministicPolicyEngine(PortfolioConstitution(
-        execution={"max_premium_bps": Decimal("100"),
-                   "max_slippage_bps": Decimal("100")}))
+        execution={"max_premium_bps": Decimal(100),
+                   "max_slippage_bps": Decimal(100)}))
     out = t.evaluate(intent, [c2, c1], engine,
-                     PortfolioState(quote_balance=Decimal("100")))
+                     PortfolioState(quote_balance=Decimal(100)))
     assert out[0].representation.token_symbol == "NVDAon"
     assert out[0].score > out[1].score
 

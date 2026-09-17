@@ -28,6 +28,7 @@ export interface Representation {
   shares_per_token: string;
   token_price_usd: string | null;
   reference_price_usd: string | null;
+  reference_price_source?: string | null;
   market_state: MarketState;
   market_reason_code: string | null;
   market_reason_msg: string | null;

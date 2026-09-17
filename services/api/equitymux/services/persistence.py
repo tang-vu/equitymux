@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import sqlite3
 import threading
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from equitymux.config import DB_PATH
@@ -62,7 +62,7 @@ def init_db() -> None:
 
 def save_constitution(nl_text: str, canonical: dict, compiler_version: str,
                       chash: str, approved: bool) -> None:
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     with _LOCK, _conn() as c:
         prev = c.execute("SELECT MAX(revision) r FROM constitutions").fetchone()["r"] or 0
         if approved:
@@ -91,7 +91,7 @@ def constitution_history() -> list[dict]:
 
 
 def save_receipt(rec: dict) -> None:
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     with _LOCK, _conn() as c:
         c.execute(
             "INSERT OR REPLACE INTO receipts(receipt_id,receipt_hash,state,intent_json,receipt_json,created_at)"
@@ -124,14 +124,14 @@ def save_task(task_id: str, kind: str, inp: dict) -> None:
             "INSERT OR REPLACE INTO agent_tasks(task_id,kind,input_json,status,created_at)"
             " VALUES(?,?,?,?,?)",
             (task_id, kind, json.dumps(inp, default=str), "QUEUED",
-             datetime.now(timezone.utc).isoformat()))
+             datetime.now(UTC).isoformat()))
 
 
 def finish_task(task_id: str, output: dict, status: str = "SUCCEEDED") -> None:
     with _LOCK, _conn() as c:
         c.execute("UPDATE agent_tasks SET status=?, output_json=?, completed_at=? WHERE task_id=?",
                   (status, json.dumps(output, default=str),
-                   datetime.now(timezone.utc).isoformat(), task_id))
+                   datetime.now(UTC).isoformat(), task_id))
 
 
 def list_tasks(limit: int = 50) -> list[dict]:

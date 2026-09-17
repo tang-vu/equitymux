@@ -26,7 +26,7 @@ _QUOTE_ASSETS = {"USDC", "USDT", "USD1", "U", "BNB"}
 
 def parse_intent(text: str) -> EquityIntent:
     t = text.strip()
-    side = Side.SELL if re.search(r"\b(sell|reduce|exit|trim)\b", t, re.I) else Side.BUY
+    side = Side.SELL if re.search(r"\b(sell|reduce|exit|trim)\b", t, re.IGNORECASE) else Side.BUY
 
     ticker = None
     for word in re.findall(r"[A-Za-z]{2,6}", t):
@@ -40,7 +40,7 @@ def parse_intent(text: str) -> EquityIntent:
             ticker = m.group(1)
 
     notional = None
-    m = re.search(r"\$\s*(\d+(?:\.\d+)?)", t) or re.search(r"(\d+(?:\.\d+)?)\s*(?:usdc|usdt|usd1|u\b|dollars?)", t, re.I)
+    m = re.search(r"\$\s*(\d+(?:\.\d+)?)", t) or re.search(r"(\d+(?:\.\d+)?)\s*(?:usdc|usdt|usd1|u\b|dollars?)", t, re.IGNORECASE)
     if m:
         notional = Decimal(m.group(1))
 
@@ -50,10 +50,10 @@ def parse_intent(text: str) -> EquityIntent:
         quote_asset = m.group(1).upper()
 
     constraints: dict = {}
-    m = re.search(r"(?:no more than|max(?:imum)?|under)\s*(\d+(?:\.\d+)?)\s*bps", t, re.I)
+    m = re.search(r"(?:no more than|max(?:imum)?|under)\s*(\d+(?:\.\d+)?)\s*bps", t, re.IGNORECASE)
     if m:
         constraints["maxPremiumBps"] = int(Decimal(m.group(1)))
-    m = re.search(r"slippage\s*(\d+(?:\.\d+)?)\s*bps", t, re.I)
+    m = re.search(r"slippage\s*(\d+(?:\.\d+)?)\s*bps", t, re.IGNORECASE)
     if m:
         constraints["maxSlippageBps"] = int(Decimal(m.group(1)))
 

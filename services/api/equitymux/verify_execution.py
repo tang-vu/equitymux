@@ -39,7 +39,7 @@ def main() -> int:
         print(f"BLOCKED: {e}")
         return 2
 
-    notional = Decimal("5")  # smallest sane proof trade
+    notional = Decimal(5)  # smallest sane proof trade
     if notional > Decimal(s.max_mainnet_notional_usd):
         print(f"Refusing: notional ${notional} exceeds MAX_MAINNET_NOTIONAL_USD")
         return 2
@@ -52,8 +52,8 @@ def main() -> int:
         return 2
 
     constitution = PortfolioConstitution()  # defaults + system ceilings still apply
-    state = PortfolioState(quote_balance=Decimal("1000000"),
-                           total_value_usd=Decimal("1000000"))
+    state = PortfolioState(quote_balance=Decimal(1000000),
+                           total_value_usd=Decimal(1000000))
     intent = EquityIntent(raw="mainnet proof trade", ticker="NVDA",
                           side=Side.BUY, notional=notional, quote_asset="USDT")
     result = pipeline.run(intent, constitution, state, confirm=True)

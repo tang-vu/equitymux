@@ -67,7 +67,7 @@ def score_route(
         "premium": Decimal("1.0"),      # per bps over reference
         "slippage": Decimal("1.0"),     # per expected slippage bps
         "staleness": Decimal("0.05"),   # per second of reference age
-        "illiquidity": Decimal("20"),   # applied when liquidity unknown/thin
+        "illiquidity": Decimal(20),   # applied when liquidity unknown/thin
     }
     breakdown: dict[str, Decimal] = {}
     breakdown["premium"] = max(D0, premium) * w["premium"] / Decimal(10)

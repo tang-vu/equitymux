@@ -18,8 +18,6 @@ from typing import Any
 from equitymux.config import Settings, get_settings
 from equitymux.dx.recorder import record_event
 from equitymux.providers.errors import (
-    AuthenticationError,
-    BroadcastError,
     ProviderError,
     WalletNotConnectedError,
 )
@@ -74,7 +72,8 @@ class AgenticWallet:
         return str(self._run(["wallet", "status"]).get("status", "UNCONNECTED"))
 
     def chains(self) -> list[dict]:
-        return list(self._run(["wallet", "chains"]) or [])
+        v = self._run(["wallet", "chains"])
+        return v if isinstance(v, list) else v.get("chains", [])
 
     def address(self, chain_id: str = "56") -> str | None:
         for a in self._run(["wallet", "address"]).get("addresses", []):
@@ -83,7 +82,8 @@ class AgenticWallet:
         return None
 
     def balances(self, chain_id: str = "56") -> list[dict]:
-        return list(self._run(["wallet", "balance", "--binanceChainId", chain_id]) or [])
+        v = self._run(["wallet", "balance", "--binanceChainId", chain_id])
+        return v if isinstance(v, list) else v.get("balances", v.get("assets", []))
 
     def settings(self) -> dict:
         return dict(self._run(["wallet", "settings"]) or {})

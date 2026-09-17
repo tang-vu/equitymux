@@ -16,15 +16,13 @@ BLOCKED with the exact human action needed.
 """
 from __future__ import annotations
 
-import json
 import sys
-from decimal import Decimal
 
 from equitymux.config import get_settings
 from equitymux.providers.baw import AgenticWallet
-from equitymux.providers.bsc_rpc import BscRpc
 from equitymux.providers.binance_public import BinancePublicClient
-from equitymux.providers.errors import ProviderError, WalletNotConnectedError
+from equitymux.providers.bsc_rpc import BscRpc
+from equitymux.providers.errors import WalletNotConnectedError
 from equitymux.services.graph import CanonicalEquityGraph
 from equitymux.services.tournament import QUOTE_ASSET_ADDR
 
@@ -63,9 +61,12 @@ def main() -> int:
         len(client.stock_list(1)), len(client.stock_list(2)), len(client.stock_list(3))))
 
     reps = []
-    check("NVDA resolves on BSC", lambda: (
-        reps.extend(graph.discover("NVDA", 56, enrich=False)),
-        f"{len(reps)} representations")[1])
+
+    def _discover() -> str:
+        reps.extend(graph.discover("NVDA", 56, enrich=False))
+        return f"{len(reps)} representations"
+
+    check("NVDA resolves on BSC", _discover)
     check("prices load", lambda: (
         [graph.adapters[0].enrich(r) for r in reps],
         "; ".join(f"{r.token_symbol}=${r.token_price_usd} ref=${r.reference_price_usd}"
@@ -88,8 +89,12 @@ def main() -> int:
                 r = reps_q[0]
                 check("executable quote (5 USDC -> " + r.token_symbol + ")",
                       lambda: wallet.quote(QUOTE_ASSET_ADDR["USDC"], r.token_address, "5", "56"))
-            check("simulation probe (eth_call)", lambda: rpc.balance_of(
-                QUOTE_ASSET_ADDR["USDC"], wallet.address("56")) is not None)
+            def _probe() -> bool:
+                addr = wallet.address("56")
+                return addr is not None and rpc.balance_of(
+                    QUOTE_ASSET_ADDR["USDC"], addr) is not None
+
+            check("simulation probe (eth_call)", _probe)
         else:
             print("\n  HUMAN ACTION REQUIRED")
             print("  Action: sign in the Agentic Wallet")

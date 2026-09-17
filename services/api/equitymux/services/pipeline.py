@@ -11,7 +11,7 @@ Authorization boundary layers:
 from __future__ import annotations
 
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 
 from equitymux.config import Settings, get_settings
@@ -27,15 +27,15 @@ from equitymux.policy.schema import PortfolioConstitution, constitution_hash
 from equitymux.providers.baw import AgenticWallet
 from equitymux.providers.bsc_rpc import BscRpc
 from equitymux.providers.errors import ProviderError
+from equitymux.services import persistence
 from equitymux.services.graph import CanonicalEquityGraph
 from equitymux.services.receipts import build_receipt, freshness_ok
 from equitymux.services.state_machine import ExecutionStateMachine
 from equitymux.services.tournament import QUOTE_ASSET_ADDR, RouteTournament
-from equitymux.services import persistence
 
 
 def _iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 class Pipeline:
@@ -68,8 +68,8 @@ class Pipeline:
         reps = self.graph.discover(intent.ticker, enrich=True)
         if not reps:
             sm.transition(ExecState.NO_VALID_ROUTE, note="no representations found")
-            rec = self._receipt(sm, intent, chash, [], [], None, None, {}, {},
-                                execution_mode)
+            rec = self._receipt(sm, intent, chash, [], self._market_ctx(), [],
+                                None, None, {}, {}, execution_mode)
             persistence.save_receipt(rec)
             return {"state": sm.state.value, "receipt": rec}
 
@@ -181,7 +181,7 @@ class Pipeline:
                                     detail="quote fresh; funding verified on-chain"
                                     if addr else "quote fresh (wallet address unknown)",
                                     calldata_hash=None)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             return SimulationRecord(status="FAIL", method="eth_call+quote",
                                     timestamp=_iso(), detail=str(e)[:300])
 
@@ -190,6 +190,9 @@ class Pipeline:
         if sim.timestamp and not freshness_ok(sim.timestamp, self.s.max_simulation_age_s):
             return {"status": "FAILED", "error": "simulation stale — re-run pipeline"}
         from_token = QUOTE_ASSET_ADDR.get(intent.quote_asset.upper())
+        if from_token is None:
+            return {"status": "FAILED",
+                    "error": f"quote asset {intent.quote_asset} not in allowlist"}
         slip = str((c.expected_slippage_bps or 50) / 100)
         try:
             res = self.wallet.swap(from_token, c.representation.token_address,

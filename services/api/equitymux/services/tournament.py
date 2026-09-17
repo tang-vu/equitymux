@@ -3,8 +3,7 @@ simulate, score survivors transparently.
 """
 from __future__ import annotations
 
-import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 
 from equitymux.config import Settings, get_settings
@@ -36,7 +35,11 @@ class RouteTournament:
                  wallet: AgenticWallet | None = None,
                  settings: Settings | None = None):
         self.s = settings or get_settings()
-        self.graph = graph or CanonicalEquityGraph(settings=self.s)
+        if graph is None:
+            from equitymux.providers.binance_public import BinancePublicClient
+            graph = CanonicalEquityGraph(client=BinancePublicClient(self.s),
+                                         platforms=self.s.platforms)
+        self.graph = graph
         self.wallet = wallet or AgenticWallet(self.s)
 
     def build_candidates(self, intent: EquityIntent,
@@ -97,10 +100,12 @@ class RouteTournament:
                     to_amount=to_amt,
                     slippage_bps=int(Decimal(str(q.get("slippage", 0))) * 100)
                     if q.get("slippage") is not None else None,
-                    obtained_at=datetime.now(timezone.utc).isoformat(),
+                    obtained_at=datetime.now(UTC).isoformat(),
                     source="baw market-order quote", raw=q,
                 )
-                c.expected_slippage_bps = c.quote.slippage_bps
+                c.expected_slippage_bps = (
+                    Decimal(c.quote.slippage_bps)
+                    if c.quote.slippage_bps is not None else None)
             except ProviderError as e:
                 c.status = RouteStatus.NO_QUOTE
                 c.reason_codes.append(f"QUOTE_FAILED:{e}")

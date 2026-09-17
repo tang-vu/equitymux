@@ -43,7 +43,7 @@ class BscRpc:
                 if ok:
                     return payload.get("result")
                 last_err = UpstreamHTTPError(json.dumps(payload.get("error")), r.status_code, url)
-            except Exception as e:  # noqa: BLE001 - try next endpoint
+            except Exception as e:
                 record_event(module="bsc-rpc", endpoint=url, operation=method, method="POST",
                              success=False, error_class=type(e).__name__, error_message=str(e)[:200])
                 last_err = e
@@ -86,5 +86,5 @@ class BscRpc:
             block = self.block_number()
             return {"ok": True, "returnData": result, "block": block,
                     "calldataHash": "0x" + hashlib.sha256(bytes.fromhex(data[2:])).hexdigest()}
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             raise SimulationError(f"eth_call simulation failed: {e}") from e

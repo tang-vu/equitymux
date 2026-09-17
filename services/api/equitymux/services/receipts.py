@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
 
@@ -43,7 +42,7 @@ def build_receipt(*, intent: EquityIntent, constitution_hash: str,
     rec = {
         "version": "1",
         "receiptId": uuid.uuid4().hex,
-        "createdAt": datetime.now(timezone.utc).isoformat(),
+        "createdAt": datetime.now(UTC).isoformat(),
         "intent": _ser(intent.model_dump(mode="json")),
         "policy": {"constitutionHash": constitution_hash, "checks": policy_checks},
         "marketContext": _ser(market_context),

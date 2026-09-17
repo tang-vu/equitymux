@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   async rewrites() {
     const api = process.env.EQUITYMUX_API ?? "http://localhost:8000";
     return [{ source: "/api/:path*", destination: `${api}/api/:path*` }];

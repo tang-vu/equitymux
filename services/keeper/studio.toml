@@ -1,14 +1,23 @@
-# BNB Agent Studio project config for EquityMux Keeper.
-# Deploy with: bag deploy --provider aws|azure   (managed `bnb` = 48h testnet trial only)
+# BNB Agent Studio project config for the EquityMux Keeper.
+# Layout follows `bag init` convention: studio.toml at workspace root,
+# agent code in ./agent/src (entrypoint agent/src/unifiedMain.ts).
+# Deploy requires an explicit choice: `bag deploy --provider aws|azure`
+# (managed `bnb` = 48h testnet trial only — not our mainnet target).
+
+[project]
+name = "equitymux-keeper-agent"
+
+[stack]
+runtime = "agentcore"
+protocols = ["A2A", "MCP", "X402"]
+
 [agent]
 name = "EquityMux Keeper"
 description = "Monitors explicitly authorized portfolio constitutions and proposes bounded maintenance: representation-graph refresh, compliance evaluation, rebalance preparation. Never self-executes funds."
 version = "0.1.0"
 
-[protocols]
-faces = ["A2A", "MCP", "X402"]
-
 [network]
+default = "bsc-mainnet"
 chain = "bsc"
 chain_id = 56
 # Final hackathon flow targets BSC mainnet. Testnet only for plumbing validation.
@@ -19,8 +28,37 @@ description = "Evaluate a tokenized-equity intent against a constitution hash; r
 price_usd = "0"          # analysis endpoint; x402 payment optional
 
 [wallet]
-kind = "evm-local"       # keystore via .studio/wallets (never committed)
-# The keeper never holds user funds; user executions go through Agentic Wallet.
+# Local keystore signer — the Agent is the SOLE key-holder/signer.
+# Keystore lives at .studio/wallets (never committed). The keeper never
+# holds user funds; user executions go through the Agentic Wallet boundary.
+kind = "evm-local"
+signer = "local"
+keystore_dir = ".studio/wallets"
+
+[llm]
+provider = "pieverse-llm"
+model = "auto/free"
 
 [budget]
 llm_daily_usd = "1"      # hard cap on model spend; x402 charges visible via bag audit
+
+[payments.erc8183]
+# EVALUATE_EQUITY_INTENT is FREE analysis — price 0 is supported by the
+# canonical stack and keeps the demo path open without escrow.
+currency = "0xcE24439F2D9C6a2289F741120FE202248B666666"   # $U on BSC mainnet
+price = "0"
+min_price = "0"
+max_price = ""           # set before charging for real
+quote_ttl_seconds = 900
+auto_settle = false
+
+[payments.b402_seller]
+# Public x402 seller rail (mounted at /x402 by unifiedMain).
+enabled = true
+price_usd = "0"          # explicit FREE passthrough while in demo
+assets = ["U"]
+pay_to = ""              # agent wallet receives payment when set
+work_timeout_seconds = 60
+
+[storage]
+kind = "local"           # file:// — offline dev only, not durable across deploy
