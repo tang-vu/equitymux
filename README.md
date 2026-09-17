@@ -81,7 +81,7 @@ pnpm dev:web          # http://localhost:3000
 **Judge fast path:**
 
 ```bash
-pnpm test:api         # 86 backend tests (fixtures, offline)
+pnpm test:api         # 89 backend tests (fixtures, offline)
 pnpm test:web         # 11 frontend tests — canonical-JSON/hash parity + components
 pnpm test:contracts   # Foundry receipt-registry tests (4, incl. fuzz)
 pnpm verify:live      # read-only live checks — no tx, no wallet needed
@@ -146,7 +146,7 @@ fresh quote, passing simulation, constitution pass, and human confirmation.
 | Component | Status |
 |---|---|
 | RWA discovery (3 platforms, BSC) | ✅ verified live — 510 underlyings indexed |
-| Constitution + policy engine | ✅ 86 tests |
+| Constitution + policy engine | ✅ 89 tests |
 | Route tournament | ✅ tested; live run scored all 3 NVDA reps with explicit reasons |
 | Receipt registry contract | ✅ forge tests pass; testnet deploy simulated (343,595 gas) |
 | Keeper (BNB Agent Studio) | ✅ canonical `bag` scaffold — `bag doctor` PASS, tsc clean |

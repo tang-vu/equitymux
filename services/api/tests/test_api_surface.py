@@ -131,6 +131,42 @@ def test_explore_labels_recorded(api_client):
         assert "reference_price_source" in rep
 
 
+def _approve_constitution(api_client):
+    comp = api_client.post("/api/constitution/compile",
+                           json={"text": "only trade approved platforms: ondo"})
+    c = comp.json()["constitution"]
+    r = api_client.post("/api/constitution/approve",
+                        json={"nl_text": "only ondo", "constitution": c})
+    assert r.status_code == 200
+    return r.json()["hash"]
+
+
+def test_intent_end_to_end_demo(api_client):
+    """The main user path: text → constitution → pipeline → hashed receipt."""
+    chash = _approve_constitution(api_client)
+    r = api_client.post("/api/intent", json={"text": "buy $10 of NVDA"})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["receipt"]["dataLabel"] == "RECORDED"
+    assert body["receipt"]["policy"]["constitutionHash"] == chash
+    assert body["receipt"]["receiptHash"].startswith("0x")
+    # wallet unconnected → candidates must carry an explicit no-quote reason
+    statuses = {c["status"] for c in body["receipt"]["candidates"]}
+    assert "ELIGIBLE" not in statuses or body["state"] != "CONFIRMED"
+
+
+def test_intent_requires_constitution(api_client):
+    r = api_client.post("/api/intent", json={"text": "buy $10 of NVDA"})
+    assert r.status_code == 400
+    assert "constitution" in r.json()["detail"]
+
+
+def test_intent_unparseable_text_400(api_client):
+    _approve_constitution(api_client)
+    r = api_client.post("/api/intent", json={"text": "hmm whatever"})
+    assert r.status_code == 400
+
+
 def test_health_endpoint(api_client):
     r = api_client.get("/api/health")
     assert r.status_code == 200
