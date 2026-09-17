@@ -84,7 +84,7 @@ class TokenizedRepresentation(BaseModel):
 
     @property
     def implied_share_price_usd(self) -> Decimal | None:
-        if self.token_price_usd is None:
+        if self.token_price_usd is None or self.shares_per_token <= 0:
             return None
         return self.token_price_usd / self.shares_per_token
 
@@ -168,20 +168,6 @@ class ExecState(str, Enum):
     POLICY_REJECTED = "POLICY_REJECTED"
 
 
-class ExecutionReceipt(BaseModel):
-    version: str = "1"
-    receipt_id: str
-    created_at: str
-    intent: dict[str, Any]
-    policy: dict[str, Any]
-    market_context: dict[str, Any]
-    candidates: list[dict[str, Any]]
-    selected_route: dict[str, Any] | None = None
-    simulation: dict[str, Any] | None = None
-    authorization: dict[str, Any] = Field(default_factory=dict)
-    execution: dict[str, Any] = Field(default_factory=dict)
-    agent: dict[str, Any] = Field(default_factory=dict)
-    evidence: list[dict[str, Any]] = Field(default_factory=list)
-    transitions: list[dict[str, Any]] = Field(default_factory=list)
-    state: str = "DRAFT"
-    receipt_hash: str | None = None
+# Receipts are plain camelCase dicts built by services/receipts.py — a typed
+# model here would only drift from the hashed body shape, so none exists on
+# purpose.
