@@ -10,19 +10,32 @@ from pathlib import Path
 from equitymux.config import DB_PATH
 
 _LOCK = threading.Lock()
+_INIT_LOCK = threading.Lock()
 _DB = Path(DB_PATH)
+_initialized = False
 
 
 def _conn() -> sqlite3.Connection:
+    # separate lock: callers already hold _LOCK (non-reentrant) — nesting would
+    # deadlock. _INIT_LOCK is only ever taken here.
+    global _initialized
     _DB.parent.mkdir(parents=True, exist_ok=True)
     c = sqlite3.connect(str(_DB), check_same_thread=False)
     c.row_factory = sqlite3.Row
+    if not _initialized:
+        with _INIT_LOCK:
+            if not _initialized:
+                _init_schema(c)
+                _initialized = True
     return c
 
 
 def init_db() -> None:
-    with _LOCK, _conn() as c:
-        c.executescript("""
+    _conn().close()
+
+
+def _init_schema(c: sqlite3.Connection) -> None:
+    c.executescript("""
         CREATE TABLE IF NOT EXISTS constitutions (
             hash TEXT PRIMARY KEY,
             nl_text TEXT NOT NULL,
