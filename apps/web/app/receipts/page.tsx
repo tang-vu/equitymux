@@ -30,12 +30,17 @@ export default function ReceiptsPage() {
                 className={`w-full text-left px-3 py-2.5 rounded-lg border text-xs transition-colors ${
                   sel === r.receipt_id ? "border-[var(--color-accent)] bg-[var(--color-panel-2)]" : "border-[var(--color-edge)] hover:border-[var(--color-ink-3)]"
                 }`}>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="mono">{r.receipt_id.slice(0, 12)}…</span>
-                  <span className={`chip ${
-                    r.state === "CONFIRMED" ? "chip-pass" :
-                    ["NO_VALID_ROUTE", "SIMULATION_FAILED", "EXECUTION_FAILED", "POLICY_REJECTED"].includes(r.state) ? "chip-fail" : "chip-warn"
-                  }`}>{r.state}</span>
+                  <span className="flex gap-1">
+                    {r.data_label && (
+                      <span className={`chip ${r.data_label === "LIVE" ? "chip-pass" : "chip-warn"}`}>{r.data_label}</span>
+                    )}
+                    <span className={`chip ${
+                      r.state === "CONFIRMED" ? "chip-pass" :
+                      ["NO_VALID_ROUTE", "SIMULATION_FAILED", "EXECUTION_FAILED", "POLICY_REJECTED"].includes(r.state) ? "chip-fail" : "chip-warn"
+                    }`}>{r.state}</span>
+                  </span>
                 </div>
                 <div className="text-[var(--color-ink-3)] mt-1">{r.created_at}</div>
               </button>

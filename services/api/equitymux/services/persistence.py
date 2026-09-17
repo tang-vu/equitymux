@@ -72,6 +72,13 @@ def _init_schema(c: sqlite3.Connection) -> None:
             completed_at TEXT
         );
         """)
+    # migration: receipts.data_label added after first deploys
+    cols = {r["name"] for r in c.execute("PRAGMA table_info(receipts)")}
+    if "data_label" not in cols:
+        c.execute("ALTER TABLE receipts ADD COLUMN data_label TEXT")
+        c.execute("UPDATE receipts SET data_label="
+                  "json_extract(receipt_json,'$.dataLabel') WHERE data_label IS NULL")
+    c.commit()  # callers may close() without a `with` — init must persist
 
 
 def save_constitution(nl_text: str, canonical: dict, compiler_version: str,
@@ -108,11 +115,11 @@ def save_receipt(rec: dict) -> None:
     now = datetime.now(UTC).isoformat()
     with _LOCK, _conn() as c:
         c.execute(
-            "INSERT OR REPLACE INTO receipts(receipt_id,receipt_hash,state,intent_json,receipt_json,created_at)"
-            " VALUES(?,?,?,?,?,?)",
+            "INSERT OR REPLACE INTO receipts(receipt_id,receipt_hash,state,intent_json,receipt_json,created_at,data_label)"
+            " VALUES(?,?,?,?,?,?,?)",
             (rec["receiptId"], rec["receiptHash"], rec["state"],
              json.dumps(rec["intent"], default=str),
-             json.dumps(rec, default=str), now))
+             json.dumps(rec, default=str), now, rec.get("dataLabel")))
         for t in rec.get("transitions", []):
             c.execute("INSERT INTO transitions(receipt_id,state,at,note) VALUES(?,?,?,?)",
                       (rec["receiptId"], t["state"], t["at"], t.get("note")))
@@ -121,8 +128,8 @@ def save_receipt(rec: dict) -> None:
 def list_receipts(limit: int = 50) -> list[dict]:
     with _LOCK, _conn() as c:
         return [dict(r) for r in c.execute(
-            "SELECT receipt_id,receipt_hash,state,created_at,intent_json FROM receipts"
-            " ORDER BY created_at DESC LIMIT ?", (limit,)).fetchall()]
+            "SELECT receipt_id,receipt_hash,state,created_at,intent_json,data_label"
+            " FROM receipts ORDER BY created_at DESC LIMIT ?", (limit,)).fetchall()]
 
 
 def get_receipt(receipt_id: str) -> dict | None:
