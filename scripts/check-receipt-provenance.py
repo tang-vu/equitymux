@@ -5,6 +5,7 @@ Usage: python scripts/check-receipt-provenance.py [base_url]
 import hashlib
 import json
 import sys
+import urllib.error
 import urllib.request
 
 BASE = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8001"
@@ -31,7 +32,15 @@ def canon(d):
 health = get("/api/health")
 print("health.demoMode:", health["demoMode"])
 
-res = post("/api/intent", {"text": "buy $10 of NVDA", "mode": "auto"})
+try:
+    res = post("/api/intent", {"text": "buy $10 of NVDA", "mode": "auto"})
+except urllib.error.HTTPError as e:
+    detail = e.read().decode()[:300]
+    print(f"intent failed: HTTP {e.code} {detail}")
+    if "constitution" in detail:
+        print("hint: approve a constitution first — POST /api/constitution/compile "
+              "then /api/constitution/approve (or use the /constitution page)")
+    sys.exit(1)
 receipt = res["receipt"]
 rid = receipt["receiptId"]
 print("receiptId:", rid)
