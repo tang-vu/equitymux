@@ -69,7 +69,7 @@ def _confirm_above(c: PortfolioConstitution, m: re.Match):
     c.confirmation.confirm_above_usd = Decimal(m.group(1))
 
 
-@_p(r"(?:ask me|require confirmation|confirm)[^.]*every transaction")
+@_p(r"(?:ask me|require confirmation|confirm)[^.]*every transaction(?!\s*(?:over|above|more than)\s*\$?\d)")
 def _confirm_always(c: PortfolioConstitution, m: re.Match):
     c.confirmation.always_confirm = True
 
