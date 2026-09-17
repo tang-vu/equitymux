@@ -4,11 +4,32 @@ Usage: python scripts/check-receipt-provenance.py [base_url]
 """
 import hashlib
 import json
+import os
 import sys
 import urllib.error
 import urllib.request
 
-BASE = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8001"
+def _pick_base() -> str:
+    if len(sys.argv) > 1:
+        return sys.argv[1]
+    if os.environ.get("EQUITYMUX_API"):
+        return os.environ["EQUITYMUX_API"].rstrip("/")
+    # dev default is :8000; local sessions sometimes use :8001. The service
+    # fingerprint guards against a foreign app squatting on the port.
+    for port in (8000, 8001, 8002):
+        try:
+            h = json.load(urllib.request.urlopen(
+                f"http://127.0.0.1:{port}/api/health", timeout=3))
+            if h.get("service") == "equitymux-api":
+                return f"http://127.0.0.1:{port}"
+        except Exception:
+            continue
+    print("no EquityMux API found on :8000/:8001/:8002 — start one first "
+          "(pnpm dev:api) or pass the base URL")
+    sys.exit(1)
+
+
+BASE = _pick_base()
 
 
 def post(path, body):
