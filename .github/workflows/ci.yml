@@ -22,6 +22,14 @@ jobs:
         run: uv run mypy -p equitymux --no-incremental
       - name: Tests
         run: uv run pytest -q
+      - name: Demo-mode smoke (boot on fixtures, exercise API)
+        run: |
+          DEMO_MODE=true uv run uvicorn equitymux.api.main:app --port 8123 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8123/api/health > /tmp/h.json && break; sleep 1; done
+          python3 -c "import json;d=json.load(open('/tmp/h.json'));assert d['service']=='equitymux-api' and d['demoMode'] is True, d"
+          curl -sf http://127.0.0.1:8123/api/explore/NVDA | python3 -c "import json,sys;d=json.load(sys.stdin);assert d['dataLabel']=='RECORDED' and len(d['representations'])>=1, d"
+          curl -sf -X POST http://127.0.0.1:8123/api/constitution/compile -H 'Content-Type: application/json' -d '{"text":"never spend more than 20 dollars per transaction"}' | python3 -c "import json,sys;assert json.load(sys.stdin)['constitution']['execution']['max_notional_usd'] in ('20','20.0')"
+          kill %1 || true
 
   contracts:
     runs-on: ubuntu-latest
