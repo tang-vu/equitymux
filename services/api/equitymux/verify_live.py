@@ -70,8 +70,14 @@ def main() -> int:
     check("prices load", lambda: (
         [graph.adapters[0].enrich(r) for r in reps],
         "; ".join(f"{r.token_symbol}=${r.token_price_usd} ref=${r.reference_price_usd}"
+                  f"({r.reference_price_source or 'none'})"
                   for r in reps))[1])
     check("market state", lambda: reps and reps[0].market_state.value)
+    if reps:
+        check("token kline (reference fallback)",
+              lambda: f"{len((client.token_kline(56, reps[0].token_address) or {}).get('klineInfos') or [])} candles")
+        check("token audit (fail-closed surface)",
+              lambda: f"supported={client.token_audit(56, reps[0].token_address).get('isSupported')}")
 
     # wallet-dependent checks
     if not wallet.available():

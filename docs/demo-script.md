@@ -44,7 +44,7 @@ minutes. Stage timestamps assume a connected wallet (obtained before filming).
 ## 3:30–4:00 — Agent & DX
 - Agent Ops page: Keeper task surface (ERC-8183), ERC-8004 identity card,
   x402 status — labeled honestly.
-- `pnpm verify:live` output recap: 6 PASS / 1 BLOCKED → post-auth all PASS.
+- `pnpm verify:live` output recap: 8 PASS / 1 BLOCKED → post-auth all PASS.
 - `pnpm dx:summary`: real DX events (WAF-blocked docs, audit param fix,
   wallet auth gate). Line: *"Our friction is the report."*
 
