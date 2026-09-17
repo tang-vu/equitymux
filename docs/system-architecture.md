@@ -19,7 +19,7 @@
 │   binance_public.py    RWA list/dynamic/meta/status/kline (keyless)   │
 │   baw.py               Agentic Wallet CLI boundary (baw --json)       │
 │   bsc_rpc.py           eth_call / receipts / balances (read-only)     │
-│   audit.py             token security audit (POST + requestId)        │
+│                        token_audit() lives in binance_public.py       │
 └───────┬──────────────────┬───────────────────┬────────────────────────┘
         ▼                  ▼                   ▼
   Binance public      Agentic Wallet      BSC JSON-RPC
@@ -46,10 +46,14 @@ services/keeper      BNB Agent Studio config (bag CLI, ERC-8004/8183/x402)
 
 ## Execution state machine
 
-`INTENT_COMPILED → DISCOVERING → QUOTING → SIMULATING →
-{AWAITING_CONFIRMATION | POLICY_REJECTED | SIMULATION_FAILED |
+`INTENT_COMPILED → DISCOVERING → QUOTING → POLICY_EVALUATION →
+SIMULATING → {AWAITING_CONFIRMATION | READY | SIMULATION_FAILED |
 NO_VALID_ROUTE} → EXECUTING → PENDING_CONFIRMATION → {CONFIRMED |
 EXECUTION_FAILED}`
+
+`READY` then branches to `POLICY_REJECTED` when the system kill switch is
+off, or `EXECUTING` when armed + confirmed. Any pre-quote stage can also
+terminate at `NO_VALID_ROUTE`; policy failures at `POLICY_REJECTED`.
 
 Every transition is timestamped into the receipt.
 

@@ -21,8 +21,12 @@
 - **x402** challenge surface (`/api/agent/tasks/paid`): 402 + `accepts`
   when configured, honest 501 otherwise.
 - Dockerfiles (api+web verified), compose, `ci-local.sh`, CI with vitest +
-  keeper + secrets scan. Clean-checkout judge test passed end-to-end.
-- DX evidence pipeline: 8 recorded issues → `docs/dx-report.md`.
+  keeper + secrets scan + demo-mode smoke test. Clean-checkout judge test
+  passed end-to-end.
+- **Kline reference fallback** — bStock-only tickers resolve a `kline:close`
+  reference when `stockInfo.price` is null and no peer exists.
+- Receipt provenance: `dataLabel` inside the hashed body (`verify:receipt`).
+- DX evidence pipeline: 9 recorded issues → `docs/dx-report.md`.
 
 ## Blocked on human action
 
@@ -36,8 +40,6 @@
 ## Near-term
 
 - Receipt commit tx on the deployed registry (post-deploy).
-- Kline-based reference proxy for bStock when `stockInfo.price` is null
-  (peer fallback already shipped).
 - x402 paid endpoint demo on the deployed keeper + facilitator wiring.
 
 ## Later
