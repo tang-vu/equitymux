@@ -141,15 +141,16 @@ class Pipeline:
         execution = self._execute(intent, selected, sim)
         if execution.get("status") == "CONFIRMED":
             sm.transition(ExecState.PENDING_CONFIRMATION)
-            sm.transition(ExecState.CONFIRMED)
+            sm.transition(ExecState.CONFIRMED,
+                          note=f"order {execution.get('orderId')} FINISHED")
+        elif execution.get("status") == "PENDING":
+            # async order still in-flight — honest non-terminal state, the
+            # wallet keeps working; the receipt records it as PENDING
+            sm.transition(ExecState.PENDING_CONFIRMATION,
+                          note=f"order {execution.get('orderId')} pending past 90s poll")
         else:
-            try:
-                sm.transition(ExecState.PENDING_CONFIRMATION)
-            except Exception:
-                pass
-            sm.state = ExecState.EXECUTION_FAILED
-            sm.history.append({"state": "EXECUTION_FAILED", "at": _iso(),
-                               "note": execution.get("error", "execution failed")})
+            sm.transition(ExecState.EXECUTION_FAILED,
+                          note=execution.get("error", "execution failed"))
         rec = self._receipt(sm, intent, chash, self._checks(candidates),
                             self._market_ctx(), candidates, selected,
                             sim.model_dump(mode="json"),
