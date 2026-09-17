@@ -67,7 +67,7 @@ jobs:
         with:
           node-version: 22
       - name: Install (standalone package)
-        run: pnpm install --ignore-workspace
+        run: pnpm install   # agent/pnpm-workspace.yaml makes this dir self-contained
       - name: Compile
         run: pnpm build
 
