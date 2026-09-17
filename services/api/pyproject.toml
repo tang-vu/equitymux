@@ -12,7 +12,8 @@ dependencies = [
     "structlog>=24.4",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
+# Installed by default on `uv sync`; skipped in images via `uv pip install .`
 dev = [
     "pytest>=8.3",
     "pytest-asyncio>=0.24",
