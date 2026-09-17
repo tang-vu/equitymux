@@ -26,7 +26,9 @@ equitymux/
 │       │                        intent parser
 │       ├── verify_live.py       read-only mainnet checks (no tx)
 │       └── verify_execution.py  human-gated real-trade proof
-│   └── tests/                   68 pytest tests, fixture-driven
+│   └── tests/                   81 pytest tests — compiler, intent fuzz,
+│                                pipeline state machine, graph enrichment,
+│                                api surface, security, openapi guard
 ├── services/keeper/             BNB Agent Studio keeper
 │   ├── studio.toml              canonical bag layout (bsc-mainnet, $U)
 │   └── agent/                   bag-init scaffold — doWorkAndSubmit
@@ -36,12 +38,14 @@ equitymux/
 ├── docs/                        research, architecture, standards, demo,
 │   │                            submission, dx-report, roadmap
 │   └── demo/                    live screenshots of all 7 pages
-├── dx/                          recorded DX issues (8) + raw API events
+├── dx/                          recorded DX issues (9) + raw API events
 ├── scripts/                     fetch-fixtures, dx-summary, screenshots,
-│                              ci-local (full judge pipeline)
+│                                check-receipt-provenance (verify:receipt),
+│                                ci-local (full judge pipeline)
 ├── Dockerfile.api/.web          verified images; docker-compose.yml
 └── .github/workflows/ci.yml     backend, contracts, frontend+vitest,
-                               keeper-agent, secrets scan
+                               keeper-agent, secrets scan, demo-mode
+                               smoke test
 ```
 
 ## Entry points
@@ -49,10 +53,11 @@ equitymux/
 | Command | Purpose |
 |---|---|
 | `pnpm dev:api` / `pnpm dev:web` | local stack |
-| `pnpm test:api` | 78 backend tests (offline) |
-| `pnpm test:web` | 8 vitest tests (canonical parity) |
+| `pnpm test:api` | 81 backend tests (offline) |
+| `pnpm test:web` | 11 vitest tests (canonical parity + components) |
 | `pnpm test:contracts` | forge tests |
-| `pnpm verify:live` | live read-only checks |
+| `pnpm verify:live` | live read-only checks (8 PASS / 1 BLOCKED w/o wallet) |
+| `pnpm verify:receipt` | receipt provenance — dataLabel inside the hash |
 | `pnpm verify:mainnet-execution` | gated real-tx proof |
 | `pnpm dx:summary` | DX evidence report |
 | `./scripts/ci-local.sh` | everything, in order |

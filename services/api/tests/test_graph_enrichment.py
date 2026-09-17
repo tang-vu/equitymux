@@ -107,6 +107,21 @@ def test_underlyings_index():
     assert set(nvda["platforms"]) == {"ondo", "xstocks", "bstock"}
 
 
+def test_adapter_exception_isolated():
+    """A non-ProviderError crash in one adapter must not kill discovery."""
+    class CrashingClient(FakeClient):
+        def stock_list(self, type_id):
+            if type_id == 2:  # xStocks adapter explodes unexpectedly
+                raise RuntimeError("adapter bug")
+            return super().stock_list(type_id)
+
+    g = CanonicalEquityGraph(client=CrashingClient())
+    reps = g.discover("NVDA")
+    platforms = {r.platform for r in reps}
+    assert Platform.XSTOCKS not in platforms
+    assert platforms == {Platform.ONDO, Platform.BSTOCK}
+
+
 def test_ttl_cache_avoids_repeat_calls():
     from equitymux.providers.binance_public import _TTLCache
     c = _TTLCache()

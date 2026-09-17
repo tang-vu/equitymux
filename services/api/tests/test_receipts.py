@@ -45,3 +45,18 @@ def test_candidate_view_shape(rep_ondo, intent):
     for k in ("platform", "tokenAddress", "premiumBps", "marketState", "status",
               "reasonCodes", "score"):
         assert k in c
+
+
+def test_candidate_view_carries_reference_provenance(rep_ondo, intent):
+    rep_ondo.reference_price_source = "peer:xstocks"
+    r = _receipt(rep_ondo, intent)
+    assert r["candidates"][0]["referencePriceSource"] == "peer:xstocks"
+
+
+def test_data_label_inside_hashed_body(rep_ondo, intent):
+    """dataLabel must be hash-bound — appended post-hash breaks verification."""
+    live = _receipt(rep_ondo, intent)
+    recorded = _receipt(rep_ondo, intent)
+    recorded["receiptId"], recorded["createdAt"] = live["receiptId"], live["createdAt"]
+    assert live["dataLabel"] == "LIVE"
+    assert receipt_hash(live) != receipt_hash({**recorded, "dataLabel": "RECORDED"})
