@@ -76,6 +76,26 @@ def test_x402_501_without_payto(api_client, monkeypatch):
     assert r.status_code == 501
 
 
+def test_underlyings_index_endpoint(api_client):
+    r = api_client.get("/api/underlyings")
+    assert r.status_code == 200
+    idx = r.json()["underlyings"]
+    nvda = next(e for e in idx if e["ticker"] == "NVDA")
+    assert nvda["count"] >= 1 and nvda["platforms"]
+
+
+def test_explore_labels_recorded(api_client):
+    r = api_client.get("/api/explore/NVDA")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["dataLabel"] == "RECORDED"
+    reps = body["representations"]
+    assert len(reps) >= 1
+    for rep in reps:
+        # provenance must be present on every representation
+        assert "reference_price_source" in rep
+
+
 def test_health_endpoint(api_client):
     r = api_client.get("/api/health")
     assert r.status_code == 200

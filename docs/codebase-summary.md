@@ -26,7 +26,7 @@ equitymux/
 │       │                        intent parser
 │       ├── verify_live.py       read-only mainnet checks (no tx)
 │       └── verify_execution.py  human-gated real-trade proof
-│   └── tests/                   81 pytest tests — compiler, intent fuzz,
+│   └── tests/                   83 pytest tests — compiler, intent fuzz,
 │                                pipeline state machine, graph enrichment,
 │                                api surface, security, openapi guard
 ├── services/keeper/             BNB Agent Studio keeper
@@ -53,7 +53,7 @@ equitymux/
 | Command | Purpose |
 |---|---|
 | `pnpm dev:api` / `pnpm dev:web` | local stack |
-| `pnpm test:api` | 81 backend tests (offline) |
+| `pnpm test:api` | 83 backend tests (offline) |
 | `pnpm test:web` | 11 vitest tests (canonical parity + components) |
 | `pnpm test:contracts` | forge tests |
 | `pnpm verify:live` | live read-only checks (8 PASS / 1 BLOCKED w/o wallet) |
