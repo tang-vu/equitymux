@@ -22,7 +22,7 @@ step "api: ruff"
 (cd services/api && uv run ruff check .)
 
 step "api: mypy"
-(cd services/api && uv run mypy equitymux)
+(cd services/api && uv run mypy -p equitymux)
 
 step "api: pytest"
 (cd services/api && uv run pytest -q)

@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     # challenge addressed to this wallet. Empty = surface defined but unpaid.
     x402_payto_address: str = ""
 
+    # --- CORS (comma-separated browser origins allowed to call the API) ---
+    cors_origins: str = "http://localhost:3000"
+
     # --- execution kill switches (system ceiling, never relaxed by user policy) ---
     execution_enabled: bool = False
     require_simulation: bool = True
@@ -71,6 +74,10 @@ class Settings(BaseSettings):
     @property
     def quote_assets(self) -> set[str]:
         return {x.strip().upper() for x in self.allowed_quote_assets.split(",") if x.strip()}
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
 
 @lru_cache

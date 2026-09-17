@@ -12,7 +12,7 @@
     "test:contracts": "cd packages/contracts && forge test",
     "build": "pnpm --filter @equitymux/web build",
     "lint": "pnpm --filter @equitymux/web lint && cd services/api && uv run ruff check .",
-    "typecheck": "pnpm --filter @equitymux/web typecheck && cd services/api && uv run mypy equitymux",
+    "typecheck": "pnpm --filter @equitymux/web typecheck && cd services/api && uv run mypy -p equitymux",
     "verify:live": "cd services/api && uv run python -m equitymux.verify_live",
     "verify:mainnet-execution": "cd services/api && uv run python -m equitymux.verify_execution --i-understand-mainnet",
     "dx:summary": "python3 scripts/dx-summary.py"

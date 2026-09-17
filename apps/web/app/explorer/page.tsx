@@ -102,7 +102,11 @@ export default function Explorer() {
           />
         </div>
         <p className="text-xs text-[var(--color-ink-3)] mb-3">
-          {index.isLoading ? "loading…" : `${filtered.length} / ${index.data?.underlyings.length ?? 0} underlyings listed on BSC across Ondo, xStocks, bStock.`}
+          {index.isLoading
+            ? "loading…"
+            : index.error
+              ? `index unavailable: ${(index.error as Error).message}`
+              : `${filtered.length} / ${index.data?.underlyings.length ?? 0} underlyings listed on BSC across Ondo, xStocks, bStock.`}
         </p>
         <div className="max-h-96 overflow-y-auto">
           <table className="w-full text-xs">

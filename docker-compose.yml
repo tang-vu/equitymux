@@ -13,6 +13,7 @@ services:
       DEMO_MODE: ${DEMO_MODE:-false}
       EXECUTION_ENABLED: "false"
       X402_PAYTO_ADDRESS: ${X402_PAYTO_ADDRESS:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
     volumes:
       - api-data:/repo/data
     healthcheck:

@@ -30,7 +30,7 @@ log = structlog.get_logger()
 settings = get_settings()
 app = FastAPI(title="EquityMux", version="0.1.0",
               description="The intent and execution router for tokenized stocks")
-app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"],
+app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origin_list,
                    allow_methods=["*"], allow_headers=["*"])
 
 pipeline = Pipeline(settings)
