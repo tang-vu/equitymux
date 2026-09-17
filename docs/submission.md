@@ -28,7 +28,7 @@ representation — then proves it with a cryptographic receipt.
 - **Receipts are independently verifiable**: canonical JSON + sha256 with a
   cross-language parity vector (Python ⇄ TypeScript); the UI re-computes the
   hash client-side AND via `GET /api/receipts/{id}/verify`.
-- 75 Python tests + 8 frontend tests + 4 Foundry tests, all green.
+- 78 Python tests + 8 frontend tests + 4 Foundry tests, all green.
   `verify:live` reproduces every read-only claim with no credentials.
 - Fail-closed defaults: `EXECUTION_ENABLED=false`, system ceilings the
   constitution cannot loosen. Clean checkout verified end-to-end
@@ -47,16 +47,19 @@ representation — then proves it with a cryptographic receipt.
   verification is not claimed until a facilitator is wired.
 
 ## Developer Experience Report
-8 recorded issues in `dx/` (`pnpm dx:summary`): WAF-blocked docs
+9 recorded issues in `dx/` (`pnpm dx:summary`): WAF-blocked docs
 (workaround: skills-hub repo), bStock `stockInfo.price=null` (peer-reference
-fallback + provenance flag), 10s token-dynamic latency (parallel enrichment),
+fallback, then `kline:close` last-resort fallback — verified live on the
+bStock-only ticker BNC), 10s token-dynamic latency (parallel enrichment),
 token-audit 400 → corrected POST shape, `baw` async order lifecycle, dev-proxy
-silently targeting a wrong backend, a mypy-caught latent crash, and a
-container-layout `REPO_ROOT` break. See `docs/dx-report.md`.
+silently targeting a wrong backend, a mypy-caught latent crash, a
+container-layout `REPO_ROOT` break, and the peer-fallback coverage gap the
+kline fallback closes. See `docs/dx-report.md`.
 
 ## Judge quickstart
 See README — `pnpm test:api`, `pnpm test:web`, `pnpm test:contracts`,
-`pnpm verify:live`, `./scripts/ci-local.sh`, or `docker compose up --build`.
+`pnpm verify:live`, `pnpm verify:receipt`, `./scripts/ci-local.sh`, or
+`docker compose up --build`.
 Screenshots of every page against live mainnet data: `docs/demo/`.
 Mainnet execution requires the sign-in steps in `docs/demo-script.md`.
 
