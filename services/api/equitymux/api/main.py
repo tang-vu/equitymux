@@ -46,7 +46,8 @@ def _startup() -> None:
 # ---------- meta ----------
 @app.get("/api/health")
 def health() -> dict:
-    out = {"app": "ok", "demoMode": settings.demo_mode,
+    out = {"app": "ok", "service": "equitymux-api", "version": "0.1.0",
+           "demoMode": settings.demo_mode,
            "executionEnabled": settings.execution_enabled,
            "dxSession": recorder.session_id()}
     try:

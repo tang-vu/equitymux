@@ -95,6 +95,8 @@ export interface Receipt {
 
 export interface Health {
   app: string;
+  service?: string;
+  version?: string;
   demoMode: boolean;
   executionEnabled: boolean;
   bscRpc?: { ok: boolean; chainId?: number; block?: number };

@@ -4,34 +4,44 @@
 equitymux/
 ├── apps/web/                    Next.js 15 + Tailwind v4 frontend
 │   ├── app/                     / (terminal) constitution explorer routes
-│   │                            receipts agent dev
+│   │                            receipts agent dev  + icon.svg
 │   ├── components/              Nav, PipelineStages, RouteTable, ReceiptCard
-│   └── lib/api.ts               typed client; mirrors backend JSON
-├── services/api/                Python backend (uv-managed venv)
+│   ├── lib/api.ts               typed client; mirrors backend JSON
+│   └── lib/canonical.ts         Python-parity canonical JSON + sha256
+│                                (verifyReceiptHash — independent of server)
+├── services/api/                Python backend (uv-managed; dep-groups dev)
 │   └── equitymux/
 │       ├── config.py            Settings + system ceilings (kill switches)
 │       ├── api/main.py          REST: health config constitution explore
-│       │                        intent receipts agent dx
+│       │                        underlyings intent receipts agent dx
 │       ├── domain/              models (intent/representation/candidate/
 │       │                        receipt), Decimal math helpers
 │       ├── policy/              schema (PortfolioConstitution + hash),
 │       │                        compiler (NL→rules), engine (evaluate)
-│       ├── providers/           binance_public, baw (Agentic Wallet),
-│       │                        bsc_rpc, audit, errors
-│       ├── services/            graph, tournament, pipeline, receipts,
+│       ├── providers/           binance_public (TTL cache), baw (Agentic
+│       │                        Wallet), bsc_rpc, audit, errors
+│       ├── services/            graph (parallel enrich + peer ref),
+│       │                        tournament, pipeline, receipts,
 │       │                        state_machine, keeper, persistence,
 │       │                        intent parser
 │       ├── verify_live.py       read-only mainnet checks (no tx)
 │       └── verify_execution.py  human-gated real-trade proof
-│   └── tests/                   56 pytest tests, fixture-driven
-├── services/keeper/             BNB Agent Studio agent config + docs
+│   └── tests/                   68 pytest tests, fixture-driven
+├── services/keeper/             BNB Agent Studio keeper
+│   ├── studio.toml              canonical bag layout (bsc-mainnet, $U)
+│   └── agent/                   bag-init scaffold — doWorkAndSubmit
+│                                overridden → POSTs /api/agent/tasks
 ├── packages/contracts/          Foundry: EquityMuxReceiptRegistry + tests
 ├── fixtures/rwa/                recorded API responses (tests + demo mode)
 ├── docs/                        research, architecture, standards, demo,
-│                              submission, dx-report, roadmap
-├── dx/                          recorded DX issues + raw API events
-├── scripts/                     fetch-fixtures.py, dx-summary.py
-└── .github/workflows/ci.yml     backend, contracts, frontend, secrets scan
+│   │                            submission, dx-report, roadmap
+│   └── demo/                    live screenshots of all 7 pages
+├── dx/                          recorded DX issues (8) + raw API events
+├── scripts/                     fetch-fixtures, dx-summary, screenshots,
+│                              ci-local (full judge pipeline)
+├── Dockerfile.api/.web          verified images; docker-compose.yml
+└── .github/workflows/ci.yml     backend, contracts, frontend+vitest,
+                               keeper-agent, secrets scan
 ```
 
 ## Entry points
@@ -39,8 +49,11 @@ equitymux/
 | Command | Purpose |
 |---|---|
 | `pnpm dev:api` / `pnpm dev:web` | local stack |
-| `pnpm test:api` | 56 backend tests (offline) |
+| `pnpm test:api` | 68 backend tests (offline) |
+| `pnpm test:web` | 8 vitest tests (canonical parity) |
 | `pnpm test:contracts` | forge tests |
 | `pnpm verify:live` | live read-only checks |
 | `pnpm verify:mainnet-execution` | gated real-tx proof |
 | `pnpm dx:summary` | DX evidence report |
+| `./scripts/ci-local.sh` | everything, in order |
+| `docker compose up --build` | containerized demo |

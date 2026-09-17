@@ -15,6 +15,13 @@ export default function DevPage() {
         <p className="text-sm text-[var(--color-ink-2)] mt-1">Internal diagnostics — never exposes secrets.</p>
       </header>
 
+      {health.data && health.data.service !== "equitymux-api" && (
+        <div className="panel p-4 border-[var(--color-fail)] text-sm text-[var(--color-fail)]">
+          Proxy warning: <code>/api/health</code> did not identify as{" "}
+          <code>equitymux-api</code> — the dev proxy may be pointing at a
+          different backend (check <code>EQUITYMUX_API</code>).
+        </div>
+      )}
       <div className="grid md:grid-cols-2 gap-5">
         <div className="panel p-5">
           <h2 className="text-sm font-medium mb-3">Health</h2>

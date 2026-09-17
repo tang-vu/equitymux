@@ -79,4 +79,7 @@ def test_x402_501_without_payto(api_client, monkeypatch):
 def test_health_endpoint(api_client):
     r = api_client.get("/api/health")
     assert r.status_code == 200
-    assert r.json()["demoMode"] is True
+    body = r.json()
+    assert body["demoMode"] is True
+    # service fingerprint — lets the web proxy detect a wrong backend
+    assert body["service"] == "equitymux-api"

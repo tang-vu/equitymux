@@ -57,8 +57,8 @@ Every entry below was recorded at the moment it happened
   unrelated uvicorn), the already-running dev server kept proxying to
   `:8000` — every page rendered `loading…` forever with no visible error.
 - **Workaround:** restart with `EQUITYMUX_API=http://localhost:8001`.
-- **Suggested fix:** fingerprint `/api/health` (app name) and surface a
-  wrong-backend warning in the dev page.
+- **Fix applied:** `/api/health` returns `service=equitymux-api`; the dev
+  page shows a red proxy warning when the fingerprint mismatches.
 
 ## Issue 7 — latent `TypeError` on the zero-representations path
 
