@@ -41,6 +41,16 @@ def test_uncompiled_sentences_reported():
     assert report["constitution"]["reserve"]["min_quote_reserve"] in ("50", "50.0")
 
 
+def test_platform_shorthand_forms():
+    c, _ = compile_policy("Only ondo xstocks bstock.")
+    assert set(c.representation.allowed_platforms) == {"ondo", "xstocks", "bstock"}
+    c, _ = compile_policy("Only use xstocks.")
+    assert c.representation.allowed_platforms == ["xstocks"]
+    # "only" without a platform name must not match
+    report = compile_with_report("Only once per day.")
+    assert "Only once per day." in report["uncompiledSentences"]
+
+
 def test_hash_stable_and_canonical():
     c, _ = compile_policy(TEXT)
     h1 = constitution_hash(c)

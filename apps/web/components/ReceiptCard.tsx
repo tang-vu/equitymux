@@ -40,6 +40,7 @@ export function ReceiptCard({ receipt }: { receipt: Receipt }) {
         <Row k="receipt" v={receipt.receiptId} />
         <Row k="hash" v={receipt.receiptHash} accent />
         <Row k="state" v={receipt.state} />
+        <Row k="data" v={receipt.dataLabel ?? "LIVE"} />
         <Row k="constitution" v={receipt.policy.constitutionHash} />
         <Row k="intent" v={`${receipt.intent.side} $${receipt.intent.notional ?? "?"} ${receipt.intent.ticker}`} />
         <Row k="market" v={String(receipt.marketContext?.marketStatus ?? "n/a")} />

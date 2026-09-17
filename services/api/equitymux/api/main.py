@@ -127,7 +127,13 @@ def constitution_history() -> dict:
 @app.get("/api/explore/{ticker}")
 def explore(ticker: str) -> dict:
     try:
-        return pipeline.explore(ticker)
+        out = pipeline.explore(ticker)
+        # honesty marker: fixture-served responses are labeled for API consumers
+        # (the web UI shows the RECORDED badge off /api/health.demoMode)
+        if settings.demo_mode:
+            out["demoMode"] = True
+            out["dataLabel"] = "RECORDED"
+        return out
     except ProviderError as e:
         raise HTTPException(502, str(e))
 
@@ -162,8 +168,7 @@ def run_intent(body: RunIn) -> dict:
         raise HTTPException(400, "no active constitution — approve one first")
     constitution = PortfolioConstitution.model_validate(json.loads(row["canonical_json"]))
     state = PortfolioState.model_validate(body.state or {})
-    result = pipeline.run(intent, constitution, state, confirm=body.confirm)
-    return result
+    return pipeline.run(intent, constitution, state, confirm=body.confirm)
 
 
 # ---------- receipts ----------

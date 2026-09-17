@@ -82,6 +82,8 @@ export interface Receipt {
   receiptHash: string;
   state: string;
   createdAt: string;
+  /** LIVE | RECORDED — provenance is part of the hashed body */
+  dataLabel?: string;
   intent: { raw: string; ticker: string; side: string; notional: string; quote_asset: string };
   policy: { constitutionHash: string; checks: RuleResult[] };
   marketContext: Record<string, unknown>;

@@ -247,4 +247,5 @@ class Pipeline:
                              simulation=simulation, authorization=authorization,
                              execution=execution,
                              agent={"studioIdentity": None, "executionMode": mode},
-                             transitions=sm.history, state=sm.state.value)
+                             transitions=sm.history, state=sm.state.value,
+                             data_label="RECORDED" if self.s.demo_mode else "LIVE")

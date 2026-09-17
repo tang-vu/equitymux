@@ -38,11 +38,14 @@ def build_receipt(*, intent: EquityIntent, constitution_hash: str,
                   candidates: list[CandidateRoute], selected: CandidateRoute | None,
                   simulation: dict | None, authorization: dict,
                   execution: dict, agent: dict, transitions: list[dict],
-                  state: str) -> dict:
+                  state: str, data_label: str = "LIVE") -> dict:
     rec = {
         "version": "1",
         "receiptId": uuid.uuid4().hex,
         "createdAt": datetime.now(UTC).isoformat(),
+        # provenance is part of the hashed body — a RECORDED receipt can never
+        # be passed off as live without breaking its own hash.
+        "dataLabel": data_label,
         "intent": _ser(intent.model_dump(mode="json")),
         "policy": {"constitutionHash": constitution_hash, "checks": policy_checks},
         "marketContext": _ser(market_context),

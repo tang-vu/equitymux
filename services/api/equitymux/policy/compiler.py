@@ -85,9 +85,11 @@ def _stale(c: PortfolioConstitution, m: re.Match):
     c.reference.max_reference_age_s = int(Decimal(m.group(1)) * mult)
 
 
-@_p(r"only trade (?:approved )?(?:platforms?|issuers?)\s*:?\s*([a-z,\s]+)")
+@_p(r"only trade (?:approved )?(?:platforms?|issuers?)\s*:?\s*([a-z,\s]+)"
+    r"|only\s+(?:(?:use|trade|on|via)\s+)?((?:ondo|xstocks?|bstocks?)\b[a-z,\s]*)")
 def _platforms(c: PortfolioConstitution, m: re.Match):
-    names = [n.strip().lower() for n in re.split(r"[,\s]+and\s+|,\s*|\s+and\s+|\s+", m.group(1))
+    src = m.group(1) or m.group(2)
+    names = [n.strip().lower() for n in re.split(r"[,\s]+and\s+|,\s*|\s+and\s+|\s+", src)
              if n.strip().rstrip(".") in {"ondo", "xstocks", "xstock", "bstocks", "bstock"}]
     if names:
         norm = {"xstock": "xstocks", "bstock": "bstock", "bstocks": "bstock"}
