@@ -1,0 +1,31 @@
+{
+  "code": "000000",
+  "message": null,
+  "messageDetail": null,
+  "data": {
+    "tokenId": "F728DD7CABE8942D7CC78CDCF757A895",
+    "name": "Apple (Ondo)",
+    "symbol": "AAPLon",
+    "ticker": "AAPL",
+    "icon": "/images/web3-data/public/token/logos/F728DD7CABE8942D7CC78CDCF757A895.png",
+    "dailyAttestationReports": "/images/web3-data/public/token/ondo/pdf/daily-2026-09-14.pdf",
+    "monthlyAttestationReports": "/images/web3-data/public/token/ondo/pdf/monthly-2026-07.pdf",
+    "companyInfo": {
+      "companyName": "Apple Inc.",
+      "companyNameZh": "\u82f9\u679c",
+      "description": "Apple is among the largest companies in the world, with a broad portfolio of hardware and software products targeted at consumers and businesses. Apple's iPhone makes up a majority of the firm sales, and Apple's other products like Mac, iPad, and Watch are designed around the iPhone as the focal point of an expansive software ecosystem. Apple has progressively worked to add new applications, like streaming video, subscription bundles, and augmented reality. The firm designs its own software and semiconductors while working with subcontractors like Foxconn and TSMC to build its products and chips. Slightly less than half of Apple's sales come directly through its flagship stores, with a majority of sales coming indirectly through partnerships and distribution.",
+      "descriptionZh": "\u82f9\u679c\u662f\u4e16\u754c\u4e0a\u6700\u5927\u7684\u516c\u53f8\u4e4b\u4e00\uff0c\u62e5\u6709\u9762\u5411\u6d88\u8d39\u8005\u548c\u4f01\u4e1a\u7684\u5e7f\u6cdb\u786c\u4ef6\u548c\u8f6f\u4ef6\u4ea7\u54c1\u7ec4\u5408\u3002\u82f9\u679c\u7684iPhone\u5360\u516c\u53f8\u9500\u552e\u989d\u7684\u5927\u90e8\u5206\uff0c\u82f9\u679c\u7684\u5176\u4ed6\u4ea7\u54c1\u5982Mac\u3001iPad\u548cWatch\u90fd\u662f\u56f4\u7ed5iPhone\u8bbe\u8ba1\u7684\uff0ciPhone\u4f5c\u4e3a\u4e00\u4e2a\u5e9e\u5927\u8f6f\u4ef6\u751f\u6001\u7cfb\u7edf\u7684\u6838\u5fc3\u3002\u82f9\u679c\u4e0d\u65ad\u52aa\u529b\u589e\u52a0\u65b0\u5e94\u7528\uff0c\u5982\u6d41\u5a92\u4f53\u89c6\u9891\u3001\u8ba2\u9605\u6346\u7ed1\u548c\u589e\u5f3a\u73b0\u5b9e\u3002\u516c\u53f8\u8bbe\u8ba1\u81ea\u5df1\u7684\u8f6f\u4ef6\u548c\u534a\u5bfc\u4f53\uff0c\u540c\u65f6\u4e0e\u5bcc\u58eb\u5eb7\u548c\u53f0\u79ef\u7535\u7b49\u5206\u5305\u5546\u5408\u4f5c\u5236\u9020\u4ea7\u54c1\u548c\u82af\u7247\u3002\u82f9\u679c\u4e0d\u5230\u4e00\u534a\u7684\u9500\u552e\u989d\u76f4\u63a5\u901a\u8fc7\u5176\u65d7\u8230\u5e97\u5b9e\u73b0\uff0c\u5927\u90e8\u5206\u9500\u552e\u901a\u8fc7\u5408\u4f5c\u4f19\u4f34\u548c\u5206\u9500\u6e20\u9053\u95f4\u63a5\u5b8c\u6210\u3002",
+      "ceo": "John Ternus",
+      "industry": "Technology",
+      "industryKey": "wmp-label-stock-technology",
+      "conceptsCn": [],
+      "conceptsEn": [],
+      "homepageUrl": "https://www.apple.com",
+      "logo": "/images/web3-data/public/stock/company-logos/8b10e4ae9eeb5684.png"
+    },
+    "decimals": 18,
+    "type": 1,
+    "asterPair": "AAPLUSDT"
+  },
+  "success": true
+}

@@ -4,11 +4,11 @@
   "messageDetail": null,
   "data": {
     "openState": true,
-    "marketStatus": "postmarket",
+    "marketStatus": null,
     "reasonCode": "TRADING",
     "reasonMsg": null,
-    "nextOpenTime": 1789689900000,
-    "nextCloseTime": 1789689540000
+    "nextOpenTime": null,
+    "nextCloseTime": null
   },
   "success": true
 }

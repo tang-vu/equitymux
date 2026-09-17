@@ -1,0 +1,71 @@
+{
+  "code": "000000",
+  "message": null,
+  "messageDetail": null,
+  "data": {
+    "symbol": "AAPLon",
+    "ticker": "AAPL",
+    "tokenInfo": {
+      "price": "337.500593043629456174",
+      "priceHigh24h": "339.33677125857406",
+      "priceLow24h": "331.36896185700294",
+      "priceChange24h": "3.87052320445291617",
+      "priceChangePct24h": "1.16012420772464186",
+      "totalHolders": "33699",
+      "sharesMultiplier": "1.003376073740221058",
+      "volume24h": "12333181200.197201810334",
+      "marketCap": "3293489.273278420438838204079103242916680488",
+      "fdv": "3293489.273278420438838204079103242916680488",
+      "circulatingSupply": "9758.469588385771273612",
+      "maxSupply": "9758.469588385771273612",
+      "bnTrader": "19547",
+      "bnHolder": "3389"
+    },
+    "stockInfo": {
+      "price": "336.266667",
+      "priceHigh52w": "344.5699",
+      "priceLow52w": "236.65",
+      "volume": "36676787.831002",
+      "averageVolume": "49169931",
+      "avgVolume30d": null,
+      "sharesOutstanding": "14594180000",
+      "marketCap": "4918342906228",
+      "turnoverRate": "0.2513",
+      "amplitude": "2.381800",
+      "priceToEarnings": "37.51",
+      "dividendYield": "0.32",
+      "priceToBook": "44.97",
+      "lastCashAmount": "0.270000",
+      "apy": null,
+      "wso": "14594180000",
+      "perShareValuation": null,
+      "positionMarketValue": null,
+      "discount": null,
+      "shareHeld": null,
+      "valuation": null,
+      "marketReferenceValuation": null,
+      "eps": null,
+      "priceToSales": null,
+      "enterpriseValue": null,
+      "evToEbitda": null,
+      "returnOnEquity": null,
+      "returnOnAssets": null,
+      "freeCashFlow": null,
+      "debtToEquity": null
+    },
+    "statusInfo": {
+      "openState": true,
+      "marketStatus": "postmarket",
+      "reasonCode": "TRADING",
+      "reasonMsg": null,
+      "nextOpenTime": 1789689900000,
+      "nextCloseTime": 1789689540000
+    },
+    "limitInfo": {
+      "maxAttestationCount": "1500",
+      "maxActiveNotionalValue": "600000"
+    },
+    "type": 1
+  },
+  "success": true
+}

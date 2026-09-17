@@ -89,10 +89,12 @@ def main():
     # 2) overall market status
     fetch("rwa-market-status", CALLS[1][2], "market-status.json")
 
-    # 3) per-asset data for NVDA on BSC for each type that has it
+    # 3) per-asset data for demo tickers on BSC for each type that lists them
     for t, items in lists.items():
-        nvda = [i for i in items if i.get("ticker") == "NVDA" and str(i.get("chainId")) == "56"]
-        for item in nvda[:1]:
+        wanted = [i for i in items
+                  if i.get("ticker") in {"NVDA", "TSLA", "AAPL"}
+                  and str(i.get("chainId")) == "56"]
+        for item in wanted:
             a = item["contractAddress"]
             tag = f"type{t}"
             fetch("rwa-meta", CALLS[2][2].format(c=56, a=a), f"rwa-meta-{tag}-{a}.json")

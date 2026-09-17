@@ -1,0 +1,71 @@
+{
+  "code": "000000",
+  "message": null,
+  "messageDetail": null,
+  "data": {
+    "symbol": "TSLAon",
+    "ticker": "TSLA",
+    "tokenInfo": {
+      "price": "365.511538",
+      "priceHigh24h": "374.083333",
+      "priceLow24h": "358.211111",
+      "priceChange24h": "7.216538",
+      "priceChangePct24h": "2.01413304679105207",
+      "totalHolders": "29691",
+      "sharesMultiplier": "1",
+      "volume24h": "14207002253.99145576",
+      "marketCap": "10123540.758884480404930878809132",
+      "fdv": "10123540.758884480404930878809132",
+      "circulatingSupply": "27696.911605795821430214",
+      "maxSupply": "27696.911605795821430214",
+      "bnTrader": "14525",
+      "bnHolder": "4147"
+    },
+    "stockInfo": {
+      "price": "365.49",
+      "priceHigh52w": "498.83",
+      "priceLow52w": "297.38",
+      "volume": "38871110.711624",
+      "averageVolume": "61825325",
+      "avgVolume30d": null,
+      "sharesOutstanding": "3949547394",
+      "marketCap": "1445800940653",
+      "turnoverRate": "0.9842",
+      "amplitude": "4.029100",
+      "priceToEarnings": "370.22",
+      "dividendYield": "0",
+      "priceToBook": "16.21",
+      "lastCashAmount": "0.000000",
+      "apy": null,
+      "wso": "3949547394",
+      "perShareValuation": null,
+      "positionMarketValue": null,
+      "discount": null,
+      "shareHeld": null,
+      "valuation": null,
+      "marketReferenceValuation": null,
+      "eps": null,
+      "priceToSales": null,
+      "enterpriseValue": null,
+      "evToEbitda": null,
+      "returnOnEquity": null,
+      "returnOnAssets": null,
+      "freeCashFlow": null,
+      "debtToEquity": null
+    },
+    "statusInfo": {
+      "openState": true,
+      "marketStatus": "postmarket",
+      "reasonCode": "TRADING",
+      "reasonMsg": null,
+      "nextOpenTime": 1789689900000,
+      "nextCloseTime": 1789689540000
+    },
+    "limitInfo": {
+      "maxAttestationCount": "1500",
+      "maxActiveNotionalValue": "975000"
+    },
+    "type": 1
+  },
+  "success": true
+}

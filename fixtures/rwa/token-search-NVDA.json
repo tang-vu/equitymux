@@ -10,9 +10,9 @@
       "name": "NVIDIA \u2022 Robinhood Token",
       "symbol": "NVDA",
       "icon": "/images/web3-data/public/token/logos/CA4E361E35614ED9727D8EFCED2FCE59.png",
-      "price": "219.12813221096636",
+      "price": "218.47241495601097",
       "percentChange24h": "-2.22",
-      "volume24h": "3976158948",
+      "volume24h": "16073495441",
       "marketCap": "5165043300000.00",
       "liquidity": "10787180.635890235073792900513938977597",
       "tokenAddresses": [
@@ -40,7 +40,7 @@
       },
       "createTime": 1781031216000,
       "holdersTop10Percent": null,
-      "holders": "166095",
+      "holders": "167506",
       "riskLevel": -1,
       "zone": "stock",
       "stockCompanyName": "Nvidia Corp",
@@ -54,11 +54,11 @@
       "name": "NVIDIA (bStocks)",
       "symbol": "NVDAB",
       "icon": "/images/web3-data/public/token/logos/9dc00cf6f4c44054b6be2d2e032b76c0.png",
-      "price": "219.31053995319033",
-      "percentChange24h": "1.864",
-      "volume24h": "3976158948",
+      "price": "219.5907578558411",
+      "percentChange24h": "1.994",
+      "volume24h": "16071203594",
       "marketCap": "5165043300000.00",
-      "liquidity": "3533697.55286591484536524",
+      "liquidity": "3436084.848686750686770782",
       "tokenAddresses": [
         {
           "chainId": "56",
@@ -108,12 +108,64 @@
       },
       "createTime": 1780655759500,
       "holdersTop10Percent": null,
-      "holders": "128241",
+      "holders": "128084",
       "riskLevel": 0,
       "zone": "stock",
       "stockCompanyName": "Nvidia Corp",
       "stockCompanyNameZh": "\u82f1\u4f1f\u8fbe",
       "rwaType": 3,
+      "assetType": 1
+    },
+    {
+      "chainId": "8453",
+      "contractAddress": "0xb20000000000000000000078ee7ce2fe4908108c",
+      "tokenId": "A8DD2A1D47D1A5B842B5271EEBEEE1C7",
+      "name": "NVIDIA Corporation",
+      "symbol": "NVDAc",
+      "icon": "/images/web3-data/public/token/logos/A8DD2A1D47D1A5B842B5271EEBEEE1C7.png",
+      "price": "219.2467964591913",
+      "percentChange24h": "1.94",
+      "volume24h": "9101844.93933441893801871785",
+      "marketCap": "4012391.4294095084848358238014518106347823503179420",
+      "liquidity": "3110761.2230169850087659091469765213539",
+      "tokenAddresses": [
+        {
+          "chainId": "8453",
+          "contractAddress": "0xb20000000000000000000078ee7ce2fe4908108c",
+          "nativeAddressFlag": false,
+          "lsdFlag": 0,
+          "decimals": 8
+        }
+      ],
+      "tagsInfo": {
+        "Social Events": [
+          {
+            "tagName": "DEX Paid",
+            "languageKey": "wmp-label-update-dexscreener-social"
+          }
+        ]
+      },
+      "links": [
+        {
+          "label": "website",
+          "link": "https://www.coinbase.com/zh-cn/tokenize"
+        }
+      ],
+      "previewLink": {
+        "website": [
+          "https://www.coinbase.com/zh-cn/tokenize"
+        ],
+        "x": [],
+        "tg": []
+      },
+      "createTime": 1785079969000,
+      "holdersTop10Percent": null,
+      "holders": "10800",
+      "riskLevel": 1,
+      "zone": "stock",
+      "stockCompanyName": "Nvidia Corp",
+      "stockCompanyNameZh": "\u82f1\u4f1f\u8fbe",
+      "rwaType": 11,
       "assetType": 1
     },
     {
@@ -123,10 +175,10 @@
       "name": "NVIDIA xStock",
       "symbol": "NVDAx",
       "icon": "/images/web3-data/public/token/logos/0196CE5F3FA2D91473E5765705F00B45.png",
-      "price": "219.12034817960503",
+      "price": "219.6372817541103",
       "percentChange24h": "-2.08",
-      "volume24h": "3976158948",
-      "marketCap": "5165043300000.00",
+      "volume24h": "20627455707.447884742185",
+      "marketCap": "5294846850732",
       "liquidity": "2740161.435260996084843553",
       "tokenAddresses": [
         {
@@ -170,64 +222,12 @@
       },
       "createTime": 1749634799000,
       "holdersTop10Percent": null,
-      "holders": "91667",
+      "holders": "91963",
       "riskLevel": 1,
       "zone": "stock",
       "stockCompanyName": "Nvidia Corp",
       "stockCompanyNameZh": "\u82f1\u4f1f\u8fbe",
       "rwaType": 2,
-      "assetType": 1
-    },
-    {
-      "chainId": "8453",
-      "contractAddress": "0xb20000000000000000000078ee7ce2fe4908108c",
-      "tokenId": "A8DD2A1D47D1A5B842B5271EEBEEE1C7",
-      "name": "NVIDIA Corporation",
-      "symbol": "NVDAc",
-      "icon": "/images/web3-data/public/token/logos/A8DD2A1D47D1A5B842B5271EEBEEE1C7.png",
-      "price": "218.93991495343013",
-      "percentChange24h": "1.91",
-      "volume24h": "12709023.71862303707342024158",
-      "marketCap": "4054723.0942040984004937818309688150774409456993560",
-      "liquidity": "2348657.391615390043311339846617271976",
-      "tokenAddresses": [
-        {
-          "chainId": "8453",
-          "contractAddress": "0xb20000000000000000000078ee7ce2fe4908108c",
-          "nativeAddressFlag": false,
-          "lsdFlag": 0,
-          "decimals": 8
-        }
-      ],
-      "tagsInfo": {
-        "Social Events": [
-          {
-            "tagName": "DEX Paid",
-            "languageKey": "wmp-label-update-dexscreener-social"
-          }
-        ]
-      },
-      "links": [
-        {
-          "label": "website",
-          "link": "https://www.coinbase.com/zh-cn/tokenize"
-        }
-      ],
-      "previewLink": {
-        "website": [
-          "https://www.coinbase.com/zh-cn/tokenize"
-        ],
-        "x": [],
-        "tg": []
-      },
-      "createTime": 1785079969000,
-      "holdersTop10Percent": null,
-      "holders": "10752",
-      "riskLevel": 1,
-      "zone": "stock",
-      "stockCompanyName": "Nvidia Corp",
-      "stockCompanyNameZh": "\u82f1\u4f1f\u8fbe",
-      "rwaType": 11,
       "assetType": 1
     },
     {
@@ -237,11 +237,11 @@
       "name": "NVIDIA (Ondo Tokenized)",
       "symbol": "NVDAon",
       "icon": "/images/web3-data/public/token/logos/28FDC3750F6CE85501E8D350CCA61842.png",
-      "price": "219.2821463970059",
-      "percentChange24h": "1.8454764120219584",
-      "volume24h": "3979665986.244377273334",
-      "marketCap": "5286341721951",
-      "liquidity": "1508570.755369991619925209",
+      "price": "219.6360854510087",
+      "percentChange24h": "2.0056693770341205",
+      "volume24h": "20627455707.447884742185",
+      "marketCap": "5294846850732",
+      "liquidity": "1602478.629624892063652949",
       "tokenAddresses": [
         {
           "chainId": "1",
@@ -295,10 +295,10 @@
       "name": "NVIDIA (Ondo)",
       "symbol": "NVDAon",
       "icon": "/images/web3-data/public/token/logos/4357ecbcd49d4dea9bca1072cb0da0f6.png",
-      "price": "219.2821463970059",
-      "percentChange24h": "1.8454764120219584",
-      "volume24h": "3979665986.244377273334",
-      "marketCap": "5286341721951",
+      "price": "219.6360854510087",
+      "percentChange24h": "2.0056693770341205",
+      "volume24h": "20627455707.447884742185",
+      "marketCap": "5294846850732",
       "liquidity": "0",
       "tokenAddresses": [
         {
@@ -320,12 +320,6 @@
           {
             "tagName": "Ondo",
             "languageKey": "wmp-label-title-ondo"
-          }
-        ],
-        "Volume Trend": [
-          {
-            "tagName": "Token Volume Surging",
-            "languageKey": "wmp-label-title-volume-surging"
           }
         ],
         "Community Recognition Level": [
@@ -358,10 +352,10 @@
       "name": "NVIDIA (Ondo Tokenized)",
       "symbol": "NVDAon",
       "icon": "/images/web3-data/public/token/logos/4357ecbcd49d4dea9bca1072cb0da0f6.png",
-      "price": "219.2821463970059",
-      "percentChange24h": "1.8454764120219584",
-      "volume24h": "3979665986.244377273334",
-      "marketCap": "5286341721951",
+      "price": "219.6360854510087",
+      "percentChange24h": "2.0056693770341205",
+      "volume24h": "20627455707.447884742185",
+      "marketCap": "5294846850732",
       "liquidity": "0",
       "tokenAddresses": [
         {
@@ -377,12 +371,6 @@
           {
             "tagName": "Ondo",
             "languageKey": "wmp-label-title-ondo"
-          }
-        ],
-        "Volume Trend": [
-          {
-            "tagName": "Token Volume Plunging",
-            "languageKey": "wmp-label-title-volume-plunging"
           }
         ]
       },
@@ -424,8 +412,8 @@
       "icon": "/images/web3-data/public/token/logos/15839EA7A056E656FB7DE7A53557C5BF.png",
       "price": "215.3535107676519",
       "percentChange24h": "0.94",
-      "volume24h": "3976158948",
-      "marketCap": "5165043300000.00",
+      "volume24h": "20627455707.447884742185",
+      "marketCap": "5294846850732",
       "liquidity": "0",
       "tokenAddresses": [
         {
@@ -498,11 +486,11 @@
       "name": "NVDA 3x Long",
       "symbol": "NVDAx3L",
       "icon": "/images/web3-data/public/token/logos/5449A3D94735793DE59D9151918963F8.webp",
-      "price": "1.096685128252078",
-      "percentChange24h": "0.86",
-      "volume24h": "788268.51032802313206023329",
-      "marketCap": "661677.355822587130878394897381736349528269601004169456434288",
-      "liquidity": "799376.0872188047611968850212595792628",
+      "price": "1.0902587852518424",
+      "percentChange24h": "0.73",
+      "volume24h": "1055963.69365320563251854657",
+      "marketCap": "657800.06640335149092760892457652939219210017157244913463768",
+      "liquidity": "801338.6138486705951386907067127208658",
       "tokenAddresses": [
         {
           "chainId": "4663",
@@ -520,7 +508,7 @@
         "tg": []
       },
       "createTime": 1787411711000,
-      "holdersTop10Percent": "97.5432254184430409",
+      "holdersTop10Percent": "97.9636743376524124",
       "holders": "503",
       "riskLevel": -1
     },
@@ -694,11 +682,11 @@
       "name": "Wrapped NVIDIA xStock",
       "symbol": "wNVDAx",
       "icon": null,
-      "price": "215.7718808406278",
-      "percentChange24h": "0.0073",
-      "volume24h": "765.70001101151486965",
-      "marketCap": "75283.000360462325074708",
-      "liquidity": "111302.336486185826402444",
+      "price": "219.33083274932994",
+      "percentChange24h": "0.0191",
+      "volume24h": "741.689938356058527833",
+      "marketCap": "76524.721834001263189217",
+      "liquidity": "112215.819793732681881796",
       "tokenAddresses": [
         {
           "chainId": "5000",
@@ -1094,67 +1082,20 @@
     },
     {
       "chainId": "CT_501",
-      "contractAddress": "8nMpoRGnX2dr4G6p6UqTP4fcoee2ttiHFJ1o9f3nqvEA",
-      "tokenId": "FC87EE6378AEA19DA4BE6B8DE4AFFDA1",
+      "contractAddress": "FwS81TEMqoPjm4RK8GNjjKi6y4AbzQ7BVT6gpC4pump",
+      "tokenId": "4C58F7E22EBEBDAB7715880F3239C4FC",
       "name": "NVIDIA",
       "symbol": "NVDA",
-      "icon": null,
-      "price": "0.00009858934366348",
-      "percentChange24h": "0.0",
-      "volume24h": "0",
-      "marketCap": "98585.68814960571440396061304",
-      "liquidity": "35536.12647991841509",
+      "icon": "/images/web3-data/public/token/logos/4C58F7E22EBEBDAB7715880F3239C4FC.png",
+      "price": "0.000004046653985959794",
+      "percentChange24h": "-63.13",
+      "volume24h": "66607.43016462744012198124",
+      "marketCap": "4022.406042916989955079984996461417898799666882",
+      "liquidity": "17194.70685483751683550462896",
       "tokenAddresses": [
         {
           "chainId": "CT_501",
-          "contractAddress": "8nMpoRGnX2dr4G6p6UqTP4fcoee2ttiHFJ1o9f3nqvEA",
-          "nativeAddressFlag": false,
-          "lsdFlag": 0,
-          "decimals": 6
-        }
-      ],
-      "tagsInfo": {
-        "Launch Platform": [
-          {
-            "tagName": "Dynamic BC",
-            "languageKey": "wmp-label-title-alpha-dynamic-bc"
-          }
-        ]
-      },
-      "links": [
-        {
-          "label": "x",
-          "link": "https://x.com/search?q=NVIDIA"
-        }
-      ],
-      "previewLink": {
-        "website": [],
-        "x": [
-          "https://x.com/search?q=NVIDIA"
-        ],
-        "tg": []
-      },
-      "createTime": 1764104546000,
-      "holdersTop10Percent": "99.9624523127387241",
-      "holders": "4",
-      "riskLevel": 1
-    },
-    {
-      "chainId": "CT_501",
-      "contractAddress": "hexZen8jEWBFdjZ3Jy7LRRtmJRr4W1frQ3K9qRvpump",
-      "tokenId": "0DB93B3EDE72F89FC2F354B29460D3FA",
-      "name": "NVIDIA",
-      "symbol": "NVDA",
-      "icon": "/images/web3-data/public/token/logos/0DB93B3EDE72F89FC2F354B29460D3FA.png",
-      "price": "0.000004093495297980536",
-      "percentChange24h": "-61.36",
-      "volume24h": "110367.4673417323996053485",
-      "marketCap": "4082.609895091620384693793542906815082642175536",
-      "liquidity": "969.1749196070811518651548",
-      "tokenAddresses": [
-        {
-          "chainId": "CT_501",
-          "contractAddress": "hexZen8jEWBFdjZ3Jy7LRRtmJRr4W1frQ3K9qRvpump",
+          "contractAddress": "FwS81TEMqoPjm4RK8GNjjKi6y4AbzQ7BVT6gpC4pump",
           "nativeAddressFlag": false,
           "lsdFlag": 0,
           "decimals": 6
@@ -1166,11 +1107,58 @@
             "tagName": "Pumpfun",
             "languageKey": "wmp-label-title-pumpfun"
           }
+        ]
+      },
+      "links": [
+        {
+          "label": "website",
+          "link": "https://www.nvidia.com/"
+        },
+        {
+          "label": "x",
+          "link": "https://x.com/nvidia"
+        }
+      ],
+      "previewLink": {
+        "website": [
+          "https://www.nvidia.com/"
         ],
-        "Volume Trend": [
+        "x": [
+          "https://x.com/nvidia"
+        ],
+        "tg": []
+      },
+      "createTime": 1789676092000,
+      "holdersTop10Percent": "0.0857248414334896",
+      "holders": "33",
+      "riskLevel": -1
+    },
+    {
+      "chainId": "CT_501",
+      "contractAddress": "95hBcCRhjF7ShP78BP6DgVTDC8NBwnLHwZWVDKTDxtAh",
+      "tokenId": "767D57A40AE120157E6B04D54FF4D92C",
+      "name": "NVIDIA",
+      "symbol": "NVDA",
+      "icon": "/images/web3-data/public/token/logos/767D57A40AE120157E6B04D54FF4D92C.png",
+      "price": "0.000004174106322906256",
+      "percentChange24h": "-61.87",
+      "volume24h": "80171.27101496531262501813",
+      "marketCap": "4155.26285858889092112432765692572033486921280",
+      "liquidity": "17148.65852322497741159678778",
+      "tokenAddresses": [
+        {
+          "chainId": "CT_501",
+          "contractAddress": "95hBcCRhjF7ShP78BP6DgVTDC8NBwnLHwZWVDKTDxtAh",
+          "nativeAddressFlag": false,
+          "lsdFlag": 0,
+          "decimals": 6
+        }
+      ],
+      "tagsInfo": {
+        "Launch Platform": [
           {
-            "tagName": "Token Volume Plunging",
-            "languageKey": "wmp-label-title-volume-plunging"
+            "tagName": "Pumpfun",
+            "languageKey": "wmp-label-title-pumpfun"
           }
         ]
       },
@@ -1193,10 +1181,10 @@
         ],
         "tg": []
       },
-      "createTime": 1789583756000,
-      "holdersTop10Percent": "0.8675210653551592",
-      "holders": "33",
-      "riskLevel": 1
+      "createTime": 1789672020000,
+      "holdersTop10Percent": "0.7700634876500474",
+      "holders": "31",
+      "riskLevel": -1
     },
     {
       "chainId": "CT_501",
@@ -1407,6 +1395,42 @@
       "holdersTop10Percent": "100",
       "holders": "2",
       "riskLevel": 1
+    },
+    {
+      "chainId": "5042",
+      "contractAddress": "0x03a2683605e38e77be5f3457dc32081cb7af54e7",
+      "tokenId": "66F6F66A2528317B77A3FA5CF90FBFEE",
+      "name": "Non-stop Victories of Doge Asset",
+      "symbol": "NVDA",
+      "icon": "/images/web3-data/public/token/logos/66F6F66A2528317B77A3FA5CF90FBFEE.webp",
+      "price": "0.0000024803818936588704",
+      "percentChange24h": "-75.3",
+      "volume24h": "14383.1835618074305053096",
+      "marketCap": "2480.38189365887033130974814438370298836274638893706824864",
+      "liquidity": "99.7263889586338314481808",
+      "tokenAddresses": [
+        {
+          "chainId": "5042",
+          "contractAddress": "0x03a2683605e38e77be5f3457dc32081cb7af54e7",
+          "nativeAddressFlag": false,
+          "lsdFlag": 0,
+          "decimals": 18
+        }
+      ],
+      "tagsInfo": {
+        "Launch Platform": [
+          {
+            "tagName": "Argus",
+            "languageKey": "wmp-label-title-argus"
+          }
+        ]
+      },
+      "links": [],
+      "previewLink": null,
+      "createTime": 1789677536000,
+      "holdersTop10Percent": "100",
+      "holders": "8",
+      "riskLevel": -1
     },
     {
       "chainId": "CT_501",
@@ -2215,59 +2239,6 @@
       },
       "createTime": 1764539603000,
       "holdersTop10Percent": "0",
-      "holders": "1",
-      "riskLevel": 1
-    },
-    {
-      "chainId": "CT_501",
-      "contractAddress": "B17DFjzX9Xs19TfHLMKotPmQyck3QvhkC71Cc8BRpump",
-      "tokenId": "6258C6CED729D094CB0A1F5761817447",
-      "name": "NVIDIA Foundation Coin",
-      "symbol": "NVDA",
-      "icon": "/images/web3-data/public/token/logos/6258C6CED729D094CB0A1F5761817447.jpg",
-      "price": "0.000004081889551767",
-      "percentChange24h": "0.0",
-      "volume24h": "0",
-      "marketCap": "4081.889551767000000000",
-      "liquidity": "0.531897243519029388",
-      "tokenAddresses": [
-        {
-          "chainId": "CT_501",
-          "contractAddress": "B17DFjzX9Xs19TfHLMKotPmQyck3QvhkC71Cc8BRpump",
-          "nativeAddressFlag": false,
-          "lsdFlag": 0,
-          "decimals": 6
-        }
-      ],
-      "tagsInfo": {
-        "Launch Platform": [
-          {
-            "tagName": "Pumpfun",
-            "languageKey": "wmp-label-title-pumpfun"
-          }
-        ]
-      },
-      "links": [
-        {
-          "label": "website",
-          "link": "https://www.svcf.org/nvidia"
-        },
-        {
-          "label": "x",
-          "link": "https://x.com/NvidiaCharity/status/1995248681575223492"
-        }
-      ],
-      "previewLink": {
-        "website": [
-          "https://www.svcf.org/nvidia"
-        ],
-        "x": [
-          "https://x.com/NvidiaCharity/status/1995248681575223492"
-        ],
-        "tg": []
-      },
-      "createTime": 1764539561000,
-      "holdersTop10Percent": "100",
       "holders": "1",
       "riskLevel": 1
     }
