@@ -233,11 +233,20 @@ def submit_task(body: TaskIn) -> dict:
     persistence.save_task(task_id, body.kind, body.input)
     try:
         output = keeper.run_task(body.kind, body.input, pipeline)
-        persistence.finish_task(task_id, output)
-        return {"taskId": task_id, "status": "SUCCEEDED", "output": output}
     except ProviderError as e:
         persistence.finish_task(task_id, {"error": str(e)}, "FAILED")
         raise HTTPException(502, str(e))
+    except Exception as e:
+        # bad input shapes (e.g. non-numeric notional) must not 500 with an
+        # unfinished task row — record the failure honestly
+        persistence.finish_task(task_id, {"error": f"{type(e).__name__}: {e}"},
+                                "FAILED")
+        raise HTTPException(400, f"task failed: {type(e).__name__}: {e}")
+    if "error" in output:
+        persistence.finish_task(task_id, output, "FAILED")
+        return {"taskId": task_id, "status": "FAILED", "output": output}
+    persistence.finish_task(task_id, output)
+    return {"taskId": task_id, "status": "SUCCEEDED", "output": output}
 
 
 @app.get("/api/agent/tasks")

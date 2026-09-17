@@ -1,4 +1,5 @@
 """API-surface tests: receipt verification + x402 challenge — TestClient, offline."""
+import json
 from decimal import Decimal
 
 import pytest
@@ -74,6 +75,27 @@ def test_x402_501_without_payto(api_client, monkeypatch):
     r = api_client.post("/api/agent/tasks/paid",
                         json={"kind": "X", "input": {}})
     assert r.status_code == 501
+
+
+def test_keeper_task_unsupported_kind_fails_honestly(api_client):
+    r = api_client.post("/api/agent/tasks",
+                        json={"kind": "DO_A_CRIME", "input": {}})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["status"] == "FAILED"
+    assert "unsupported task kind" in body["output"]["error"]
+
+
+def test_keeper_task_bad_input_no_orphan(api_client):
+    """Malformed input must return 4xx AND mark the task row FAILED."""
+    r = api_client.post("/api/agent/tasks",
+                        json={"kind": "EVALUATE_EQUITY_INTENT",
+                              "input": {"ticker": "NVDA", "notional": "garbage"}})
+    assert r.status_code == 400
+    tasks = api_client.get("/api/agent/tasks").json()["tasks"]
+    assert tasks[0]["status"] == "FAILED"
+    out = json.loads(tasks[0]["output_json"])
+    assert "error" in out
 
 
 def test_underlyings_index_endpoint(api_client):
