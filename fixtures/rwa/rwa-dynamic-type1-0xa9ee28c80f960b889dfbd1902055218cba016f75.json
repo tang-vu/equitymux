@@ -1,0 +1,71 @@
+{
+  "code": "000000",
+  "message": null,
+  "messageDetail": null,
+  "data": {
+    "symbol": "NVDAon",
+    "ticker": "NVDA",
+    "tokenInfo": {
+      "price": "219.300510842662066965",
+      "priceHigh24h": "219.54843536673908",
+      "priceLow24h": "212.88652810462133",
+      "priceChange24h": "3.99183526645201697",
+      "priceChangePct24h": "1.85400576905182729",
+      "totalHolders": "56962",
+      "sharesMultiplier": "1.0017152487959898",
+      "volume24h": "3979665986.244377273334",
+      "marketCap": "15790274.179078011745008296748652603177631355",
+      "fdv": "15790274.179078011745008296748652603177631355",
+      "circulatingSupply": "72002.906506710329677647",
+      "maxSupply": "72002.906506710329677647",
+      "bnTrader": "22517",
+      "bnHolder": "5989"
+    },
+    "stockInfo": {
+      "price": "218.923333",
+      "priceHigh52w": "236.54",
+      "priceLow52w": "164.27",
+      "volume": "18178354.639998",
+      "averageVolume": "165041238",
+      "avgVolume30d": null,
+      "sharesOutstanding": "24147000000",
+      "marketCap": "5286341721951",
+      "turnoverRate": "0.0753",
+      "amplitude": "1.883900",
+      "priceToEarnings": "26.56",
+      "dividendYield": "0.13",
+      "priceToBook": "22.37",
+      "lastCashAmount": "0.250000",
+      "apy": null,
+      "wso": "24147000000",
+      "perShareValuation": null,
+      "positionMarketValue": null,
+      "discount": null,
+      "shareHeld": null,
+      "valuation": null,
+      "marketReferenceValuation": null,
+      "eps": null,
+      "priceToSales": null,
+      "enterpriseValue": null,
+      "evToEbitda": null,
+      "returnOnEquity": null,
+      "returnOnAssets": null,
+      "freeCashFlow": null,
+      "debtToEquity": null
+    },
+    "statusInfo": {
+      "openState": true,
+      "marketStatus": "regular",
+      "reasonCode": "TRADING",
+      "reasonMsg": null,
+      "nextOpenTime": 1789675260000,
+      "nextCloseTime": 1789675140000
+    },
+    "limitInfo": {
+      "maxAttestationCount": "1500",
+      "maxActiveNotionalValue": "3000000"
+    },
+    "type": 1
+  },
+  "success": true
+}

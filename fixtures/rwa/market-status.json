@@ -1,0 +1,21 @@
+{
+  "code": "000000",
+  "message": null,
+  "messageDetail": null,
+  "data": {
+    "marketStatus": "regular",
+    "openState": true,
+    "reasonCode": null,
+    "reasonMsg": null,
+    "nextOpen": "2026-09-17T20:01:00Z",
+    "nextClose": "2026-09-17T19:59:00Z",
+    "nextOpenTime": 1789675260000,
+    "nextCloseTime": 1789675140000,
+    "offhours": {
+      "openState": false,
+      "nextOpenTime": 1789776300000,
+      "nextCloseTime": 1789948500000
+    }
+  },
+  "success": true
+}

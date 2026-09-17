@@ -1,0 +1,20 @@
+{
+  "name": "equitymux",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The intent and execution router for tokenized stocks",
+  "packageManager": "pnpm@11.24.0",
+  "scripts": {
+    "dev:web": "pnpm --filter @equitymux/web dev",
+    "dev:api": "cd services/api && uv run uvicorn equitymux.api.main:app --reload --port 8000",
+    "test:api": "cd services/api && uv run pytest -q",
+    "test:web": "pnpm --filter @equitymux/web test",
+    "test:contracts": "cd packages/contracts && forge test",
+    "build": "pnpm --filter @equitymux/web build",
+    "lint": "pnpm --filter @equitymux/web lint && cd services/api && uv run ruff check .",
+    "typecheck": "pnpm --filter @equitymux/web typecheck && cd services/api && uv run mypy equitymux",
+    "verify:live": "cd services/api && uv run python -m equitymux.verify_live",
+    "verify:mainnet-execution": "cd services/api && uv run python -m equitymux.verify_execution --i-understand-mainnet",
+    "dx:summary": "python3 scripts/dx-summary.py"
+  }
+}

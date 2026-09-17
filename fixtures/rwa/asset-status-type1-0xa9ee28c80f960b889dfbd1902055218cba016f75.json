@@ -1,0 +1,14 @@
+{
+  "code": "000000",
+  "message": null,
+  "messageDetail": null,
+  "data": {
+    "openState": true,
+    "marketStatus": "regular",
+    "reasonCode": "TRADING",
+    "reasonMsg": null,
+    "nextOpenTime": 1789675260000,
+    "nextCloseTime": 1789675140000
+  },
+  "success": true
+}
