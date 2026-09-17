@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0a0e13;
+  --color-panel: #10161e;
+  --color-panel-2: #151d27;
+  --color-edge: #1e2a37;
+  --color-ink: #e8eef4;
+  --color-ink-2: #94a7b8;
+  --color-ink-3: #5b6d7f;
+  --color-accent: #f0b90b;
+  --color-accent-ink: #1a1405;
+  --color-pass: #2ebd85;
+  --color-fail: #f6465d;
+  --color-warn: #f0b90b;
+  --color-info: #4a9cf5;
+  --font-display: "Sohne", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+}
+
+html { color-scheme: dark; }
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+}
+
+.panel {
+  background: var(--color-panel);
+  border: 1px solid var(--color-edge);
+  border-radius: 12px;
+}
+
+.mono { font-family: var(--font-mono); }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 2px 10px; border-radius: 999px; font-size: 11px;
+  font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  border: 1px solid var(--color-edge); color: var(--color-ink-2);
+}
+.chip-pass { color: var(--color-pass); border-color: color-mix(in srgb, var(--color-pass) 40%, transparent); background: color-mix(in srgb, var(--color-pass) 8%, transparent); }
+.chip-fail { color: var(--color-fail); border-color: color-mix(in srgb, var(--color-fail) 40%, transparent); background: color-mix(in srgb, var(--color-fail) 8%, transparent); }
+.chip-warn { color: var(--color-warn); border-color: color-mix(in srgb, var(--color-warn) 40%, transparent); background: color-mix(in srgb, var(--color-warn) 8%, transparent); }
+.chip-info { color: var(--color-info); border-color: color-mix(in srgb, var(--color-info) 40%, transparent); background: color-mix(in srgb, var(--color-info) 8%, transparent); }
+
+@keyframes pulse-dot { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.dot-live { background: var(--color-pass); animation: pulse-dot 1.6s infinite; }
+.dot-rec { background: var(--color-warn); }
+
+@keyframes stage-in { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+.stage-in { animation: stage-in .3s ease both; }
+
+input, textarea, select { outline: none; }
+input:focus, textarea:focus { border-color: var(--color-accent) !important; }
+
+.table-num { font-variant-numeric: tabular-nums; text-align: right; }

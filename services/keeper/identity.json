@@ -1,0 +1,10 @@
+{
+  "name": "EquityMux Keeper",
+  "erc8004": null,
+  "network": "bsc-mainnet",
+  "chainId": 56,
+  "endpoint": "local",
+  "status": "local-runtime",
+  "note": "ERC-8004 registration pending: run `bag erc8004 register --endpoint <public-url>` once a deploy target is chosen. Managed `bnb` provider is a 48h testnet trial; mainnet uses aws/azure provider.",
+  "capabilities": ["EVALUATE_EQUITY_INTENT", "REFRESH_REPRESENTATION_GRAPH", "CHECK_CONSTITUTION_COMPLIANCE", "PREPARE_REBALANCE"]
+}

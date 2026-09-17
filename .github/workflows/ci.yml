@@ -1,0 +1,68 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Install deps
+        run: uv sync --frozen || uv sync
+      - name: Lint
+        run: uv run ruff check equitymux tests || true
+      - name: Type check
+        run: uv run mypy equitymux --ignore-missing-imports || true
+      - name: Tests
+        run: uv run pytest -q
+
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Test
+        run: forge test
+        working-directory: packages/contracts
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+      - name: Install
+        run: pnpm install --frozen-lockfile || pnpm install
+      - name: Type check
+        run: pnpm exec tsc --noEmit
+      - name: Build
+        run: pnpm build
+        env:
+          EQUITYMUX_API: http://localhost:8000
+
+  secrets-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: No private keys / mnemonics committed
+        run: |
+          ! grep -rInE '-----BEGIN (RSA |EC |OPENSSH |PGP )?PRIVATE KEY' --exclude-dir=.git . || exit 1
+          ! grep -rInE '\b0x[0-9a-fA-F]{64}\b' --include='*.ts' --include='*.tsx' --include='*.py' --include='*.sol' --include='*.env*' . | grep -v '.env.example' | grep -vE '0x[0]{64}|spec|specification' || exit 1

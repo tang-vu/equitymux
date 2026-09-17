@@ -41,7 +41,8 @@ def _iso() -> str:
 class Pipeline:
     def __init__(self, settings: Settings | None = None):
         self.s = settings or get_settings()
-        self.graph = CanonicalEquityGraph(settings=self.s,
+        from equitymux.providers.binance_public import BinancePublicClient
+        self.graph = CanonicalEquityGraph(client=BinancePublicClient(self.s),
                                           platforms=self.s.platforms)
         self.tournament = RouteTournament(self.graph, settings=self.s)
         self.wallet = AgenticWallet(self.s)

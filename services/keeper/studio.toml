@@ -1,0 +1,26 @@
+# BNB Agent Studio project config for EquityMux Keeper.
+# Deploy with: bag deploy --provider aws|azure   (managed `bnb` = 48h testnet trial only)
+[agent]
+name = "EquityMux Keeper"
+description = "Monitors explicitly authorized portfolio constitutions and proposes bounded maintenance: representation-graph refresh, compliance evaluation, rebalance preparation. Never self-executes funds."
+version = "0.1.0"
+
+[protocols]
+faces = ["A2A", "MCP", "X402"]
+
+[network]
+chain = "bsc"
+chain_id = 56
+# Final hackathon flow targets BSC mainnet. Testnet only for plumbing validation.
+
+[services.EVALUATE_EQUITY_INTENT]
+kind = "erc8183"
+description = "Evaluate a tokenized-equity intent against a constitution hash; returns route evaluation bundle (no execution)."
+price_usd = "0"          # analysis endpoint; x402 payment optional
+
+[wallet]
+kind = "evm-local"       # keystore via .studio/wallets (never committed)
+# The keeper never holds user funds; user executions go through Agentic Wallet.
+
+[budget]
+llm_daily_usd = "1"      # hard cap on model spend; x402 charges visible via bag audit
