@@ -208,7 +208,13 @@ class Pipeline:
             return {"status": "FAILED", "error": f"no orderId returned: {res}"}
         deadline = time.time() + 90
         while time.time() < deadline:
-            order = self.wallet.order(order_id)
+            try:
+                order = self.wallet.order(order_id)
+            except ProviderError:
+                # transient poll failure — the order may still be live;
+                # keep polling until the deadline rather than 500 mid-flight
+                time.sleep(4)
+                continue
             if order and order.get("status") in ("FINISHED", "FAILED"):
                 out = {"status": "CONFIRMED" if order["status"] == "FINISHED" else "FAILED",
                        "orderId": order_id, "txHash": order.get("txHash"),
