@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import type { Candidate } from "@/lib/api";
 
 const STATUS_CHIP: Record<string, string> = {
@@ -44,9 +44,8 @@ export function RouteTable({ candidates, selected }: {
             const isSel = selected?.representation.token_address === rep.token_address;
             const fails = c.policy?.results.filter((r) => r.status === "FAIL") ?? [];
             return (
-              <>
+              <Fragment key={rep.token_address}>
                 <tr
-                  key={rep.token_address}
                   onClick={() => setOpen(open === rep.token_address ? null : rep.token_address)}
                   className={`border-b border-[var(--color-edge)] cursor-pointer transition-colors hover:bg-[var(--color-panel-2)] ${isSel ? "bg-[var(--color-panel-2)]" : ""}`}
                 >
@@ -81,7 +80,7 @@ export function RouteTable({ candidates, selected }: {
                   </td>
                 </tr>
                 {open === rep.token_address && (
-                  <tr key={rep.token_address + "-detail"} className="bg-[var(--color-panel-2)]">
+                  <tr className="bg-[var(--color-panel-2)]">
                     <td colSpan={8} className="px-5 py-4">
                       <div className="grid md:grid-cols-3 gap-4 text-xs">
                         <div>
@@ -129,7 +128,7 @@ export function RouteTable({ candidates, selected }: {
                     </td>
                   </tr>
                 )}
-              </>
+              </Fragment>
             );
           })}
         </tbody>
