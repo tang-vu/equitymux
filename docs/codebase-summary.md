@@ -18,8 +18,8 @@ equitymux/
 │       │                        receipt), Decimal math helpers
 │       ├── policy/              schema (PortfolioConstitution + hash),
 │       │                        compiler (NL→rules), engine (evaluate)
-│       ├── providers/           binance_public (TTL cache), baw (Agentic
-│       │                        Wallet), bsc_rpc, audit, errors
+│       ├── providers/           binance_public (TTL cache + token_audit),
+│       │                        baw (Agentic Wallet), bsc_rpc, errors
 │       ├── services/            graph (parallel enrich + peer ref),
 │       │                        tournament, pipeline, receipts,
 │       │                        state_machine, keeper, persistence,
@@ -43,9 +43,9 @@ equitymux/
 │                                check-receipt-provenance (verify:receipt),
 │                                ci-local (full judge pipeline)
 ├── Dockerfile.api/.web          verified images; docker-compose.yml
-└── .github/workflows/ci.yml     backend, contracts, frontend+vitest,
-                               keeper-agent, secrets scan, demo-mode
-                               smoke test
+└── .github/workflows/ci.yml     backend, contracts, frontend (typecheck+
+                               eslint+vitest+build), keeper-agent, secrets
+                               scan, demo-mode smoke test
 ```
 
 ## Entry points

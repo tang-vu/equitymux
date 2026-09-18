@@ -12,7 +12,7 @@ minutes. Stage timestamps assume a connected wallet (obtained before filming).
 - Terminal page: type `Buy $10 of NVIDIA`.
 - Pipeline stages animate: intent resolved → NVDA, constitution compiled.
 - Open Constitution page: show the compiled policy —
-  `execution.max_premium_bps`, `market_hours.allow_when_closed`,
+  `execution.max_premium`, `market_hours.allow_when_closed`,
   `execution.require_simulation`, `representation.allowed_platforms`.
   Line: *"The LLM interprets. The constitution decides."*
 
