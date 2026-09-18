@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "The intent and execution router for tokenized stocks",
+  "license": "MIT",
   "packageManager": "pnpm@11.24.0",
   "engines": {
     "node": ">=22",
