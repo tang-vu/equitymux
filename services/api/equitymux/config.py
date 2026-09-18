@@ -59,8 +59,6 @@ class Settings(BaseSettings):
     max_quote_age_s: int = 30
     max_reference_age_s: int = 900  # stale reference ceiling used when policy sets none
 
-    database_url: str = f"sqlite:///{DB_PATH}"
-
     @property
     def rpc_urls(self) -> list[str]:
         return [u.strip() for u in self.bsc_rpc_urls.split(",") if u.strip()]
