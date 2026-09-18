@@ -16,10 +16,13 @@ describe("api client", () => {
   it("throws ApiError with server detail", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        new Response(JSON.stringify({ detail: "boom" }), { status: 502 }),
+      vi.fn().mockImplementation(() =>
+        Promise.resolve(
+          new Response(JSON.stringify({ detail: "boom" }), { status: 502 }),
+        ),
       ),
     );
+    await expect(api("/x")).rejects.toBeInstanceOf(ApiError);
     await expect(api("/x")).rejects.toMatchObject({ status: 502, message: "boom" });
     vi.unstubAllGlobals();
   });

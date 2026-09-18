@@ -1,12 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { api, type Config, type Health } from "@/lib/api";
+import { api, type Config, type DxEvent, type Health } from "@/lib/api";
 
 export default function DevPage() {
   const health = useQuery({ queryKey: ["health"], queryFn: () => api<Health>("/health") });
   const config = useQuery({ queryKey: ["config"], queryFn: () => api<Config>("/config") });
-  const events = useQuery({ queryKey: ["dx"], queryFn: () => api<{ events: any[] }>("/dx/events?limit=100") });
+  const events = useQuery({ queryKey: ["dx"], queryFn: () => api<{ events: DxEvent[] }>("/dx/events?limit=100") });
 
   return (
     <div className="space-y-6">

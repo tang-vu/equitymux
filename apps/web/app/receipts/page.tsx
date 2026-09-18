@@ -2,11 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { api, type Receipt } from "@/lib/api";
+import { api, type Receipt, type ReceiptRow } from "@/lib/api";
 import { ReceiptCard } from "@/components/ReceiptCard";
 
 export default function ReceiptsPage() {
-  const { data } = useQuery({ queryKey: ["receipts"], queryFn: () => api<{ receipts: any[] }>("/receipts") });
+  const { data } = useQuery({ queryKey: ["receipts"], queryFn: () => api<{ receipts: ReceiptRow[] }>("/receipts") });
   const [sel, setSel] = useState<string | null>(null);
   const detail = useQuery({
     queryKey: ["receipt", sel],

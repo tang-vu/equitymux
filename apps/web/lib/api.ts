@@ -106,6 +106,87 @@ export interface Health {
   binanceRwa?: { ok: boolean; marketStatus?: string };
 }
 
+export interface AgentTaskRow {
+  task_id: string;
+  kind: string;
+  status: string;
+  created_at: string;
+  output_json?: string | null;
+}
+
+export interface AgentIdentity {
+  agent: {
+    name?: string;
+    erc8004?: string | null;
+    network?: string;
+    endpoint?: string;
+    status?: string;
+    note?: string;
+  };
+  tasks: AgentTaskRow[];
+}
+
+export interface X402Info {
+  x402: {
+    surface: string;
+    challenge: string;
+    settlement: string;
+    payToConfigured: boolean;
+    bawSupport: string;
+  };
+}
+
+export interface TaskResult {
+  taskId: string;
+  status: "SUCCEEDED" | "FAILED";
+  output: Record<string, unknown>;
+}
+
+export interface ConstitutionRevision {
+  hash: string;
+  revision: number;
+  active: number;
+  nl_text: string;
+  canonical?: Record<string, unknown>;
+  compiler_version?: string;
+  approved_at?: string | null;
+  created_at: string;
+}
+
+export interface CompiledConstitution {
+  compilerVersion: string;
+  constitution: Record<string, unknown>;
+  matchedRules: string[];
+  uncompiledSentences: string[];
+}
+
+export interface DxEvent {
+  timestamp: string;
+  sessionId: string;
+  module: string;
+  endpoint: string;
+  operation: string;
+  method: string;
+  httpStatus: number | null;
+  businessCode?: string | null;
+  success?: boolean;
+  latencyMs?: number | null;
+  errorClass?: string | null;
+  errorMessage?: string | null;
+  docsSection?: string | null;
+  requestShape?: string | null;
+  retryCount?: number | null;
+  notes?: string | null;
+}
+
+export interface ReceiptRow {
+  receipt_id: string;
+  receipt_hash: string;
+  state: string;
+  created_at: string;
+  data_label?: string | null;
+}
+
 export interface Config {
   demoMode: boolean;
   executionEnabled: boolean;

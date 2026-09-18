@@ -56,6 +56,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Type check
         run: pnpm --filter @equitymux/web typecheck
+      - name: Lint
+        run: pnpm --filter @equitymux/web lint
       - name: Unit tests
         run: pnpm --filter @equitymux/web test
       - name: Build

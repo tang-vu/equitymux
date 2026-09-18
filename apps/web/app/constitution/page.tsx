@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { api } from "@/lib/api";
+import { api, CompiledConstitution, ConstitutionRevision } from "@/lib/api";
 
 const EXAMPLES = [
   "Never spend my last $100 USDC",
@@ -30,19 +30,19 @@ Ask me before any transaction over $25.`;
 export default function ConstitutionPage() {
   const qc = useQueryClient();
   const [text, setText] = useState(DEFAULT);
-  const [draft, setDraft] = useState<any>(null);
+  const [draft, setDraft] = useState<CompiledConstitution | null>(null);
 
-  const active = useQuery({ queryKey: ["constitution"], queryFn: () => api<any>("/constitution") });
-  const history = useQuery({ queryKey: ["constitution-history"], queryFn: () => api<any>("/constitution/history") });
+  const active = useQuery({ queryKey: ["constitution"], queryFn: () => api<{ active: ConstitutionRevision | null }>("/constitution") });
+  const history = useQuery({ queryKey: ["constitution-history"], queryFn: () => api<{ history: ConstitutionRevision[] }>("/constitution/history") });
 
   const compile = useMutation({
-    mutationFn: () => api<any>("/constitution/compile", { method: "POST", body: JSON.stringify({ text }) }),
+    mutationFn: () => api<CompiledConstitution>("/constitution/compile", { method: "POST", body: JSON.stringify({ text }) }),
     onSuccess: setDraft,
   });
   const approve = useMutation({
-    mutationFn: () => api<any>("/constitution/approve", {
+    mutationFn: () => api<{ hash: string; active: boolean }>("/constitution/approve", {
       method: "POST",
-      body: JSON.stringify({ nl_text: text, constitution: draft.constitution }),
+      body: JSON.stringify({ nl_text: text, constitution: draft?.constitution }),
     }),
     onSuccess: () => {
       setDraft(null);
@@ -120,11 +120,11 @@ export default function ConstitutionPage() {
         </div>
       </div>
 
-      {history.data?.history?.length > 0 && (
+      {(history.data?.history?.length ?? 0) > 0 && (
         <div className="panel p-4">
           <h2 className="text-sm font-medium mb-2">Revision history</h2>
           <div className="space-y-1 text-xs mono">
-            {history.data.history.map((h: any) => (
+            {(history.data?.history ?? []).map((h) => (
               <div key={h.hash} className="flex gap-3 items-center">
                 <span className={h.active ? "chip chip-pass" : "chip"}>{h.active ? "active" : `rev ${h.revision}`}</span>
                 <span className="text-[var(--color-ink-3)]">{h.hash?.slice(0, 18)}…</span>

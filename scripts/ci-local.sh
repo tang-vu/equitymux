@@ -12,6 +12,9 @@ pnpm install --frozen-lockfile
 step "web: typecheck"
 pnpm --filter @equitymux/web typecheck
 
+step "web: lint (eslint)"
+pnpm --filter @equitymux/web lint
+
 step "web: tests (vitest)"
 pnpm --filter @equitymux/web test
 

@@ -4,6 +4,10 @@
   "private": true,
   "description": "The intent and execution router for tokenized stocks",
   "packageManager": "pnpm@11.24.0",
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=11"
+  },
   "scripts": {
     "dev:web": "pnpm --filter @equitymux/web dev",
     "dev:api": "cd services/api && uv run uvicorn equitymux.api.main:app --reload --port 8000",

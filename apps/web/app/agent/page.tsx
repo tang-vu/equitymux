@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { api } from "@/lib/api";
+import { api, AgentIdentity, TaskResult, X402Info } from "@/lib/api";
 
 const LAYERS = [
   { n: 1, name: "Portfolio Constitution", desc: "Your typed rules — reserve, concentration, premium, slippage, market-hours" },
@@ -14,17 +14,17 @@ const LAYERS = [
 
 export default function AgentOps() {
   const qc = useQueryClient();
-  const { data } = useQuery({ queryKey: ["agent"], queryFn: () => api<any>("/agent/identity") });
-  const x402 = useQuery({ queryKey: ["x402"], queryFn: () => api<any>("/agent/x402") });
+  const { data } = useQuery({ queryKey: ["agent"], queryFn: () => api<AgentIdentity>("/agent/identity") });
+  const x402 = useQuery({ queryKey: ["x402"], queryFn: () => api<X402Info>("/agent/x402") });
   const [input, setInput] = useState('{"ticker": "NVDA", "notional": "10"}');
   const paid = useMutation({
-    mutationFn: () => api<any>("/agent/tasks/paid", {
+    mutationFn: () => api<TaskResult>("/agent/tasks/paid", {
       method: "POST",
       body: JSON.stringify({ kind: "EVALUATE_EQUITY_INTENT", input: JSON.parse(input) }),
     }),
   });
   const task = useMutation({
-    mutationFn: () => api<any>("/agent/tasks", {
+    mutationFn: () => api<TaskResult>("/agent/tasks", {
       method: "POST",
       body: JSON.stringify({ kind: "EVALUATE_EQUITY_INTENT", input: JSON.parse(input) }),
     }),
@@ -72,10 +72,10 @@ export default function AgentOps() {
         <div className="panel p-5">
           <h2 className="text-sm font-medium mb-3">x402 payment surface</h2>
           <div className="space-y-2 text-xs mono">
-            <Row k="status" v={x402.data?.x402?.status ?? "…"} />
+            <Row k="surface" v={x402.data?.x402?.surface ?? "…"} />
+            <Row k="challenge" v={x402.data?.x402?.challenge ?? "…"} />
+            <Row k="settlement" v={x402.data?.x402?.settlement ?? "…"} />
             <Row k="payTo" v={x402.data?.x402?.payToConfigured ? "configured" : "not configured"} />
-            <Row k="scheme" v={x402.data?.x402?.scheme ?? "exact"} />
-            <Row k="asset" v={x402.data?.x402?.asset ?? "USDC (BSC)"} />
           </div>
           <button
             className="mt-3 text-xs px-3 py-1.5 rounded border border-[var(--color-edge)] hover:border-[var(--color-accent)] disabled:opacity-50"
@@ -118,7 +118,7 @@ export default function AgentOps() {
       <div className="panel p-5">
         <h2 className="text-sm font-medium mb-3">Task history</h2>
         <div className="space-y-1.5 text-xs mono">
-          {(data?.tasks ?? []).map((t: any) => (
+          {(data?.tasks ?? []).map((t) => (
             <div key={t.task_id} className="flex gap-3 items-center">
               <span className={`chip ${t.status === "SUCCEEDED" ? "chip-pass" : "chip-fail"}`}>{t.status}</span>
               <span>{t.kind}</span>
