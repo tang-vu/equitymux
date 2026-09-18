@@ -39,8 +39,8 @@ Every entry below was recorded at the moment it happened
 - **Observed:** HTTP 400. Actual contract is `POST` with JSON body
   `{binanceChainId, contractAddress, requestId}` where `requestId` must be
   UUID v4.
-- **Fix applied:** corrected in `providers/audit.py`; now returns
-  `hasResult`/`isSupported`/risk items.
+- **Fix applied:** corrected in `providers/binance_public.py`
+  (`token_audit`); now returns `hasResult`/`isSupported`/risk items.
 
 ## Issue 5 — `baw` order submission is not execution
 

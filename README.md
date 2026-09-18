@@ -160,3 +160,8 @@ See `docs/research/integration-matrix.md` for the honest, per-feature matrix.
 Nothing in this repo claims to work that hasn't been tested. Wallet-dependent
 paths are labeled `BLOCKED` with exact reproduction steps. Recorded fixtures
 are labeled `RECORDED`. There are no fake integrations.
+
+---
+
+Contributing: `CONTRIBUTING.md` · Security disclosures: `SECURITY.md` ·
+License: MIT
