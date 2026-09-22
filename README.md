@@ -12,6 +12,10 @@ receipt that anyone can replay.
 **Try the judge loop:** `pnpm demo` — recorded data, no keys, no wallet, no funds.
 Open the decision desk with `pnpm dev:api` and `pnpm dev:web`.
 
+**Hosted research demo:** [equitymux.tangvu.dev](https://equitymux.tangvu.dev)
+— recorded analysis, no wallet or mainnet execution. Runs on the builder's machine
+through PM2 and Cloudflare Tunnel; see [hosting operations](docs/hosting.md).
+
 Built for [BNB Hack: Tokenized Stocks Edition](https://www.bnbchain.org/en/hackathons/tokenized-stocks).
 
 ![Decision desk with recorded provider comparison and verified replay](docs/demo/decision-desk.png)

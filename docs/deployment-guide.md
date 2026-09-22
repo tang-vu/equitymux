@@ -1,5 +1,9 @@
 # Deployment Guide
 
+The current public research demo runs on Windows/WSL with PM2 and a dedicated
+Cloudflare Tunnel: [equitymux.tangvu.dev](https://equitymux.tangvu.dev).
+See [host operations and recovery](hosting.md) for the deployed configuration.
+
 ## Local (development / judging)
 
 ```bash

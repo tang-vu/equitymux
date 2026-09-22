@@ -58,5 +58,20 @@ receipt, and confirm `/api/constitution/approve` returns 403 through the public
 web proxy. Test PM2 restart and confirm that ports 3017/8017 have one listener
 each. Availability depends on this machine, WSL and its internet connection.
 
+Reproduce the deployed checks with:
+
+```powershell
+node scripts/check-host.mjs https://equitymux.tangvu.dev
+```
+
+For Chromium, run `node scripts/check-public.mjs https://equitymux.tangvu.dev`
+from `apps/web` in an environment with Playwright Chromium installed.
+
+On 2026-09-22 both checks passed against the public HTTPS origin. The Windows
+logon task was invoked manually and returned exit code 0; the API and web PIDs
+changed, with exactly one listener remaining on each assigned port. All three
+PM2 processes were online, and `pm2 save` persisted the process list. A full
+machine reboot was not performed.
+
 References: [Cloudflare local tunnels](https://developers.cloudflare.com/tunnel/features/locally-managed-tunnels/create-local-tunnel/),
 [PM2 ecosystem configuration](https://pm2.keymetrics.io/docs/usage/application-declaration/).
