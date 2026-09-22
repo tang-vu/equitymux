@@ -18,8 +18,13 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Providers>
+          <a className="skip-link" href="#main-content">
+            Skip to workspace
+          </a>
           <Nav />
-          <main className="mx-auto max-w-7xl px-5 pb-16">{children}</main>
+          <main id="main-content" className="app-shell">
+            {children}
+          </main>
         </Providers>
       </body>
     </html>
