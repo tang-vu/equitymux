@@ -64,8 +64,9 @@ approval, authoritative freshness evidence and post-trade verification. Reproduc
 with `pnpm demo` or the execution terminal: unknown execution evidence prevents
 progress. Do not enable the kill switch merely to bypass these checks.
 
-Public deployment, Agent Studio hosted settlement and a live trade require real
-infrastructure and credentials. The DX report needs the builder's genuine
+Public deployment was subsequently completed as recorded below. Agent Studio
+hosted settlement and a live trade still require real infrastructure and
+credentials. The DX report needs the builder's genuine
 experience; this record does not replace it.
 
 ## Exposure desk design update (2026-09-22)
@@ -85,3 +86,23 @@ API/web ports 8021/3021, so they do not interrupt the existing preview.
 No execution capability, live liquidity claim or public deployment was added by
 this design update. The earlier backend/contract/keeper validation remains
 separate from this frontend-specific check.
+
+## Public PM2 host (2026-09-22)
+
+The current release runs at https://equitymux.tangvu.dev via its own Cloudflare
+Tunnel. Windows PM2 supervises API/web processes in WSL at
+`/root/services/equitymux`, replacing the temporary preview described above.
+Ports remain 3017/8017. Runtime data is separate from development data.
+
+Fresh frozen installs, 15 frontend unit tests, lint, formatting, type validation,
+production build and five local Chromium E2E tests passed. Public HTTP checks
+verified the app fingerprint, recorded decision, receipt replay and HTTP 403
+for shared writes/private diagnostics. A Chromium journey over public HTTPS
+passed comparison, policy challenge, restoration and replay without uncaught
+browser errors. Initial browser probes during tunnel/network startup failed;
+the successful run was after the host stabilized.
+
+Manual invocation of the logon recovery task returned 0 and restarted this
+project's three PM2 services. API/web had new PIDs and one listener per port;
+PM2 reported all three online. The process list was saved. No full machine
+reboot was performed. See [operations and limitations](hosting.md).

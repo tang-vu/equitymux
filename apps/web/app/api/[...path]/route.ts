@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { publicDemoAllows } from "@/lib/public-demo";
 
 // Runtime reverse proxy: browser calls /api/* and this handler forwards to
 // the EquityMux API. Unlike next.config rewrites (baked at build time),
@@ -7,6 +8,18 @@ import type { NextRequest } from "next/server";
 const apiBase = () => process.env.EQUITYMUX_API ?? "http://localhost:8000";
 
 async function proxy(req: NextRequest, path: string[]) {
+  if (
+    process.env.EQUITYMUX_PUBLIC_DEMO === "true" &&
+    !publicDemoAllows(req.method, path)
+  ) {
+    return Response.json(
+      {
+        detail:
+          "This public research demo disables shared-state writes and private diagnostics. Compare exposure and verify receipts from the research desk.",
+      },
+      { status: 403 },
+    );
+  }
   const url = `${apiBase()}/api/${path.join("/")}${req.nextUrl.search}`;
   const upstream = await fetch(url, {
     method: req.method,
