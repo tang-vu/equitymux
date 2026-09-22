@@ -9,19 +9,18 @@ from equitymux.policy.engine import DeterministicPolicyEngine, PortfolioState
 from equitymux.policy.schema import PortfolioConstitution
 from tests.conftest import cand
 
-BASE_STATE = PortfolioState(quote_balance=Decimal(100),
-                            total_value_usd=Decimal(200))
+BASE_STATE = PortfolioState(quote_balance=Decimal(100), total_value_usd=Decimal(200))
 
 
 def eng(**kw):
-    return DeterministicPolicyEngine(PortfolioConstitution(**kw),
-                                     __import__("equitymux.config", fromlist=["Settings"])
-                                     .Settings(demo_mode=True))
+    return DeterministicPolicyEngine(
+        PortfolioConstitution(**kw),
+        __import__("equitymux.config", fromlist=["Settings"]).Settings(demo_mode=True),
+    )
 
 
 def intent(notional="10"):
-    return EquityIntent(raw="t", ticker="NVDA", notional=Decimal(notional),
-                        quote_asset="USDC")
+    return EquityIntent(raw="t", ticker="NVDA", notional=Decimal(notional), quote_asset="USDC")
 
 
 class TestReserve:
@@ -53,8 +52,10 @@ class TestPremium:
         assert "62" in r.detail
 
     def test_closed_market_uses_tighter_cap(self, rep_xstocks):
-        e = eng(execution={"max_premium_bps": Decimal(40)},
-                market_hours={"max_premium_bps_when_closed": Decimal(20)})
+        e = eng(
+            execution={"max_premium_bps": Decimal(40)},
+            market_hours={"max_premium_bps_when_closed": Decimal(20)},
+        )
         ev = e.evaluate(intent(), cand(rep_xstocks, premium=30), BASE_STATE)
         r = next(x for x in ev.results if x.rule == "execution.max_premium")
         assert r.status == "FAIL" and "20" in r.detail
@@ -70,8 +71,11 @@ class TestSlippage:
 class TestConcentration:
     def test_concentration_fail(self, rep_ondo):
         e = eng(concentration={"max_single_underlying_pct": Decimal(20)})
-        st = PortfolioState(quote_balance=Decimal(500), total_value_usd=Decimal(100),
-                            underlying_exposure_usd={"NVDA": Decimal(15)})
+        st = PortfolioState(
+            quote_balance=Decimal(500),
+            total_value_usd=Decimal(100),
+            underlying_exposure_usd={"NVDA": Decimal(15)},
+        )
         ev = e.evaluate(intent("10"), cand(rep_ondo), st)
         assert next(x for x in ev.results if "concentration" in x.rule).status == "FAIL"
 
@@ -132,8 +136,9 @@ class TestRepresentation:
 class TestSimulation:
     def test_failed_sim_fails(self, rep_ondo):
         c = cand(rep_ondo)
-        c.simulation = SimulationRecord(status="FAIL", method="eth_call",
-                                        timestamp="2026-01-01T00:00:00Z", detail="revert")
+        c.simulation = SimulationRecord(
+            status="FAIL", method="eth_call", timestamp="2026-01-01T00:00:00Z", detail="revert"
+        )
         e = eng()
         ev = e.evaluate(intent(), c, BASE_STATE)
         assert next(x for x in ev.results if x.rule == "execution.require_simulation").status == "FAIL"
@@ -164,6 +169,7 @@ def test_eligible_route(rep_ondo):
     e = eng(execution={"max_premium_bps": Decimal(50), "max_slippage_bps": Decimal(50)})
     c = cand(rep_ondo, premium=10, slippage=10)
     from equitymux.domain.models import SimulationRecord
+
     c.simulation = SimulationRecord(status="PASS", method="x", timestamp="t")
     ev = e.evaluate(intent(), c, BASE_STATE)
     assert ev.eligible

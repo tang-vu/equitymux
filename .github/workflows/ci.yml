@@ -15,11 +15,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
       - name: Install deps
-        run: uv sync --frozen || uv sync
+        run: uv sync --frozen
       - name: Lint
         run: uv run ruff check equitymux tests
       - name: Type check
         run: uv run mypy -p equitymux --no-incremental
+      - name: Format check
+        run: uv run ruff format --check equitymux tests
       - name: Tests
         run: uv run pytest -q
       - name: Demo-mode smoke (boot on fixtures, exercise API)
@@ -60,10 +62,13 @@ jobs:
         run: pnpm --filter @equitymux/web lint
       - name: Unit tests
         run: pnpm --filter @equitymux/web test
-      - name: Build
-        run: pnpm --filter @equitymux/web build
-        env:
-          EQUITYMUX_API: http://localhost:8000
+      - name: Format check
+        run: pnpm --filter @equitymux/web format:check
+      - uses: astral-sh/setup-uv@v6
+      - name: Browser dependencies
+        run: pnpm --filter @equitymux/web exec playwright install --with-deps chromium
+      - name: Judge demo E2E
+        run: pnpm test:e2e
 
   keeper-agent:
     runs-on: ubuntu-latest
@@ -80,6 +85,8 @@ jobs:
         run: pnpm install   # agent/pnpm-workspace.yaml makes this dir self-contained
       - name: Compile
         run: pnpm build
+      - name: Domain delivery boundaries
+        run: node --test tests/*.test.mjs
 
   secrets-scan:
     runs-on: ubuntu-latest

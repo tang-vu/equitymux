@@ -4,6 +4,7 @@ underlying into one comparable shape.
 Adapter interface: discover(ticker) -> enrich(asset). Adding a new platform is
 a new adapter, never an engine rewrite.
 """
+
 from __future__ import annotations
 
 import time
@@ -63,8 +64,7 @@ def _market_state(status: dict) -> tuple[MarketState, str | None]:
     mapped = _REASON_TO_STATE.get(code or "", None)
     if mapped is not None:
         return mapped, code
-    return _MARKET_STATUS_MAP.get(str(status.get("marketStatus") or "").lower(),
-                                  MarketState.UNKNOWN), code
+    return _MARKET_STATUS_MAP.get(str(status.get("marketStatus") or "").lower(), MarketState.UNKNOWN), code
 
 
 class RepresentationAdapter(ABC):
@@ -139,7 +139,9 @@ class RepresentationAdapter(ABC):
         rep.reference_price_usd = _dec_or_none(stock_info.get("price"))
         if rep.reference_price_usd is not None:
             rep.reference_price_source = "stockInfo"
-        rep.reference_observed_at = _now_iso()
+        # The payload does not establish a source price timestamp.
+        # Receiving a last-close price now does not make that price fresh.
+        rep.reference_observed_at = None
         mult = _dec_or_none(token_info.get("sharesMultiplier"))
         if mult and mult > 0:
             rep.shares_per_token = mult
@@ -221,14 +223,14 @@ ADAPTERS: dict[Platform, type[RepresentationAdapter]] = {
 
 
 class CanonicalEquityGraph:
-    def __init__(self, client: BinancePublicClient | None = None,
-                 platforms: set[str] | None = None):
+    def __init__(self, client: BinancePublicClient | None = None, platforms: set[str] | None = None):
         self.client = client or BinancePublicClient()
         allowed = platforms or {p.value for p in Platform}
         self.adapters = [ADAPTERS[p](self.client) for p in Platform if p.value in allowed]
 
-    def discover(self, ticker: str, chain_id: int = BSC,
-                 enrich: bool = True) -> list[TokenizedRepresentation]:
+    def discover(
+        self, ticker: str, chain_id: int = BSC, enrich: bool = True
+    ) -> list[TokenizedRepresentation]:
         """Discover + enrich representations across all adapters in parallel.
 
         After enrichment, representations missing a reference price inherit the
@@ -261,8 +263,8 @@ class CanonicalEquityGraph:
                     if r.reference_price_usd is None:
                         r.reference_price_usd = ref.reference_price_usd
                         r.reference_price_source = f"peer:{ref.platform.value}"
-                        r.source_evidence.append(
-                            f"peer-reference:{ref.token_address}")
+                        r.reference_observed_at = ref.reference_observed_at
+                        r.source_evidence.append(f"peer-reference:{ref.token_address}")
             for r in reps:
                 if r.reference_price_usd is None:
                     self._kline_reference(r, chain_id)
@@ -283,9 +285,9 @@ class CanonicalEquityGraph:
             return
         close = _dec_or_none(infos[-1][4] if len(infos[-1]) > 4 else None)
         if close is not None:
-            rep.reference_price_usd = close
+            rep.reference_price_usd = close / rep.shares_per_token
             rep.reference_price_source = "kline:close"
-            rep.reference_observed_at = _now_iso()
+            rep.reference_observed_at = None
             rep.source_evidence.append("kline-reference:1d-close")
 
     def underlyings(self, chain_id: int = BSC) -> list[dict]:
@@ -297,11 +299,13 @@ class CanonicalEquityGraph:
                     if str(item.get("chainId")) != str(chain_id):
                         continue
                     t = item.get("ticker", "").upper()
-                    e = by_ticker.setdefault(t, {"ticker": t, "name": item.get("name"),
-                                                 "platforms": {}, "count": 0})
+                    e = by_ticker.setdefault(
+                        t, {"ticker": t, "name": item.get("name"), "platforms": {}, "count": 0}
+                    )
                     e["platforms"][adapter.platform.value] = {
                         "symbol": item.get("symbol"),
-                        "tokenAddress": item.get("contractAddress")}
+                        "tokenAddress": item.get("contractAddress"),
+                    }
                     e["count"] += 1
             except ProviderError:
                 continue

@@ -2,6 +2,7 @@
 EquityIntent. An LLM may draft intents elsewhere; this compiler is the authority
 for what actually enters the pipeline (it never signs anything).
 """
+
 from __future__ import annotations
 
 import re
@@ -10,22 +11,64 @@ from decimal import Decimal
 from equitymux.domain.models import EquityIntent, Side
 
 _KNOWN_TICKERS = {
-    "NVIDIA": "NVDA", "NVDA": "NVDA", "APPLE": "AAPL", "AAPL": "AAPL",
-    "TESLA": "TSLA", "TSLA": "TSLA", "MICROSOFT": "MSFT", "MSFT": "MSFT",
-    "AMAZON": "AMZN", "AMZN": "AMZN", "GOOGLE": "GOOGL", "ALPHABET": "GOOGL",
-    "GOOGL": "GOOGL", "META": "META", "AMD": "AMD", "CIRCLE": "CRCL",
-    "CRCL": "CRCL", "COINBASE": "COIN", "COIN": "COIN", "SPY": "SPY",
-    "QQQ": "QQQ", "MICROSTRATEGY": "MSTR", "MSTR": "MSTR", "SNDK": "SNDK",
-    "SANDISK": "SNDK", "MU": "MU", "MICRON": "MU", "INTC": "INTC",
-    "INTEL": "INTC", "AVGO": "AVGO", "BROADCOM": "AVGO", "PLTR": "PLTR",
-    "PALANTIR": "PLTR", "HOOD": "HOOD", "ROBINHOOD": "HOOD",
+    "NVIDIA": "NVDA",
+    "NVDA": "NVDA",
+    "APPLE": "AAPL",
+    "AAPL": "AAPL",
+    "TESLA": "TSLA",
+    "TSLA": "TSLA",
+    "MICROSOFT": "MSFT",
+    "MSFT": "MSFT",
+    "AMAZON": "AMZN",
+    "AMZN": "AMZN",
+    "GOOGLE": "GOOGL",
+    "ALPHABET": "GOOGL",
+    "GOOGL": "GOOGL",
+    "META": "META",
+    "AMD": "AMD",
+    "CIRCLE": "CRCL",
+    "CRCL": "CRCL",
+    "COINBASE": "COIN",
+    "COIN": "COIN",
+    "SPY": "SPY",
+    "QQQ": "QQQ",
+    "MICROSTRATEGY": "MSTR",
+    "MSTR": "MSTR",
+    "SNDK": "SNDK",
+    "SANDISK": "SNDK",
+    "MU": "MU",
+    "MICRON": "MU",
+    "INTC": "INTC",
+    "INTEL": "INTC",
+    "AVGO": "AVGO",
+    "BROADCOM": "AVGO",
+    "PLTR": "PLTR",
+    "PALANTIR": "PLTR",
+    "HOOD": "HOOD",
+    "ROBINHOOD": "HOOD",
 }
 
 _QUOTE_ASSETS = {"USDC", "USDT", "USD1", "U", "BNB"}
 
 # Uppercase words that are never ticker symbols.
-_STOP_WORDS = {"BUY", "SELL", "OF", "THE", "AND", "FOR", "WITH", "USD",
-               "USDC", "USDT", "USD1", "BNB", "BSC", "MAX", "BPS", "NOT"}
+_STOP_WORDS = {
+    "BUY",
+    "SELL",
+    "OF",
+    "THE",
+    "AND",
+    "FOR",
+    "WITH",
+    "USD",
+    "USDC",
+    "USDT",
+    "USD1",
+    "BNB",
+    "BSC",
+    "MAX",
+    "BPS",
+    "NOT",
+}
 
 
 def parse_intent(text: str) -> EquityIntent:
@@ -56,9 +99,11 @@ def parse_intent(text: str) -> EquityIntent:
                 ticker = stem if stem in _KNOWN_TICKERS.values() else cand
 
     notional = None
-    m = re.search(r"\$\s*(\d+(?:\.\d+)?)", t) or re.search(r"(\d+(?:\.\d+)?)\s*(?:usdc|usdt|usd1|u\b|dollars?)", t, re.IGNORECASE)
+    m = re.search(r"\$\s*(\d+(?:,\d{3})*(?:\.\d+)?)", t) or re.search(
+        r"(\d+(?:\.\d+)?)\s*(?:usdc|usdt|usd1|u\b|dollars?)", t, re.IGNORECASE
+    )
     if m:
-        notional = Decimal(m.group(1))
+        notional = Decimal(m.group(1).replace(",", ""))
 
     quote_asset = "USDC"
     m = re.search(r"\b(USDC|USDT|USD1|BNB|U)\b", t)
@@ -69,10 +114,17 @@ def parse_intent(text: str) -> EquityIntent:
     m = re.search(r"(?:no more than|max(?:imum)?|under)\s*(\d+(?:\.\d+)?)\s*bps", t, re.IGNORECASE)
     if m:
         constraints["maxPremiumBps"] = int(Decimal(m.group(1)))
-    m = re.search(r"slippage\s*(\d+(?:\.\d+)?)\s*bps", t, re.IGNORECASE)
+    m = re.search(r"slippage\s*(\d+(?:\.\d+)?)\s*bps", t, re.IGNORECASE) or re.search(
+        r"(\d+(?:\.\d+)?)\s*bps\s+slippage", t, re.IGNORECASE
+    )
     if m:
         constraints["maxSlippageBps"] = int(Decimal(m.group(1)))
 
-    return EquityIntent(raw=text, ticker=ticker or "", side=side,
-                        notional=notional, quote_asset=quote_asset,
-                        constraints=constraints)
+    return EquityIntent(
+        raw=text,
+        ticker=ticker or "",
+        side=side,
+        notional=notional,
+        quote_asset=quote_asset,
+        constraints=constraints,
+    )

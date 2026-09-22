@@ -1,6 +1,7 @@
 """DX evidence recorder — every Binance/BNB integration interaction lands in
 dx/raw/api-events.jsonl. Never records secrets; sensitive fields are redacted.
 """
+
 from __future__ import annotations
 
 import json

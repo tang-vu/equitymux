@@ -8,13 +8,19 @@ from tests.conftest import cand
 def _receipt(rep_ondo, intent):
     c = cand(rep_ondo, premium=Decimal(12), slippage=Decimal(5))
     return build_receipt(
-        intent=intent, constitution_hash="0xabc",
+        intent=intent,
+        constitution_hash="0xabc",
         policy_checks=[{"rule": "x", "status": "PASS"}],
         market_context={"marketState": "REGULAR"},
-        candidates=[c], selected=c,
+        candidates=[c],
+        selected=c,
         simulation={"status": "PASS", "timestamp": "t"},
         authorization={"equityMuxPolicy": "PASS"},
-        execution={"chainId": 56}, agent={}, transitions=[], state="READY")
+        execution={"chainId": 56},
+        agent={},
+        transitions=[],
+        state="READY",
+    )
 
 
 def test_receipt_hash_deterministic(rep_ondo, intent):
@@ -42,8 +48,7 @@ def test_receipt_has_no_secrets(rep_ondo, intent):
 def test_candidate_view_shape(rep_ondo, intent):
     r = _receipt(rep_ondo, intent)
     c = r["candidates"][0]
-    for k in ("platform", "tokenAddress", "premiumBps", "marketState", "status",
-              "reasonCodes", "score"):
+    for k in ("platform", "tokenAddress", "premiumBps", "marketState", "status", "reasonCodes", "score"):
         assert k in c
 
 

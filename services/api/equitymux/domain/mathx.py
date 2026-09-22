@@ -1,5 +1,5 @@
-"""Deterministic Decimal math for policy and route scoring. No floats for money.
-"""
+"""Deterministic Decimal math for policy and route scoring. No floats for money."""
+
 from decimal import ROUND_DOWN, Decimal
 
 BPS = Decimal(10_000)
@@ -64,10 +64,10 @@ def score_route(
     Weights are public and decomposable — no hidden AI score.
     """
     w = weights or {
-        "premium": Decimal("1.0"),      # per bps over reference
-        "slippage": Decimal("1.0"),     # per expected slippage bps
-        "staleness": Decimal("0.05"),   # per second of reference age
-        "illiquidity": Decimal(20),   # applied when liquidity unknown/thin
+        "premium": Decimal("1.0"),  # per bps over reference
+        "slippage": Decimal("1.0"),  # per expected slippage bps
+        "staleness": Decimal("0.05"),  # per second of reference age
+        "illiquidity": Decimal(20),  # applied when liquidity unknown/thin
     }
     breakdown: dict[str, Decimal] = {}
     breakdown["premium"] = max(D0, premium) * w["premium"] / Decimal(10)

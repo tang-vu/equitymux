@@ -1,67 +1,54 @@
-# System Architecture
+# System architecture
 
-```
-┌──────────────────────── apps/web (Next.js 15) ────────────────────────┐
-│ Terminal · Constitution · Explorer · Routes · Receipts · Agent · Dev   │
-│ /api/* rewritten → EQUITYMUX_API (no secrets in the browser)           │
-└──────────────────────────────┬─────────────────────────────────────────┘
-                               ▼
-┌──────────────────── services/api (FastAPI, Python 3.14) ──────────────┐
-│ api/main.py            thin REST layer                                │
-│ services/pipeline.py   intent→receipt orchestrator + state machine    │
-│ services/graph.py      CanonicalEquityGraph + platform adapters       │
-│ services/tournament.py quote candidates, deterministic scoring        │
-│ services/receipts.py   canonical JSON → sha256 receipt hash           │
-│ services/keeper.py     bounded maintenance tasks (ERC-8183-style)     │
-│ policy/compiler.py     NL → typed PortfolioConstitution               │
-│ policy/engine.py       deterministic per-rule evaluation, fail closed │
-│ providers/                                                            │
-│   binance_public.py    RWA list/dynamic/meta/status/kline (keyless)   │
-│   baw.py               Agentic Wallet CLI boundary (baw --json)       │
-│   bsc_rpc.py           eth_call / receipts / balances (read-only)     │
-│                        token_audit() lives in binance_public.py       │
-└───────┬──────────────────┬───────────────────┬────────────────────────┘
-        ▼                  ▼                   ▼
-  Binance public      Agentic Wallet      BSC JSON-RPC
-  RWA APIs            (baw CLI —          (public endpoints,
-  (www + web3)        signs nothing       verification only)
-                      without user)
+## Decision path
 
-packages/contracts   EquityMuxReceiptRegistry — evidence notary (no funds)
-services/keeper      BNB Agent Studio config (bag CLI, ERC-8004/8183/x402)
-```
+`UI / CLI / MCP / keeper task -> decisions -> graph -> Binance public APIs or
+recorded fixtures -> normalized snapshot -> market-data policy -> receipt`
 
-## Authorization boundary (5 layers)
+`decisions.py` supplies capture, analysis, receipt building, replay and what-if
+comparison. `DecisionPolicy` validates explicit numeric bounds and rejects
+unknown keys. Snapshot identity includes the actual representations; recorded
+capture includes a digest of the source fixture corpus. Replays perform no I/O.
 
-1. **Portfolio Constitution** — deterministic engine; each rule emits
-   PASS/FAIL/REQUIRES_CONFIRMATION with a detail string.
-2. **System ceilings** — env (`MAX_*_HARD`, `ALLOWED_*`, `EXECUTION_ENABLED`)
-   cannot be loosened by any constitution.
-3. **Fresh simulation binding** — quote + on-chain balance probe; stale
-   simulation (`> max_simulation_age_s`) aborts execution.
-4. **Agentic Wallet policy** — `baw` enforces its own limits/tx-lock; we only
-   ever *submit*; success is polled to `FINISHED`.
-5. **On-chain verification** — `eth_getTransactionReceipt` + portfolio delta
-   recorded into the receipt.
+Normalization uses Decimal arithmetic: `share price = token price / shares per
+token`. Eligible research candidates are ordered by displayed share price and a
+stable contract-address tie breaker. Market cap and volume never stand in for
+depth. Slippage is a requested future ceiling, not measured from a price feed.
 
-## Execution state machine
+Premium and absolute parity, issuer, market state, positive price and independent
+reference checks gate the shortlist. Optional issuer-report and minimum-depth
+requirements fail when unavailable. A shortlist is separate from execution
+readiness; no result in this service can submit a trade.
 
-`INTENT_COMPILED → DISCOVERING → QUOTING → POLICY_EVALUATION →
-SIMULATING → {AWAITING_CONFIRMATION | READY | SIMULATION_FAILED |
-NO_VALID_ROUTE} → EXECUTING → PENDING_CONFIRMATION → {CONFIRMED |
-EXECUTION_FAILED}`
+## Execution path and release gate
 
-`READY` then branches to `POLICY_REJECTED` when the system kill switch is
-off, or `EXECUTING` when armed + confirmed. Any pre-quote stage can also
-terminate at `NO_VALID_ROUTE`; policy failures at `POLICY_REJECTED`.
+The preserved pipeline runs discovery, wallet quotes and Portfolio Constitution
+evaluation. System ceilings cannot be relaxed by that constitution. Recorded
+mode never queries an authenticated wallet for quotes. The simulation stage now
+returns SKIP/BLOCKED because the wallet adapter does not bind quoted calldata to
+the later swap. The pipeline treats every non-PASS simulation as a stop.
 
-Every transition is timestamped into the receipt.
+Future execution must authenticate and bind human approval to a plan, establish
+actual portfolio state, freshness, simulation and identical transaction input,
+prevent replays, and verify chain receipt plus resulting position. The existing
+`confirm` flag alone is not authentication. Public multi-user execution is not
+supported.
 
-## Data integrity
+The BSC read-only simulation primitive now includes sender/value and uses one
+explicit block context. This fixes the primitive; it does not complete the swap
+adapter. Wallet terminal status alone is not final onchain verification.
 
-- Prices are `Decimal` end-to-end; `referencePrice = tokenPrice ÷
-  sharesMultiplier` where the multiplier is read per query.
-- Receipts serialize canonically (sorted keys, fixed separators) before
-  sha256; the hash field itself is excluded (`receiptHash`/`receipt_hash`).
-- `DEMO_MODE=true` swaps the provider transport to `fixtures/rwa` — same
-  parsing path, visibly labeled.
+## Receipts and authority
+
+Decision receipts are portable input/output bundles with a versioned engine.
+SHA-256 canonicalization matches Python and TypeScript. Replay checks hash,
+computed outcome and provenance label separately. A maliciously replaced source
+snapshot can be self-consistent: replay does not authenticate upstream truth.
+
+Execution receipts remain in SQLite for the original terminal. Decision bundles
+are returned directly and downloaded by the user, without adding unbounded
+public writes to the receipt archive. Keeper tasks retain their own history.
+
+The Foundry receipt registry is a notary with no custody or routing authority.
+An event establishes that a caller committed a hash, not that the alleged trade
+occurred. Agent Studio signing stays outside the analysis tool surface.

@@ -1,6 +1,7 @@
 """Domain model. Provider payloads never leak past the provider layer — everything
 here is normalized, Decimal-typed, and serializable for receipts.
 """
+
 from __future__ import annotations
 
 from decimal import Decimal

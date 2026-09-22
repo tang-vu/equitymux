@@ -1,56 +1,30 @@
-# EquityMux — 4-minute demo script
+# Judge demo — one stock, one decision, one policy challenge
 
-Target: show the full intent→receipt pipeline on BSC mainnet in under four
-minutes. Stage timestamps assume a connected wallet (obtained before filming).
+Target duration: 3 minutes. Start web/API locally, or use the verified deployment
+when available. No wallet is needed. Keep the RECORDED badge visible throughout.
 
-## 0:00–0:25 — The problem
-- Show the Explorer page: one underlying (NVDA) → three BSC tokens
-  (`NVDAon`, `NVDAx`, `NVDAB`), three different prices.
-- Line: *"Users shouldn't need to know which NVDA token to buy."*
+| Time | Action | Say / show |
+|---|---|---|
+| 0:00–0:25 | Open decision desk | “Buying NVIDIA exposure should not require choosing a wrapper. These issuers represent the same company differently.” |
+| 0:25–0:50 | Run `Buy $10 of NVDA` in recorded mode | Three real recorded representations, normalized by shares per token. No fabricated quotes. |
+| 0:50–1:20 | Expand the research lead and a rejected alternative | Show raw token price, multiplier, underlying share price, parity and exact policy checks. A shortlist is not a trade. |
+| 1:20–1:50 | Click **Require liquidity evidence** | The same snapshot now fails the depth requirement. “Market cap is not liquidity. Unknown is not safe.” |
+| 1:50–2:15 | Restore baseline; toggle an issuer or tighten premium; apply to same snapshot | Only the policy changes. Explain the revised shortlist and rejected alternatives. |
+| 2:15–2:40 | Verify & replay; download receipt | Browser hash and server replay match. Show embedded snapshot, policy and NOT_EXECUTED status. |
+| 2:40–3:00 | Show `pnpm demo` or the MCP test | Agents use the identical analyze/compare/replay workflow. No agent tool can sign. |
 
-## 0:25–0:55 — Intent & Constitution
-- Terminal page: type `Buy $10 of NVIDIA`.
-- Pipeline stages animate: intent resolved → NVDA, constitution compiled.
-- Open Constitution page: show the compiled policy —
-  `execution.max_premium`, `market_hours.allow_when_closed`,
-  `execution.require_simulation`, `representation.allowed_platforms`.
-  Line: *"The LLM interprets. The constitution decides."*
+## Reproduction
 
-## 0:55–1:45 — Discovery & route tournament
-- Routes page: three candidates with live evidence —
-  reference price vs on-chain price, premium bps, market state, liquidity,
-  audit status.
-- Tournament verdict: deterministic winner with explicit reasons; losers show
-  exact fail/pass conditions. Line: *"No black box — every route gets a
-  reason."*
+```bash
+pnpm demo
+pnpm cli replay ../../data/judge-demo/baseline.json
+cd services/api
+uv run pytest tests/test_mcp.py -q
+```
 
-## 1:45–2:40 — Policy gate, simulation, wallet
-- Selected route blocked/passed by constitution — show the pass list and
-  the system ceilings it cannot loosen.
-- Simulation result (BSC RPC eth_call): expected out, gas, slippage.
-- Agentic Wallet prompt: `baw market-order quote` → human approves in
-  Binance Wallet App. Line: *"The model never touches signing."*
-
-## 2:40–3:30 — Execution & verification
-- Order polls to `FINISHED` (never report success at orderId).
-- `eth_getTransactionReceipt` + portfolio delta shown.
-- Receipts page: canonical JSON, `receiptHash` = sha256, links to
-  policy hash, intent hash, execution tx hash. Click **verify hash** —
-  the browser recomputes sha256 over canonical JSON AND the server
-  re-verifies independently. Or `pnpm verify:receipt` on the CLI.
-- Optional: `ReceiptRegistry.commit` tx on BscScan — on-chain evidence
-  notary (holds no funds).
-
-## 3:30–4:00 — Agent & DX
-- Agent Ops page: Keeper task surface (ERC-8183), ERC-8004 identity card,
-  x402 status — labeled honestly.
-- `pnpm verify:live` output recap: 8 PASS / 1 BLOCKED → post-auth all PASS.
-- `pnpm dx:summary`: real DX events (WAF-blocked docs, audit param fix,
-  wallet auth gate). Line: *"Our friction is the report."*
-
-## Fallbacks
-- No wallet: `DEMO_MODE=true` runs the identical UI over recorded fixtures
-  (visible RECORDED badge). Execution step shows the BLOCKED panel with the
-  exact `baw auth signin` steps instead — honesty is the demo.
-- API hiccup: Explorer/Routes read from `fixtures/rwa` timestamps; state the
-  capture time aloud.
+The demo uses repository recordings. It proves deterministic decision behavior,
+not current liquidity, live execution, verified backing or investment returns.
+An actual mainnet demonstration remains an explicit release gate: authenticated
+funded wallet, exact transaction simulation and binding, authorized small trade,
+confirmed chain receipt and independently checked resulting token balance.
+Do not substitute test transactions or invented hashes for that gate.

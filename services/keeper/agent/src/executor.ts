@@ -45,6 +45,7 @@ import {
 } from "@a2a-js/sdk/server";
 import { isCommerceRateLimitError } from "./requestLimits.js";
 import { SellerCore } from "./sellerCore.js";
+import { requestEquityAnalysis } from "./equitymuxWork.js";
 
 const log = {
   error: (msg: string, e?: unknown) =>
@@ -61,12 +62,6 @@ const log = {
  * bundle. Signing (submitResult) stays in fixed code — the LLM is bypassed
  * for the deliverable itself, so the paid output is byte-reproducible.
  */
-function equitymuxApiUrl(): string {
-  return (process.env.EQUITYMUX_API_URL ?? "http://localhost:8000").replace(
-    /\/+$/,
-    "",
-  );
-}
 
 /**
  * ERC-8183 seller A2A executor: the a2a wire over `SellerCore`.
@@ -182,16 +177,7 @@ export class SellerAgentExecutor extends SellerCore implements AgentExecutor {
         ? (spec.task as Record<string, unknown>)
         : { raw: String(spec?.task ?? `job ${jobId}`) };
 
-    const resp = await fetch(`${equitymuxApiUrl()}/api/agent/tasks`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ kind: "EVALUATE_EQUITY_INTENT", input }),
-      signal: abortSignal ?? null,
-    });
-    if (!resp.ok) {
-      throw new Error(`equitymux api ${resp.status}: ${await resp.text()}`);
-    }
-    const analysis = (await resp.json()) as Record<string, unknown>;
+    const analysis = await requestEquityAnalysis(input, abortSignal);
     const work = JSON.stringify(
       { equitymux: analysis, job_id: jobId },
       null,

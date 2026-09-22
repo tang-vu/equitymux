@@ -1,68 +1,42 @@
-# EquityMux — BNB Hack: Tokenized Stocks Edition submission
+# EquityMux — submission preparation
 
-## One-liner
-The intent and execution router for tokenized stocks: say "buy $10 of NVDA"
-and EquityMux finds, vets, simulates, and executes the safest valid BSC
-representation — then proves it with a cryptographic receipt.
+**Buy the exposure. Understand the route. Keep the evidence.**
 
-## Why it's original
-- **Representation-agnostic exposure**: first-class "underlying asset" object;
-  `NVDAon`/`NVDAx`/`NVDAB` are interchangeable routes, not user-facing choices.
-- **Portfolio Constitution**: NL intent compiles to a deterministic policy —
-  premiums, slippage, liquidity, market-hours, platform allow-lists — that the
-  LLM cannot override. LLM interprets; the engine decides.
-- **Route tournament**: all valid candidates scored deterministically with
-  per-rule pass/fail evidence.
-- **Evidence receipts**: canonical JSON → sha256 receipt hash binding intent,
-  constitution, quote, simulation, tx, and post-trade portfolio delta;
-  optional on-chain commit via `EquityMuxReceiptRegistry` (notary, no custody).
+EquityMux compares BSC tokenized equity representations across Ondo, xStocks
+and bStocks, normalizes prices by share multiplier and applies explicit risk
+policies. A user or agent can challenge the same snapshot under a stricter
+policy and independently replay the exported decision.
 
-## Technical implementation
-- Real BSC mainnet reads: Binance public RWA APIs (Ondo/xStocks/bStock),
-  BSC JSON-RPC, token-audit security API. TTL-cached parallel enrichment;
-  peer reference fallback with provenance (`peer:ondo`).
-- **Underlyings index**: `/api/underlyings` — 510 canonical equity↔token
-  mappings across the three BSC issuers, browsable in Explorer.
-- Agentic Wallet boundary (`baw` CLI) for quotes/swaps; order polled to
-  terminal `FINISHED`/`FAILED`.
-- **Receipts are independently verifiable**: canonical JSON + sha256 with a
-  cross-language parity vector (Python ⇄ TypeScript); the UI re-computes the
-  hash client-side AND via `GET /api/receipts/{id}/verify`.
-- 89 Python tests + 11 frontend tests + 4 Foundry tests, all green.
-  `verify:live` reproduces every read-only claim with no credentials.
-- Fail-closed defaults: `EXECUTION_ENABLED=false`, system ceilings the
-  constitution cannot loosen. Clean checkout verified end-to-end
-  (`scripts/ci-local.sh`); Docker images for api+web, compose file included.
+## Demonstrable differentiation
 
-## Agentic-wallet + Agent Studio (special prizes)
-- **Agentic Wallet**: sole execution path for user funds; explicit auth,
-  quote, simulate, confirm, poll, verify.
-- **Agent Studio Keeper** (`services/keeper`, `bag` CLI): canonical
-  `bag init` scaffold; `bag doctor` all-PASS on bsc-mainnet. The keeper's
-  `doWorkAndSubmit` is overridden to call the EquityMux API — the paid
-  deliverable is deterministic engine JSON, not LLM prose; signing stays in
-  fixed code. ERC-8004 registration scripted, gated on public deploy.
-- **x402**: `POST /api/agent/tasks/paid` issues a real 402 challenge when
-  `X402_PAYTO_ADDRESS` is configured; honestly 501s without it — settlement
-  verification is not claimed until a facilitator is wired.
+- Exposure, rather than issuer token symbol, is the primary input.
+- Unknown executable depth cannot pass a positive minimum-liquidity policy.
+- Premium and absolute parity limits treat both expensive wrappers and extreme
+  discounts as conditions worth inspecting.
+- Complete decision receipts include inputs and deterministic outputs, not just
+  a summary hash. A rehashed, altered decision still fails semantic replay.
+- UI, CLI, REST and MCP share one analysis service. No MCP tool can sign.
 
-## Developer Experience Report
-9 recorded issues in `dx/` (`pnpm dx:summary`): WAF-blocked docs
-(workaround: skills-hub repo), bStock `stockInfo.price=null` (peer-reference
-fallback, then `kline:close` last-resort fallback — verified live on the
-bStock-only ticker BNC), 10s token-dynamic latency (parallel enrichment),
-token-audit 400 → corrected POST shape, `baw` async order lifecycle, dev-proxy
-silently targeting a wrong backend, a mypy-caught latent crash, a
-container-layout `REPO_ROOT` break, and the peer-fallback coverage gap the
-kline fallback closes. See `docs/dx-report.md`.
+## Evidence and limits
 
-## Judge quickstart
-See README — `pnpm test:api`, `pnpm test:web`, `pnpm test:contracts`,
-`pnpm verify:live`, `pnpm verify:receipt`, `./scripts/ci-local.sh`, or
-`docker compose up --build`.
-Screenshots of every page against live mainnet data: `docs/demo/`.
-Mainnet execution requires the sign-in steps in `docs/demo-script.md`.
+Use [validation](validation.md) for actual run results and [demo script](demo-script.md)
+for the three-minute presentation. The sample data is RECORDED. The live option
+uses Binance public APIs; it does not certify underlying timestamp freshness.
 
-## Integrity
-No fake data presented as live; fixtures labeled RECORDED; every blocked
-integration labeled BLOCKED with reproduction steps.
+Mainnet execution is BLOCKED: the current Agentic Wallet quote does not bind
+the later swap transaction. A quote or balance probe must not be presented as
+transaction simulation. There is no demonstrated resulting position or mainnet
+trade in this upgrade. Before submission, complete that integration with a
+funded authenticated wallet and an explicitly authorized small trade.
+
+The notary has tested commitment behavior, not a verified deployment here.
+Agent Studio has a scaffold and domain hook; registration, hosted runtime and
+paid delivery require their own evidence. x402 challenge handling is not payment
+settlement. Only claim prize integrations actually demonstrated.
+
+## Developer experience report
+
+The participant must write the report from their actual experience. Existing
+`dx/` recordings are supporting artifacts, not permission to invent experiences
+or submit AI-generated narrative. Winner research in `docs/research/winner-dna.md`
+is separate product research, not the required DX report.

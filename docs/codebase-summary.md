@@ -1,64 +1,34 @@
-# Codebase Summary
+﻿# Codebase map
 
-```
-equitymux/
-├── apps/web/                    Next.js 15 + Tailwind v4 frontend
-│   ├── app/                     / (terminal) constitution explorer routes
-│   │                            receipts agent dev  + icon.svg
-│   ├── components/              Nav, PipelineStages, RouteTable, ReceiptCard
-│   ├── lib/api.ts               typed client; mirrors backend JSON
-│   └── lib/canonical.ts         Python-parity canonical JSON + sha256
-│                                (verifyReceiptHash — independent of server)
-├── services/api/                Python backend (uv-managed; dep-groups dev)
-│   └── equitymux/
-│       ├── config.py            Settings + system ceilings (kill switches)
-│       ├── api/main.py          REST: health config constitution explore
-│       │                        underlyings intent receipts agent dx
-│       ├── domain/              models (intent/representation/candidate/
-│       │                        receipt), Decimal math helpers
-│       ├── policy/              schema (PortfolioConstitution + hash),
-│       │                        compiler (NL→rules), engine (evaluate)
-│       ├── providers/           binance_public (TTL cache + token_audit),
-│       │                        baw (Agentic Wallet), bsc_rpc, errors
-│       ├── services/            graph (parallel enrich + peer ref),
-│       │                        tournament, pipeline, receipts,
-│       │                        state_machine, keeper, persistence,
-│       │                        intent parser
-│       ├── verify_live.py       read-only mainnet checks (no tx)
-│       └── verify_execution.py  human-gated real-trade proof
-│   └── tests/                   89 pytest tests — compiler, intent fuzz,
-│                                pipeline state machine, graph enrichment,
-│                                api surface, security, openapi guard
-├── services/keeper/             BNB Agent Studio keeper
-│   ├── studio.toml              canonical bag layout (bsc-mainnet, $U)
-│   └── agent/                   bag-init scaffold — doWorkAndSubmit
-│                                overridden → POSTs /api/agent/tasks
-├── packages/contracts/          Foundry: EquityMuxReceiptRegistry + tests
-├── fixtures/rwa/                recorded API responses (tests + demo mode)
-├── docs/                        research, architecture, standards, demo,
-│   │                            submission, dx-report, roadmap
-│   └── demo/                    live screenshots of all 7 pages
-├── dx/                          recorded DX issues (9) + raw API events
-├── scripts/                     fetch-fixtures, dx-summary, screenshots,
-│                                check-receipt-provenance (verify:receipt),
-│                                ci-local (full judge pipeline)
-├── Dockerfile.api/.web          verified images; docker-compose.yml
-└── .github/workflows/ci.yml     backend, contracts, frontend (typecheck+
-                               eslint+vitest+build), keeper-agent, secrets
-                               scan, demo-mode smoke test
-```
+Read [README](../README.md) for the product and [validation](validation.md) for measured status.
 
-## Entry points
-
-| Command | Purpose |
+| Location | Responsibility |
 |---|---|
-| `pnpm dev:api` / `pnpm dev:web` | local stack |
-| `pnpm test:api` | 89 backend tests (offline) |
-| `pnpm test:web` | 11 vitest tests (canonical parity + components) |
-| `pnpm test:contracts` | forge tests |
-| `pnpm verify:live` | live read-only checks (8 PASS / 1 BLOCKED w/o wallet) |
-| `pnpm verify:receipt` | receipt provenance — dataLabel inside the hash |
-| `pnpm verify:mainnet-execution` | gated real-tx proof |
-| `pnpm dx:summary` | DX evidence report |
-| `./scripts/ci-local.sh` | everything, in order |
-| `docker compose up --build` | containerized demo |
+| apps/web/app/page.tsx | Decision desk: intent, comparison, policy challenge, replay |
+| apps/web/app/terminal | Original execution terminal; execution remains blocked |
+| apps/web/components/ParityMap.tsx | Signed provider parity on a shared scale |
+| apps/web/lib | Typed API, decision types, Python-compatible canonical SHA-256 |
+| apps/web/e2e | Desktop judge flow and mobile overflow checks |
+| services/api/equitymux/services/decisions.py | Snapshot capture, normalized shortlist, policy comparison, replay |
+| services/api/equitymux/services/graph.py | Binance RWA discovery, enrichment, provenance |
+| services/api/equitymux/services/pipeline.py | Existing execution state machine with fail-closed boundaries |
+| services/api/equitymux/policy | Constitution compiler and deterministic execution checks |
+| services/api/equitymux/providers | Binance data, Agentic Wallet CLI, BSC RPC, typed errors |
+| services/api/equitymux/cli.py | CLI plan and offline replay |
+| services/api/equitymux/mcp_server.py | Read-only MCP using the official Python SDK |
+| services/api/equitymux/demo.py | Deterministic judge scenario |
+| services/api/equitymux/api/main.py | REST, API fingerprint, configuration |
+| services/api/tests | Unit, API, security and real MCP stdio round trip |
+| services/keeper/agent | Standalone BNB Agent Studio scaffold |
+| packages/contracts | Foundry receipt registry; no verified mainnet deployment |
+| fixtures/rwa | Recorded sponsor responses, labeled RECORDED |
+| dx | Historical raw developer experience evidence |
+| docs/research/winner-dna.md | Award sources, comparison matrix and adoption decisions |
+
+`pnpm demo` needs no network or wallet. CLI plans use recorded data by default;
+`--live` explicitly fetches observations. `pnpm mcp` starts stdio tools.
+`pnpm test:e2e` starts isolated API/web servers.
+
+Decision receipts are downloadable, self-contained analysis artifacts, not stored
+executions. Hash integrity and replay do not authenticate the issuer or prove a
+trade. Keep Python and TypeScript canonical serialization aligned.

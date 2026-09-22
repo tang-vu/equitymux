@@ -5,7 +5,10 @@ import { useState } from "react";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [qc] = useState(
-    () => new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 10_000 } } }),
+    () =>
+      new QueryClient({
+        defaultOptions: { queries: { retry: 1, staleTime: 10_000 } },
+      }),
   );
   return <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
 }

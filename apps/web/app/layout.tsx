@@ -6,10 +6,14 @@ import { Nav } from "@/components/Nav";
 export const metadata: Metadata = {
   title: "EquityMux — intent & execution router for tokenized stocks",
   description:
-    "Choose the economic exposure. EquityMux chooses, verifies, simulates and executes the safest valid onchain representation on BSC.",
+    "Compare tokenized stock exposure across BSC issuers, test explicit risk policies, and export replayable decision evidence.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body>

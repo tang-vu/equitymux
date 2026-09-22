@@ -39,17 +39,21 @@ only allows `http://localhost:3000`.
 - env: `EQUITYMUX_API=https://<your-api-host>` (server-side rewrite target;
   never exposed to the browser beyond the /api path)
 
-`pnpm build` is green as of this commit (all routes static-prerendered;
-data fetched client-side through the rewrite).
+Run `pnpm build` for the checkout being deployed; current results are recorded
+in `docs/validation.md`. API data is fetched through the runtime proxy.
 
-## Docker (verified)
+For a Node host, `pnpm build` prepares `.next/standalone` with its static and
+public assets. Start it with `pnpm --filter @equitymux/web start`; set `PORT`,
+`HOSTNAME` and `EQUITYMUX_API` on the host. The production browser tests use
+this same standalone server.
+
+## Docker configuration
 
 ```bash
 docker compose up --build   # api :8000 + web :3000
 ```
 
-Both images build clean; the api image was verified serving live BSC data
-(chainId 56, market status) in-container. `docker-compose.yml` wires
+Previous image checks do not certify the current checkout. `docker-compose.yml` wires
 `EQUITYMUX_API=http://api:8000` and persists SQLite at `api-data:/repo/data`.
 
 ## Contracts
@@ -64,14 +68,18 @@ DEPLOYER_PRIVATE_KEY=... forge script script/Deploy.s.sol \
 
 The registry holds no funds; committing receipts is optional evidence.
 
-### Testnet dry-run (verified)
+The decision desk and MCP operate without a wallet. Mainnet execution remains
+BLOCKED until a bound swap simulation and authenticated plan approval are
+implemented and verified. Wallet sign-in alone does not remove that blocker.
+
+### Historical testnet dry-run (not rerun in this upgrade)
 
 `forge script script/Deploy.s.sol --rpc-url https://bsc-testnet.publicnode.com`
-simulates cleanly on chain 97: **343,595 gas ≈ 0.0000344 tBNB**. The command
+previously simulated on chain 97: **343,595 gas ≈ 0.0000344 tBNB**. The command
 regenerates artifacts under `broadcast/Deploy.s.sol/97/dry-run/` (gitignored).
 
 A throwaway deployer was generated for the testnet deploy:
-`0x0e93E8235E020173De7B33d99fDfCcE887C501FA` (balance 0 — key never committed).
+`0x0e93E8235E020173De7B33d99fDfCcE887C501FA` (balance was 0 at that check; key never committed).
 **Human action:** fund it at https://www.bnbchain.org/en/testnet-faucet
 (captcha-gated), then broadcast:
 

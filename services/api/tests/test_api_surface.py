@@ -1,4 +1,5 @@
 """API-surface tests: receipt verification + x402 challenge — TestClient, offline."""
+
 import json
 from decimal import Decimal
 
@@ -14,11 +15,20 @@ def api_client(tmp_path, monkeypatch):
     monkeypatch.setenv("EXECUTION_ENABLED", "false")
     monkeypatch.setenv("X402_PAYTO_ADDRESS", "0x1111111111111111111111111111111111111111")
     from equitymux.config import get_settings
+
     get_settings.cache_clear()
     import equitymux.api.main as m
-    monkeypatch.setattr(m, "settings", Settings(
-        demo_mode=True, x402_payto_address="0x1111111111111111111111111111111111111111"))
+
+    monkeypatch.setattr(
+        m,
+        "settings",
+        Settings(demo_mode=True, x402_payto_address="0x1111111111111111111111111111111111111111"),
+    )
+    from equitymux.services.pipeline import Pipeline
+
+    monkeypatch.setattr(m, "pipeline", Pipeline(m.settings))
     import equitymux.services.persistence as p
+
     monkeypatch.setattr(p, "_DB", tmp_path / "test.db")
     p.init_db()
     return TestClient(m.app)
@@ -27,11 +37,22 @@ def api_client(tmp_path, monkeypatch):
 def test_receipt_verify_endpoint(api_client, rep_ondo, intent):
     from equitymux.services.receipts import build_receipt
     from tests.conftest import cand
+
     c = cand(rep_ondo, premium=Decimal(12), slippage=Decimal(5))
-    rec = build_receipt(intent=intent, constitution_hash="0xabc",
-                        policy_checks=[], market_context={}, candidates=[c],
-                        selected=c, simulation=None, authorization={},
-                        execution={}, agent={}, transitions=[], state="READY")
+    rec = build_receipt(
+        intent=intent,
+        constitution_hash="0xabc",
+        policy_checks=[],
+        market_context={},
+        candidates=[c],
+        selected=c,
+        simulation=None,
+        authorization={},
+        execution={},
+        agent={},
+        transitions=[],
+        state="READY",
+    )
     r = api_client.post("/api/receipts/verify", json={"receipt": rec})
     assert r.status_code == 200
     assert r.json()["match"] is True
@@ -40,12 +61,22 @@ def test_receipt_verify_endpoint(api_client, rep_ondo, intent):
 def test_receipt_verify_detects_tamper(api_client, rep_ondo, intent):
     from equitymux.services.receipts import build_receipt
     from tests.conftest import cand
+
     c = cand(rep_ondo, premium=Decimal(12), slippage=Decimal(5))
-    rec = build_receipt(intent=intent, constitution_hash="0xabc",
-                        policy_checks=[], market_context={}, candidates=[c],
-                        selected=c, simulation=None, authorization={},
-                        execution={"txHash": "0xabc"}, agent={}, transitions=[],
-                        state="CONFIRMED")
+    rec = build_receipt(
+        intent=intent,
+        constitution_hash="0xabc",
+        policy_checks=[],
+        market_context={},
+        candidates=[c],
+        selected=c,
+        simulation=None,
+        authorization={},
+        execution={"txHash": "0xabc"},
+        agent={},
+        transitions=[],
+        state="CONFIRMED",
+    )
     rec["execution"]["txHash"] = "0xdeadbeef"
     r = api_client.post("/api/receipts/verify", json={"receipt": rec})
     assert r.status_code == 200
@@ -58,9 +89,9 @@ def test_receipt_verify_requires_hash(api_client):
 
 
 def test_x402_challenge_shape(api_client):
-    r = api_client.post("/api/agent/tasks/paid",
-                        json={"kind": "EVALUATE_EQUITY_INTENT",
-                              "input": {"ticker": "NVDA"}})
+    r = api_client.post(
+        "/api/agent/tasks/paid", json={"kind": "EVALUATE_EQUITY_INTENT", "input": {"ticker": "NVDA"}}
+    )
     assert r.status_code == 402
     body = r.json()
     assert body["x402Version"] == 1
@@ -71,16 +102,17 @@ def test_x402_challenge_shape(api_client):
 
 def test_x402_501_without_payto(api_client, monkeypatch):
     import equitymux.api.main as m
+
     monkeypatch.setattr(m.settings, "x402_payto_address", "")
-    r = api_client.post("/api/agent/tasks/paid",
-                        json={"kind": "X", "input": {}})
+    r = api_client.post("/api/agent/tasks/paid", json={"kind": "X", "input": {}})
     assert r.status_code == 501
 
 
 def test_keeper_task_evaluate_intent_happy_path(api_client):
-    r = api_client.post("/api/agent/tasks",
-                        json={"kind": "EVALUATE_EQUITY_INTENT",
-                              "input": {"ticker": "NVDA", "notional": "10"}})
+    r = api_client.post(
+        "/api/agent/tasks",
+        json={"kind": "EVALUATE_EQUITY_INTENT", "input": {"ticker": "NVDA", "notional": "10"}},
+    )
     assert r.status_code == 200
     body = r.json()
     assert body["status"] == "SUCCEEDED"
@@ -91,8 +123,7 @@ def test_keeper_task_evaluate_intent_happy_path(api_client):
 
 
 def test_keeper_task_unsupported_kind_fails_honestly(api_client):
-    r = api_client.post("/api/agent/tasks",
-                        json={"kind": "DO_A_CRIME", "input": {}})
+    r = api_client.post("/api/agent/tasks", json={"kind": "DO_A_CRIME", "input": {}})
     assert r.status_code == 200
     body = r.json()
     assert body["status"] == "FAILED"
@@ -101,9 +132,10 @@ def test_keeper_task_unsupported_kind_fails_honestly(api_client):
 
 def test_keeper_task_bad_input_no_orphan(api_client):
     """Malformed input must return 4xx AND mark the task row FAILED."""
-    r = api_client.post("/api/agent/tasks",
-                        json={"kind": "EVALUATE_EQUITY_INTENT",
-                              "input": {"ticker": "NVDA", "notional": "garbage"}})
+    r = api_client.post(
+        "/api/agent/tasks",
+        json={"kind": "EVALUATE_EQUITY_INTENT", "input": {"ticker": "NVDA", "notional": "garbage"}},
+    )
     assert r.status_code == 400
     tasks = api_client.get("/api/agent/tasks").json()["tasks"]
     assert tasks[0]["status"] == "FAILED"
@@ -132,11 +164,9 @@ def test_explore_labels_recorded(api_client):
 
 
 def _approve_constitution(api_client):
-    comp = api_client.post("/api/constitution/compile",
-                           json={"text": "only trade approved platforms: ondo"})
+    comp = api_client.post("/api/constitution/compile", json={"text": "only trade approved platforms: ondo"})
     c = comp.json()["constitution"]
-    r = api_client.post("/api/constitution/approve",
-                        json={"nl_text": "only ondo", "constitution": c})
+    r = api_client.post("/api/constitution/approve", json={"nl_text": "only ondo", "constitution": c})
     assert r.status_code == 200
     return r.json()["hash"]
 

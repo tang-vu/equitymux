@@ -22,6 +22,8 @@ coverage/
 .mypy_cache/
 .ruff_cache/
 data/
+test-results/
+playwright-report/
 
 # build artifacts
 *.tsbuildinfo

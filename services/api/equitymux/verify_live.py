@@ -16,6 +16,7 @@ Checks, in order:
 Exit code 0 when all *required* checks pass; wallet-dependent checks report
 BLOCKED with the exact human action needed.
 """
+
 from __future__ import annotations
 
 import sys
@@ -59,8 +60,13 @@ def main() -> int:
 
     check("RWA API reachable", lambda: f"marketStatus={client.market_status().get('marketStatus')}")
     check("BSC RPC chainId=56", lambda: rpc.chain_id() == 56 and "56")
-    check("RWA platforms load", lambda: "ondo=%d xstocks=%d bstock=%d" % (
-        len(client.stock_list(1)), len(client.stock_list(2)), len(client.stock_list(3))))
+    check(
+        "RWA platforms load",
+        lambda: (
+            "ondo=%d xstocks=%d bstock=%d"
+            % (len(client.stock_list(1)), len(client.stock_list(2)), len(client.stock_list(3)))
+        ),
+    )
 
     reps = []
 
@@ -69,38 +75,57 @@ def main() -> int:
         return f"{len(reps)} representations"
 
     check("NVDA resolves on BSC", _discover)
-    check("prices load", lambda: (
-        [graph.adapters[0].enrich(r) for r in reps],
-        "; ".join(f"{r.token_symbol}=${r.token_price_usd} ref=${r.reference_price_usd}"
-                  f"({r.reference_price_source or 'none'})"
-                  for r in reps))[1])
+    check(
+        "prices load",
+        lambda: (
+            [graph.adapters[0].enrich(r) for r in reps],
+            "; ".join(
+                f"{r.token_symbol}=${r.token_price_usd} ref=${r.reference_price_usd}"
+                f"({r.reference_price_source or 'none'})"
+                for r in reps
+            ),
+        )[1],
+    )
     check("market state", lambda: reps and reps[0].market_state.value)
     if reps:
-        check("token kline (reference fallback)",
-              lambda: f"{len((client.token_kline(56, reps[0].token_address) or {}).get('klineInfos') or [])} candles")
-        check("token audit (fail-closed surface)",
-              lambda: f"supported={client.token_audit(56, reps[0].token_address).get('isSupported')}")
+        check(
+            "token kline (reference fallback)",
+            lambda: (
+                f"{len((client.token_kline(56, reps[0].token_address) or {}).get('klineInfos') or [])} candles"
+            ),
+        )
+        check(
+            "token audit (fail-closed surface)",
+            lambda: f"supported={client.token_audit(56, reps[0].token_address).get('isSupported')}",
+        )
 
     # wallet-dependent checks
     if not wallet.available():
         results.append(("baw CLI installed", FAIL, "npm i -g @binance/agentic-wallet"))
         print("  [FAIL] baw CLI installed")
     else:
-        st = check("Agentic Wallet session",
-                   lambda: (_ for _ in ()).throw(WalletNotConnectedError("Not logged in"))
-                   if wallet.status() != "CONNECTED" else "CONNECTED")
+        st = check(
+            "Agentic Wallet session",
+            lambda: (
+                (_ for _ in ()).throw(WalletNotConnectedError("Not logged in"))
+                if wallet.status() != "CONNECTED"
+                else "CONNECTED"
+            ),
+        )
         if st:
             check("wallet address (BSC)", lambda: wallet.address("56"))
             check("wallet balance", lambda: f"{len(wallet.balances('56'))} assets")
             reps_q = [r for r in reps if r.token_address]
             if reps_q:
                 r = reps_q[0]
-                check("executable quote (5 USDC -> " + r.token_symbol + ")",
-                      lambda: wallet.quote(QUOTE_ASSET_ADDR["USDC"], r.token_address, "5", "56"))
+                check(
+                    "executable quote (5 USDC -> " + r.token_symbol + ")",
+                    lambda: wallet.quote(QUOTE_ASSET_ADDR["USDC"], r.token_address, "5", "56"),
+                )
+
             def _probe() -> bool:
                 addr = wallet.address("56")
-                return addr is not None and rpc.balance_of(
-                    QUOTE_ASSET_ADDR["USDC"], addr) is not None
+                return addr is not None and rpc.balance_of(QUOTE_ASSET_ADDR["USDC"], addr) is not None
 
             check("simulation probe (eth_call)", _probe)
         else:
@@ -114,8 +139,10 @@ def main() -> int:
         print(f"  {status:8} {name}")
     blocked = [n for n, s_, _ in results if s_ == BLOCKED]
     failed = [n for n, s_, _ in results if s_ == FAIL]
-    print(f"\n{sum(1 for _, s_, _ in results if s_ == OK)} passed, "
-          f"{len(blocked)} blocked (human action), {len(failed)} failed")
+    print(
+        f"\n{sum(1 for _, s_, _ in results if s_ == OK)} passed, "
+        f"{len(blocked)} blocked (human action), {len(failed)} failed"
+    )
     return 1 if failed else 0
 
 

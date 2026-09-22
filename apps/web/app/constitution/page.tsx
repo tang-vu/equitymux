@@ -32,18 +32,34 @@ export default function ConstitutionPage() {
   const [text, setText] = useState(DEFAULT);
   const [draft, setDraft] = useState<CompiledConstitution | null>(null);
 
-  const active = useQuery({ queryKey: ["constitution"], queryFn: () => api<{ active: ConstitutionRevision | null }>("/constitution") });
-  const history = useQuery({ queryKey: ["constitution-history"], queryFn: () => api<{ history: ConstitutionRevision[] }>("/constitution/history") });
+  const active = useQuery({
+    queryKey: ["constitution"],
+    queryFn: () =>
+      api<{ active: ConstitutionRevision | null }>("/constitution"),
+  });
+  const history = useQuery({
+    queryKey: ["constitution-history"],
+    queryFn: () =>
+      api<{ history: ConstitutionRevision[] }>("/constitution/history"),
+  });
 
   const compile = useMutation({
-    mutationFn: () => api<CompiledConstitution>("/constitution/compile", { method: "POST", body: JSON.stringify({ text }) }),
+    mutationFn: () =>
+      api<CompiledConstitution>("/constitution/compile", {
+        method: "POST",
+        body: JSON.stringify({ text }),
+      }),
     onSuccess: setDraft,
   });
   const approve = useMutation({
-    mutationFn: () => api<{ hash: string; active: boolean }>("/constitution/approve", {
-      method: "POST",
-      body: JSON.stringify({ nl_text: text, constitution: draft?.constitution }),
-    }),
+    mutationFn: () =>
+      api<{ hash: string; active: boolean }>("/constitution/approve", {
+        method: "POST",
+        body: JSON.stringify({
+          nl_text: text,
+          constitution: draft?.constitution,
+        }),
+      }),
     onSuccess: () => {
       setDraft(null);
       qc.invalidateQueries({ queryKey: ["constitution"] });
@@ -54,20 +70,34 @@ export default function ConstitutionPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Portfolio Constitution</h1>
-        <p className="text-sm text-[var(--color-ink-2)] mt-1">Your money follows rules, not prompts.</p>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Portfolio Constitution
+        </h1>
+        <p className="text-sm text-[var(--color-ink-2)] mt-1">
+          Your money follows rules, not prompts.
+        </p>
       </header>
 
       {active.data?.active && (
         <div className="panel p-4">
           <div className="flex items-center justify-between">
-            <span className="chip chip-pass">active · rev {active.data.active.revision}</span>
-            <span className="mono text-xs text-[var(--color-accent)]">{active.data.active.hash}</span>
+            <span className="chip chip-pass">
+              active · rev {active.data.active.revision}
+            </span>
+            <span className="mono text-xs text-[var(--color-accent)]">
+              {active.data.active.hash}
+            </span>
           </div>
-          <pre className="mt-3 text-xs text-[var(--color-ink-2)] whitespace-pre-wrap">{active.data.active.nl_text}</pre>
+          <pre className="mt-3 text-xs text-[var(--color-ink-2)] whitespace-pre-wrap">
+            {active.data.active.nl_text}
+          </pre>
           <details className="mt-2">
-            <summary className="text-xs text-[var(--color-ink-3)] cursor-pointer">canonical JSON</summary>
-            <pre className="mt-2 text-[11px] mono overflow-auto max-h-64">{JSON.stringify(active.data.active.canonical, null, 2)}</pre>
+            <summary className="text-xs text-[var(--color-ink-3)] cursor-pointer">
+              canonical JSON
+            </summary>
+            <pre className="mt-2 text-[11px] mono overflow-auto max-h-64">
+              {JSON.stringify(active.data.active.canonical, null, 2)}
+            </pre>
           </details>
         </div>
       )}
@@ -82,21 +112,32 @@ export default function ConstitutionPage() {
           />
           <div className="mt-2 flex flex-wrap gap-1.5">
             {EXAMPLES.map((e) => (
-              <button key={e} className="text-[11px] px-2 py-1 rounded-full border border-[var(--color-edge)] text-[var(--color-ink-3)] hover:text-ink"
-                onClick={() => setText((t) => t + "\n" + e + ".")}>
+              <button
+                key={e}
+                className="text-[11px] px-2 py-1 rounded-full border border-[var(--color-edge)] text-[var(--color-ink-3)] hover:text-ink"
+                onClick={() => setText((t) => t + "\n" + e + ".")}
+              >
                 + {e}
               </button>
             ))}
           </div>
-          <button className="mt-3 px-5 py-2 rounded-lg bg-[var(--color-panel-2)] border border-[var(--color-edge)] text-sm font-medium"
-            onClick={() => compile.mutate()} disabled={compile.isPending}>
+          <button
+            className="mt-3 px-5 py-2 rounded-lg bg-[var(--color-panel-2)] border border-[var(--color-edge)] text-sm font-medium"
+            onClick={() => compile.mutate()}
+            disabled={compile.isPending}
+          >
             {compile.isPending ? "Compiling…" : "Compile policy"}
           </button>
         </div>
 
         <div className="panel p-5">
           <h2 className="text-sm font-medium mb-2">Compiled policy</h2>
-          {!draft && <p className="text-sm text-[var(--color-ink-3)]">Compile to review the exact rules that will be enforced. Nothing activates until you approve.</p>}
+          {!draft && (
+            <p className="text-sm text-[var(--color-ink-3)]">
+              Compile to review the exact rules that will be enforced. Nothing
+              activates until you approve.
+            </p>
+          )}
           {draft && (
             <>
               <pre className="text-[11px] mono overflow-auto max-h-64 bg-[var(--color-bg)] rounded-lg p-3">
@@ -106,15 +147,24 @@ export default function ConstitutionPage() {
                 <div className="mt-3 text-xs">
                   <span className="chip chip-warn">not compiled</span>
                   <ul className="mt-1.5 space-y-1 text-[var(--color-ink-2)]">
-                    {draft.uncompiledSentences.map((s: string, i: number) => <li key={i}>· {s}</li>)}
+                    {draft.uncompiledSentences.map((s: string, i: number) => (
+                      <li key={i}>· {s}</li>
+                    ))}
                   </ul>
                 </div>
               )}
-              <button className="mt-4 px-5 py-2.5 rounded-lg bg-[var(--color-accent)] text-[var(--color-accent-ink)] text-sm font-semibold"
-                onClick={() => approve.mutate()} disabled={approve.isPending}>
+              <button
+                className="mt-4 px-5 py-2.5 rounded-lg bg-[var(--color-accent)] text-[var(--color-accent-ink)] text-sm font-semibold"
+                onClick={() => approve.mutate()}
+                disabled={approve.isPending}
+              >
                 Approve & activate (hash + version recorded)
               </button>
-              {approve.isError && <div className="mt-2 text-xs text-[var(--color-fail)]">{(approve.error as Error).message}</div>}
+              {approve.isError && (
+                <div className="mt-2 text-xs text-[var(--color-fail)]">
+                  {(approve.error as Error).message}
+                </div>
+              )}
             </>
           )}
         </div>
@@ -126,9 +176,15 @@ export default function ConstitutionPage() {
           <div className="space-y-1 text-xs mono">
             {(history.data?.history ?? []).map((h) => (
               <div key={h.hash} className="flex gap-3 items-center">
-                <span className={h.active ? "chip chip-pass" : "chip"}>{h.active ? "active" : `rev ${h.revision}`}</span>
-                <span className="text-[var(--color-ink-3)]">{h.hash?.slice(0, 18)}…</span>
-                <span className="text-[var(--color-ink-3)]">{h.approved_at ?? h.created_at}</span>
+                <span className={h.active ? "chip chip-pass" : "chip"}>
+                  {h.active ? "active" : `rev ${h.revision}`}
+                </span>
+                <span className="text-[var(--color-ink-3)]">
+                  {h.hash?.slice(0, 18)}…
+                </span>
+                <span className="text-[var(--color-ink-3)]">
+                  {h.approved_at ?? h.created_at}
+                </span>
               </div>
             ))}
           </div>

@@ -1,4 +1,5 @@
 """Graph enrichment: parallel discovery, peer reference fallback, underlyings."""
+
 from decimal import Decimal
 
 from equitymux.domain.models import MarketState, Platform
@@ -15,15 +16,36 @@ class FakeClient:
 
     def stock_list(self, type_id):
         data = {
-            1: [{"ticker": "NVDA", "symbol": "NVDAon", "chainId": 56,
-                 "contractAddress": "0xa9ee28c80f960b889dfbd1902055218cba016f75",
-                 "multiplier": "1.0017", "name": "NVIDIA"}],
-            2: [{"ticker": "NVDA", "symbol": "NVDAx", "chainId": 56,
-                 "contractAddress": "0xc845b2894dbddd03858fd2d643b4ef725fe0849d",
-                 "multiplier": "1", "name": "NVIDIA"}],
-            3: [{"ticker": "NVDA", "symbol": "NVDAB", "chainId": 56,
-                 "contractAddress": "0x02fca66c1d1afb4e2a7884261eb00f63598a7436",
-                 "multiplier": "1.0007", "name": "NVIDIA"}],
+            1: [
+                {
+                    "ticker": "NVDA",
+                    "symbol": "NVDAon",
+                    "chainId": 56,
+                    "contractAddress": "0xa9ee28c80f960b889dfbd1902055218cba016f75",
+                    "multiplier": "1.0017",
+                    "name": "NVIDIA",
+                }
+            ],
+            2: [
+                {
+                    "ticker": "NVDA",
+                    "symbol": "NVDAx",
+                    "chainId": 56,
+                    "contractAddress": "0xc845b2894dbddd03858fd2d643b4ef725fe0849d",
+                    "multiplier": "1",
+                    "name": "NVIDIA",
+                }
+            ],
+            3: [
+                {
+                    "ticker": "NVDA",
+                    "symbol": "NVDAB",
+                    "chainId": 56,
+                    "contractAddress": "0x02fca66c1d1afb4e2a7884261eb00f63598a7436",
+                    "multiplier": "1.0007",
+                    "name": "NVIDIA",
+                }
+            ],
         }
         return data.get(type_id, [])
 
@@ -32,11 +54,12 @@ class FakeClient:
         stock_price = None if contract == "0x02fca66c1d1afb4e2a7884261eb00f63598a7436" else "180.20"
         if "bstock" in self.missing_ref:
             stock_price = None
-        return {"tokenInfo": {"price": "180.50", "sharesMultiplier": "1.001",
-                              "totalHolders": "42"},
-                "stockInfo": {"price": stock_price},
-                "statusInfo": {"marketStatus": "regular"},
-                "limitInfo": {}}
+        return {
+            "tokenInfo": {"price": "180.50", "sharesMultiplier": "1.001", "totalHolders": "42"},
+            "stockInfo": {"price": stock_price},
+            "statusInfo": {"marketStatus": "regular"},
+            "limitInfo": {},
+        }
 
     def asset_market_status(self, chain_id, contract):
         return {"reasonCode": "TRADING", "marketStatus": "regular"}
@@ -53,8 +76,7 @@ class FakeClient:
     def token_kline(self, chain_id, contract, interval="1d", limit=30):
         if self.kline_close is None:
             return {}
-        return {"klineInfos": [[1, "1", "2", "0.5", str(self.kline_close), "10", 2]],
-                "decimals": 18}
+        return {"klineInfos": [[1, "1", "2", "0.5", str(self.kline_close), "10", 2]], "decimals": 18}
 
 
 def test_discover_all_platforms_parallel():
@@ -76,19 +98,19 @@ def test_peer_reference_fallback_marks_provenance():
 
 
 def test_no_peer_reference_stays_none():
-    g = CanonicalEquityGraph(client=FakeClient(missing_ref_platforms={"bstock"}),
-                             platforms={"bstock"})
+    g = CanonicalEquityGraph(client=FakeClient(missing_ref_platforms={"bstock"}), platforms={"bstock"})
     reps = g.discover("NVDA")
     assert reps[0].reference_price_usd is None
     assert reps[0].reference_price_source is None
 
 
 def test_kline_reference_last_resort():
-    g = CanonicalEquityGraph(client=FakeClient(missing_ref_platforms={"bstock"},
-                                             kline_close="179.90"),
-                             platforms={"bstock"})
+    g = CanonicalEquityGraph(
+        client=FakeClient(missing_ref_platforms={"bstock"}, kline_close="179.90"), platforms={"bstock"}
+    )
     reps = g.discover("NVDA")
-    assert reps[0].reference_price_usd == Decimal("179.90")
+    assert reps[0].reference_price_usd == Decimal("179.90") / reps[0].shares_per_token
+    assert reps[0].reference_observed_at is None
     assert reps[0].reference_price_source == "kline:close"
     assert "kline-reference:1d-close" in reps[0].source_evidence
 
@@ -109,6 +131,7 @@ def test_underlyings_index():
 
 def test_adapter_exception_isolated():
     """A non-ProviderError crash in one adapter must not kill discovery."""
+
     class CrashingClient(FakeClient):
         def stock_list(self, type_id):
             if type_id == 2:  # xStocks adapter explodes unexpectedly
@@ -124,6 +147,7 @@ def test_adapter_exception_isolated():
 
 def test_ttl_cache_avoids_repeat_calls():
     from equitymux.providers.binance_public import _TTLCache
+
     c = _TTLCache()
     c.set("k", {"v": 1}, ttl_s=60)
     assert c.get("k") == {"v": 1}
