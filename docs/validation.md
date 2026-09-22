@@ -54,8 +54,8 @@ The E2E suite builds and boots the production standalone server. Initial dev-ser
 tests exposed hot-reload JavaScript failures; the production browser run passed.
 This is not a claim that every development-server race was fixed.
 
-The local preview runs from the validated WSL source snapshot at
-`/tmp/equitymux-judge-20260922`, with web port 3017 and API port 8017. It is
+The local preview runs from the validated WSL frontend source snapshot at
+`/tmp/equitymux-design-20260922`, with web port 3017 and the existing API on port 8017. It is
 temporary and not a public judging deployment. Current repository edits require
 a new build to appear there.
 
@@ -67,3 +67,21 @@ progress. Do not enable the kill switch merely to bypass these checks.
 Public deployment, Agent Studio hosted settlement and a live trade require real
 infrastructure and credentials. The DX report needs the builder's genuine
 experience; this record does not replace it.
+
+## Exposure desk design update (2026-09-22)
+
+The frontend was rebuilt as an editorial research workspace with self-hosted,
+OFL-licensed fonts, an expandable issuer ledger, responsive parity visualization,
+policy memo and downloadable evidence record. See [design rationale](design.md).
+
+Validation: 12 frontend unit tests, ESLint, Prettier, TypeScript and the Next.js
+production build pass. Five Chromium E2E tests exercise initial recorded data,
+keyboard and skip-link access, all seven secondary workspace pages, a custom
+policy baseline, the complete challenge/replay/download journey and mobile
+overflow. Each test asserts no uncaught browser errors. Desktop and mobile
+screenshots were regenerated and visually inspected. The tests use isolated
+API/web ports 8021/3021, so they do not interrupt the existing preview.
+
+No execution capability, live liquidity claim or public deployment was added by
+this design update. The earlier backend/contract/keeper validation remains
+separate from this frontend-specific check.

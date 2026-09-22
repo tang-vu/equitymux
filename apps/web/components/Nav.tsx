@@ -3,17 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { ArrowUpRight, ChevronDown } from "lucide-react";
 import { api, type Health } from "@/lib/api";
 
-const LINKS = [
-  { href: "/", label: "Decision desk" },
-  { href: "/terminal", label: "Execution" },
-  { href: "/constitution", label: "Constitution" },
-  { href: "/explorer", label: "Explorer" },
-  { href: "/routes", label: "Routes" },
-  { href: "/receipts", label: "Receipts" },
-  { href: "/agent", label: "Agent Ops" },
-  { href: "/dev", label: "Dev" },
+const MAIN = [
+  { href: "/", label: "Research desk" },
+  { href: "/explorer", label: "Asset universe" },
+  { href: "/agent", label: "Agent tools" },
+];
+const TOOLS = [
+  { href: "/constitution", label: "Portfolio constitution" },
+  { href: "/terminal", label: "Execution terminal" },
+  { href: "/routes", label: "Route inspector" },
+  { href: "/receipts", label: "Receipt archive" },
+  { href: "/dev", label: "Developer API" },
 ];
 
 export function Nav() {
@@ -23,56 +26,73 @@ export function Nav() {
     queryFn: () => api<Health>("/health"),
     refetchInterval: 30_000,
   });
-  const live = !health?.demoMode;
   return (
-    <header className="border-b border-[var(--color-edge)] mb-8">
-      <div className="mx-auto max-w-7xl px-5 min-h-14 py-3 flex flex-wrap items-center gap-4">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded bg-[var(--color-accent)] grid place-items-center text-[var(--color-accent-ink)] font-bold text-xs">
-            EM
-          </div>
-          <span className="font-semibold tracking-tight">EquityMux</span>
+    <header className="site-header">
+      <div className="header-inner">
+        <Link href="/" className="brand" aria-label="EquityMux home">
+          <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <path
+              d="M3 7h10l7 9h9M3 16h26M3 25h10l7-9"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="square"
+            />
+            <path d="m24 11 5 5-5 5" stroke="currentColor" strokeWidth="2.4" />
+          </svg>
+          <span>equitymux</span>
         </Link>
-        <nav
-          aria-label="Main navigation"
-          className="flex items-center flex-wrap gap-1 text-xs"
-        >
-          {LINKS.map((l) => (
+        <nav aria-label="Main navigation" className="main-navigation">
+          {MAIN.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              className={`px-3 py-1.5 rounded-md transition-colors ${
-                path === l.href
-                  ? "text-ink bg-panel-2"
-                  : "text-[var(--color-ink-2)] hover:text-ink"
-              }`}
+              aria-current={path === l.href ? "page" : undefined}
             >
               {l.label}
             </Link>
           ))}
         </nav>
-        <div className="ml-auto hidden xl:flex items-center gap-3 text-xs">
-          {health && (
-            <>
-              <span className="chip chip-info">BSC · 56</span>
-              <span
-                title="Default API mode; each decision labels its own data source"
-                className={`chip ${live ? "chip-info" : "chip-warn"}`}
-              >
-                <span className={`dot ${live ? "dot-live" : "dot-rec"}`} />
-                {live ? "API: LIVE" : "API: RECORDED"}
-              </span>
-              {health.binanceRwa?.marketStatus && (
-                <span className="chip">{health.binanceRwa.marketStatus}</span>
-              )}
-              <span
-                className={`chip ${health.agenticWallet?.status === "CONNECTED" ? "chip-pass" : ""}`}
-              >
-                wallet: {health.agenticWallet?.status ?? "n/a"}
-              </span>
-            </>
-          )}
-        </div>
+        <span className="header-network">
+          <span className="network-mark" />
+          BNB Smart Chain
+        </span>
+        <details
+          className="workspace-menu"
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.currentTarget.removeAttribute("open");
+              event.currentTarget.querySelector("summary")?.focus();
+            }
+          }}
+        >
+          <summary>
+            Workspace <ChevronDown size={13} />
+          </summary>
+          <div className="workspace-dropdown">
+            <nav aria-label="Workspace tools">
+              {TOOLS.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  aria-current={path === l.href ? "page" : undefined}
+                  onClick={(e) =>
+                    e.currentTarget.closest("details")?.removeAttribute("open")
+                  }
+                >
+                  {l.label}
+                  <ArrowUpRight size={13} />
+                </Link>
+              ))}
+            </nav>
+            <p className="workspace-status">
+              {!health
+                ? "Checking service…"
+                : health.agenticWallet?.status === "CONNECTED"
+                  ? "Wallet connected · execution gated"
+                  : "Read-only workspace · no wallet required"}
+            </p>
+          </div>
+        </details>
       </div>
     </header>
   );
