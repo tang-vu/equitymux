@@ -68,7 +68,7 @@ export function ParityMap({
               <span className="parity-row-value">
                 {fmt(r.premiumBps, 1)} bps
                 <small>
-                  {r.referenceSource ?? "Unknown basis"} ?{" "}
+                  {r.referenceSource ?? "Unknown basis"} at{" "}
                   {r.referencePriceUsd == null
                     ? "Unknown"
                     : "$" + fmt(r.referencePriceUsd)}
@@ -78,7 +78,7 @@ export function ParityMap({
           );
         })}
         <div className="parity-axis">
-          <span>?{fmt(String(bound), 1)} bps</span>
+          <span>-{fmt(String(bound), 1)} bps</span>
           <span>0</span>
           <span>+{fmt(String(bound), 1)} bps</span>
         </div>

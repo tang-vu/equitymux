@@ -145,6 +145,12 @@ test("sleeves, parity and inspector remain synchronized across tickers", async (
     name: "Select NVDAx normalization",
   });
   await sleeve.click();
+  await expect(page.locator(".parity-axis span").first()).toHaveText(
+    /^-\d.* bps$/,
+  );
+  await expect(page.locator(".parity-row-value small").first()).toContainText(
+    " at $",
+  );
   await expect(sleeve).toHaveAttribute("aria-pressed", "true");
   await expect(
     page.getByRole("button", { name: "Inspect NVDAx evidence" }),
