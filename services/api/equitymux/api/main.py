@@ -1,4 +1,5 @@
 """EquityMux API — thin HTTP layer over the domain services."""
+
 from __future__ import annotations
 
 import json
@@ -24,6 +25,7 @@ from equitymux.providers.baw import AgenticWallet
 from equitymux.providers.bsc_rpc import BscRpc
 from equitymux.providers.errors import ProviderError
 from equitymux.services import persistence
+from equitymux.services.decisions import DecisionPolicy, DecisionRequest, compare, decide, replay
 from equitymux.services.intent import parse_intent
 from equitymux.services.pipeline import Pipeline
 
@@ -37,37 +39,90 @@ async def lifespan(_app: FastAPI):
     yield
 
 
-app = FastAPI(title="EquityMux", version="0.1.0", lifespan=lifespan,
-              description="The intent and execution router for tokenized stocks")
-app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origin_list,
-                   allow_methods=["*"], allow_headers=["*"])
+app = FastAPI(
+    title="EquityMux",
+    version="0.1.0",
+    lifespan=lifespan,
+    description="The intent and execution router for tokenized stocks",
+)
+app.add_middleware(
+    CORSMiddleware, allow_origins=settings.cors_origin_list, allow_methods=["*"], allow_headers=["*"]
+)
 
 pipeline = Pipeline(settings)
 wallet = AgenticWallet(settings)
 rpc = BscRpc(settings)
 
 
+@app.post("/api/decisions")
+def decision_create(body: DecisionRequest) -> dict:
+    """Read-only analysis; never calls the wallet or approves a constitution."""
+    try:
+        return decide(body, settings)
+    except ValueError as e:
+        raise HTTPException(422, str(e)) from e
+    except ProviderError as e:
+        raise HTTPException(502, str(e)) from e
+
+
+class DecisionBundleIn(BaseModel):
+    receipt: dict[str, Any]
+
+
+@app.post("/api/decisions/replay")
+def decision_replay(body: DecisionBundleIn) -> dict:
+    try:
+        return replay(body.receipt)
+    except (ValueError, KeyError, TypeError) as e:
+        raise HTTPException(422, f"invalid decision receipt: {e}") from e
+
+
+class CompareIn(DecisionBundleIn):
+    policy: DecisionPolicy
+
+
+@app.post("/api/decisions/compare")
+def decision_compare(body: CompareIn) -> dict:
+    try:
+        return compare(body.receipt, body.policy)
+    except (ValueError, KeyError, TypeError) as e:
+        raise HTTPException(422, f"invalid comparison: {e}") from e
+
+
 # ---------- meta ----------
 @app.get("/api/health")
 def health() -> dict:
-    out = {"app": "ok", "service": "equitymux-api", "version": "0.1.0",
-           "demoMode": settings.demo_mode,
-           "executionEnabled": settings.execution_enabled,
-           "dxSession": recorder.session_id()}
+    out = {
+        "app": "ok",
+        "service": "equitymux-api",
+        "version": "0.1.0",
+        "demoMode": settings.demo_mode,
+        "executionEnabled": settings.execution_enabled,
+        "dxSession": recorder.session_id(),
+    }
+    if settings.demo_mode:
+        out["bscRpc"] = {"ok": False, "status": "NOT_PROBED_RECORDED_MODE"}
+        out["agenticWallet"] = {"installed": False, "status": "NOT_PROBED_RECORDED_MODE"}
+        out["binanceRwa"] = {"ok": True, "dataLabel": "RECORDED"}
+        return out
     try:
-        out["bscRpc"] = {"ok": True, "chainId": rpc.chain_id(),
-                         "block": rpc.block_number()}
+        out["bscRpc"] = {"ok": True, "chainId": rpc.chain_id(), "block": rpc.block_number()}
     except Exception as e:
         out["bscRpc"] = {"ok": False, "error": str(e)[:200]}
     try:
-        out["agenticWallet"] = {"installed": wallet.available(),
-                                "status": wallet.status() if wallet.available() else None}
+        out["agenticWallet"] = {
+            "installed": wallet.available(),
+            "status": wallet.status() if wallet.available() else None,
+        }
     except Exception as e:
         out["agenticWallet"] = {"installed": wallet.available(), "error": str(e)[:200]}
     try:
         ms = pipeline.graph.client.market_status()
-        out["binanceRwa"] = {"ok": True, "marketStatus": ms.get("marketStatus"),
-                             "openState": ms.get("openState")}
+        out["binanceRwa"] = {
+            "ok": True,
+            "marketStatus": ms.get("marketStatus"),
+            "openState": ms.get("openState"),
+        }
     except Exception as e:
         out["binanceRwa"] = {"ok": False, "error": str(e)[:200]}
     return out
@@ -108,8 +163,9 @@ class ApproveIn(BaseModel):
 def constitution_approve(body: ApproveIn) -> dict:
     c = PortfolioConstitution.model_validate(body.constitution)
     chash = constitution_hash(c)
-    persistence.save_constitution(body.nl_text, c.model_dump(mode="json"),
-                                  POLICY_COMPILER_VERSION, chash, approved=True)
+    persistence.save_constitution(
+        body.nl_text, c.model_dump(mode="json"), POLICY_COMPILER_VERSION, chash, approved=True
+    )
     return {"hash": chash, "active": True}
 
 
@@ -164,6 +220,7 @@ def run_intent(body: RunIn) -> dict:
     intent = parse_intent(body.text) if body.text else None
     if intent is None and body.intent:
         from equitymux.domain.models import EquityIntent
+
         intent = EquityIntent.model_validate(body.intent)
     if intent is None or not intent.ticker:
         raise HTTPException(400, "could not parse a supported ticker from intent")
@@ -193,13 +250,18 @@ def receipt(receipt_id: str) -> dict:
 def receipt_verify(receipt_id: str) -> dict:
     """Recompute the canonical sha256 over the stored receipt and compare."""
     from equitymux.services.receipts import receipt_hash
+
     r = persistence.get_receipt(receipt_id)
     if not r:
         raise HTTPException(404, "receipt not found")
     recomputed = receipt_hash(r)
-    return {"receiptId": receipt_id, "storedHash": r.get("receiptHash"),
-            "recomputedHash": recomputed, "match": recomputed == r.get("receiptHash"),
-            "method": "sha256(canonicalJson(receipt minus receiptHash))"}
+    return {
+        "receiptId": receipt_id,
+        "storedHash": r.get("receiptHash"),
+        "recomputedHash": recomputed,
+        "match": recomputed == r.get("receiptHash"),
+        "method": "sha256(canonicalJson(receipt minus receiptHash))",
+    }
 
 
 class VerifyIn(BaseModel):
@@ -210,12 +272,12 @@ class VerifyIn(BaseModel):
 def receipt_verify_upload(body: VerifyIn) -> dict:
     """Verify any receipt JSON — e.g. a file downloaded from the UI."""
     from equitymux.services.receipts import receipt_hash
+
     claimed = body.receipt.get("receiptHash") or body.receipt.get("receipt_hash")
     if not claimed:
         raise HTTPException(400, "receipt has no receiptHash field")
     recomputed = receipt_hash(body.receipt)
-    return {"claimedHash": claimed, "recomputedHash": recomputed,
-            "match": recomputed == claimed}
+    return {"claimedHash": claimed, "recomputedHash": recomputed, "match": recomputed == claimed}
 
 
 # ---------- agent / keeper ----------
@@ -229,6 +291,7 @@ def submit_task(body: TaskIn) -> dict:
     """ERC-8183-style task intake. Analysis tasks run inline; execution tasks are
     always queued for the wallet boundary — an arbitrary caller can never spend."""
     from equitymux.services import keeper
+
     task_id = uuid.uuid4().hex[:16]
     persistence.save_task(task_id, body.kind, body.input)
     try:
@@ -239,8 +302,7 @@ def submit_task(body: TaskIn) -> dict:
     except Exception as e:
         # bad input shapes (e.g. non-numeric notional) must not 500 with an
         # unfinished task row — record the failure honestly
-        persistence.finish_task(task_id, {"error": f"{type(e).__name__}: {e}"},
-                                "FAILED")
+        persistence.finish_task(task_id, {"error": f"{type(e).__name__}: {e}"}, "FAILED")
         raise HTTPException(400, f"task failed: {type(e).__name__}: {e}")
     if "error" in output:
         persistence.finish_task(task_id, output, "FAILED")
@@ -265,29 +327,39 @@ def submit_task_paid(body: TaskIn):
     PLANNED: it requires a connected payer wallet or facilitator.
     """
     from fastapi.responses import JSONResponse
+
     if not settings.x402_payto_address:
         raise HTTPException(
-            501, "x402 surface defined; X402_PAYTO_ADDRESS not configured — "
-                 "cannot issue a payment challenge without a settlement address")
+            501,
+            "x402 surface defined; X402_PAYTO_ADDRESS not configured — "
+            "cannot issue a payment challenge without a settlement address",
+        )
     # A real x402 payment would arrive in the X-PAYMENT header; verification is
     # not yet wired to a facilitator — refuse to pretend it was paid.
-    accepts = [{
-        "scheme": "exact",
-        "network": "bsc",
-        "chainId": 56,
-        "maxAmountRequired": "10000",  # 0.01 USDC (6 decimals)
-        "asset": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
-        "assetSymbol": "USDC",
-        "payTo": settings.x402_payto_address,
-        "resource": "/api/agent/tasks/paid",
-        "description": f"EquityMux keeper task: {body.kind} (analysis only)",
-        "maxTimeoutSeconds": 30,
-    }]
+    accepts = [
+        {
+            "scheme": "exact",
+            "network": "bsc",
+            "chainId": 56,
+            "maxAmountRequired": "10000",  # 0.01 USDC (6 decimals)
+            "asset": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+            "assetSymbol": "USDC",
+            "payTo": settings.x402_payto_address,
+            "resource": "/api/agent/tasks/paid",
+            "description": f"EquityMux keeper task: {body.kind} (analysis only)",
+            "maxTimeoutSeconds": 30,
+        }
+    ]
     return JSONResponse(
         status_code=402,
-        content={"x402Version": 1, "accepts": accepts, "error": None,
-                 "note": "payment verification not yet wired — challenge issued "
-                         "honestly; settlement requires a payer wallet"})
+        content={
+            "x402Version": 1,
+            "accepts": accepts,
+            "error": None,
+            "note": "payment verification not yet wired — challenge issued "
+            "honestly; settlement requires a payer wallet",
+        },
+    )
 
 
 @app.get("/api/agent/x402")
@@ -306,12 +378,17 @@ def agent_x402_info() -> dict:
 @app.get("/api/agent/identity")
 def agent_identity() -> dict:
     from equitymux.config import REPO_ROOT
+
     p = REPO_ROOT / "services" / "keeper" / "identity.json"
     try:
         ident = json.loads(p.read_text(encoding="utf-8"))
     except Exception:
-        ident = {"name": "EquityMux Keeper", "erc8004": None,
-                 "status": "local-runtime", "note": "register with `bag erc8004 register`"}
+        ident = {
+            "name": "EquityMux Keeper",
+            "erc8004": None,
+            "status": "local-runtime",
+            "note": "register with `bag erc8004 register`",
+        }
     return {"agent": ident, "tasks": persistence.list_tasks(10)}
 
 

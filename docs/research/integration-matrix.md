@@ -1,5 +1,15 @@
 # Integration Matrix — EquityMux
 
+## 2026-09-22 correction
+
+The table below is a historical 2026-09-17 integration record, not a current
+deployment claim. The decision desk adds recorded/live analysis, policy
+counterfactuals and replay via REST/CLI/MCP. See `docs/validation.md` for reruns.
+A quote plus balance probe is not swap simulation; that pipeline now stops
+explicitly. Source timestamps are unknown, token candles cannot satisfy an
+independent equity-reference policy, and market cap is not liquidity. Wallet
+execution, hosted Agent Studio identity and payment settlement remain BLOCKED.
+
 Verified: 2026-09-17 (updated post-hardening). Evidence: `dx/raw/api-events.jsonl`, `fixtures/rwa/`, `docs/demo/*.png`.
 
 | Component | Docs location | Purpose in EquityMux | Auth model | Endpoints / tools | Chains | Runtime status | What we use | Known limitations | Fallback | Date verified |

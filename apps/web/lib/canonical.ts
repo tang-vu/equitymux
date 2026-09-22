@@ -43,19 +43,35 @@ export function canonicalJson(v: unknown): string {
 }
 
 /** receipt hash: sha256 over canonical JSON with receiptHash fields excluded. */
-export function receiptBody(receipt: Record<string, unknown>): Record<string, unknown> {
+export function receiptBody(
+  receipt: Record<string, unknown>,
+): Record<string, unknown> {
   const { receiptHash: _a, receipt_hash: _b, ...rest } = receipt;
   return rest;
 }
 
 export async function sha256Hex(s: string): Promise<string> {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
-  return "0x" + [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  const buf = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(s),
+  );
+  return (
+    "0x" +
+    [...new Uint8Array(buf)]
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("")
+  );
 }
 
 export async function verifyReceiptHash(receipt: Record<string, unknown>) {
-  const claimed = (receipt.receiptHash ?? receipt.receipt_hash) as string | undefined;
+  const claimed = (receipt.receiptHash ?? receipt.receipt_hash) as
+    string | undefined;
   if (!claimed) return { ok: false as const, error: "no receiptHash field" };
   const recomputed = await sha256Hex(canonicalJson(receiptBody(receipt)));
-  return { ok: true as const, claimed, recomputed, match: recomputed === claimed };
+  return {
+    ok: true as const,
+    claimed,
+    recomputed,
+    match: recomputed === claimed,
+  };
 }

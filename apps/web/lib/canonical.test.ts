@@ -1,10 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { canonicalJson, receiptBody, sha256Hex, verifyReceiptHash } from "./canonical";
+import {
+  canonicalJson,
+  receiptBody,
+  sha256Hex,
+  verifyReceiptHash,
+} from "./canonical";
 
 // Reference vector produced by the Python backend:
 //   json.dumps(v, sort_keys=True, separators=(",",":"), ensure_ascii=True)
 //   sha256 -> 0xcb72ae...
-const VECTOR = { a: "héllo 😀", b: [1, 2.5, null], c: { x: true, y: "line\nbreak" } };
+const VECTOR = {
+  a: "héllo 😀",
+  b: [1, 2.5, null],
+  c: { x: true, y: "line\nbreak" },
+};
 
 describe("canonicalJson (Python parity)", () => {
   it("serializes identically to json.dumps sorted/compact/ensure_ascii", () => {
@@ -14,7 +23,9 @@ describe("canonicalJson (Python parity)", () => {
   });
 
   it("sorts keys recursively", () => {
-    expect(canonicalJson({ z: 1, a: { y: 1, b: 2 } })).toBe('{"a":{"b":2,"y":1},"z":1}');
+    expect(canonicalJson({ z: 1, a: { y: 1, b: 2 } })).toBe(
+      '{"a":{"b":2,"y":1},"z":1}',
+    );
   });
 
   it("sha256 matches the backend vector", async () => {

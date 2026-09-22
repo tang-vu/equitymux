@@ -4,18 +4,36 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
     headers: { "content-type": "application/json", ...(init?.headers ?? {}) },
   });
   const body = await r.json().catch(() => ({}));
-  if (!r.ok) throw new ApiError(r.status, body?.detail ?? r.statusText);
+  if (!r.ok) {
+    const detail = body?.detail;
+    const message =
+      typeof detail === "string"
+        ? detail
+        : Array.isArray(detail)
+          ? detail
+              .map(
+                (issue: { loc?: string[]; msg?: string }) =>
+                  `${issue.loc?.join(".") ?? "input"}: ${issue.msg ?? "invalid"}`,
+              )
+              .join("; ")
+          : r.statusText;
+    throw new ApiError(r.status, message);
+  }
   return body as T;
 }
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  constructor(
+    public status: number,
+    message: string,
+  ) {
     super(message);
   }
 }
 
 // ---------- types mirroring the backend ----------
-export type MarketState = "REGULAR" | "EXTENDED" | "CLOSED" | "HALTED" | "UNKNOWN";
+export type MarketState =
+  "REGULAR" | "EXTENDED" | "CLOSED" | "HALTED" | "UNKNOWN";
 
 export interface Representation {
   underlying_ticker: string;
@@ -34,7 +52,11 @@ export interface Representation {
   market_reason_msg: string | null;
   next_open_time: number | null;
   next_close_time: number | null;
-  attestation: { supported: boolean; daily_url: string | null; monthly_url: string | null };
+  attestation: {
+    supported: boolean;
+    daily_url: string | null;
+    monthly_url: string | null;
+  };
   liquidity: {
     volume_24h_buy_usd: string | null;
     volume_24h_sell_usd: string | null;
@@ -52,21 +74,41 @@ export interface RuleResult {
 
 export interface Candidate {
   representation: Representation;
-  quote: { from_symbol: string; to_symbol: string; from_amount: string; to_amount: string; slippage_bps: number | null } | null;
+  quote: {
+    from_symbol: string;
+    to_symbol: string;
+    from_amount: string;
+    to_amount: string;
+    slippage_bps: number | null;
+  } | null;
   premium_bps: string | null;
   expected_slippage_bps: string | null;
   reference_age_s: number | null;
-  status: "ELIGIBLE" | "REJECTED" | "REQUIRES_CONFIRMATION" | "SIMULATION_FAILED" | "STALE_REFERENCE" | "NO_QUOTE";
+  status:
+    | "ELIGIBLE"
+    | "REJECTED"
+    | "REQUIRES_CONFIRMATION"
+    | "SIMULATION_FAILED"
+    | "STALE_REFERENCE"
+    | "NO_QUOTE";
   reason_codes: string[];
   score: string | null;
   score_breakdown: Record<string, string>;
-  policy: { eligible: boolean; requires_confirmation: boolean; results: RuleResult[] } | null;
+  policy: {
+    eligible: boolean;
+    requires_confirmation: boolean;
+    results: RuleResult[];
+  } | null;
   simulation: { status: string; detail: string } | null;
 }
 
 export interface ExploreResult {
   ticker: string;
-  market: Record<string, unknown> & { marketStatus?: string; openState?: boolean; nextOpenTime?: number };
+  market: Record<string, unknown> & {
+    marketStatus?: string;
+    openState?: boolean;
+    nextOpenTime?: number;
+  };
   representations: Representation[];
 }
 
@@ -84,7 +126,13 @@ export interface Receipt {
   createdAt: string;
   /** LIVE | RECORDED — provenance is part of the hashed body */
   dataLabel?: string;
-  intent: { raw: string; ticker: string; side: string; notional: string; quote_asset: string };
+  intent: {
+    raw: string;
+    ticker: string;
+    side: string;
+    notional: string;
+    quote_asset: string;
+  };
   policy: { constitutionHash: string; checks: RuleResult[] };
   marketContext: Record<string, unknown>;
   candidates: Candidate[];

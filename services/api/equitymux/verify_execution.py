@@ -5,6 +5,7 @@ EXECUTION_ENABLED=true in env. Executes the smallest possible swap through the
 full pipeline and produces a verifiable receipt. This is the human-gated proof
 step — it is never run by CI and never runs silently.
 """
+
 from __future__ import annotations
 
 import sys
@@ -60,20 +61,18 @@ def main() -> int:
         quote_balance = Decimal(0)
         total_value = Decimal(0)
         for b in bals if isinstance(bals, list) else []:
-            usd = Decimal(str(b.get("valueUsd") or b.get("usdValue")
-                              or b.get("value_usd") or 0))
+            usd = Decimal(str(b.get("valueUsd") or b.get("usdValue") or b.get("value_usd") or 0))
             total_value += usd
             if str(b.get("asset") or b.get("symbol") or "").upper() == "USDT":
-                quote_balance += Decimal(str(b.get("amount") or b.get("qty")
-                                             or b.get("balance") or usd))
-        state = PortfolioState(quote_asset="USDT", quote_balance=quote_balance,
-                               total_value_usd=total_value)
+                quote_balance += Decimal(str(b.get("amount") or b.get("qty") or b.get("balance") or usd))
+        state = PortfolioState(quote_asset="USDT", quote_balance=quote_balance, total_value_usd=total_value)
         print(f"wallet: USDT balance ${quote_balance}, total ${total_value}")
     except ProviderError as e:
         print(f"warning: balances unreadable ({e}) — policy sees zero state")
         state = PortfolioState(quote_asset="USDT")
-    intent = EquityIntent(raw="mainnet proof trade", ticker="NVDA",
-                          side=Side.BUY, notional=notional, quote_asset="USDT")
+    intent = EquityIntent(
+        raw="mainnet proof trade", ticker="NVDA", side=Side.BUY, notional=notional, quote_asset="USDT"
+    )
     result = pipeline.run(intent, constitution, state, confirm=True)
     rec = result["receipt"]
     print(f"\nstate: {result['state']}")

@@ -1,5 +1,5 @@
-"""Execution receipts — canonical JSON + SHA-256 hash. Never contains secrets.
-"""
+"""Execution receipts — canonical JSON + SHA-256 hash. Never contains secrets."""
+
 from __future__ import annotations
 
 import hashlib
@@ -33,12 +33,22 @@ def receipt_hash(receipt: dict) -> str:
     return "0x" + hashlib.sha256(canonical_json(body).encode()).hexdigest()
 
 
-def build_receipt(*, intent: EquityIntent, constitution_hash: str,
-                  policy_checks: list[dict], market_context: dict,
-                  candidates: list[CandidateRoute], selected: CandidateRoute | None,
-                  simulation: dict | None, authorization: dict,
-                  execution: dict, agent: dict, transitions: list[dict],
-                  state: str, data_label: str = "LIVE") -> dict:
+def build_receipt(
+    *,
+    intent: EquityIntent,
+    constitution_hash: str,
+    policy_checks: list[dict],
+    market_context: dict,
+    candidates: list[CandidateRoute],
+    selected: CandidateRoute | None,
+    simulation: dict | None,
+    authorization: dict,
+    execution: dict,
+    agent: dict,
+    transitions: list[dict],
+    state: str,
+    data_label: str = "LIVE",
+) -> dict:
     rec = {
         "version": "1",
         "receiptId": uuid.uuid4().hex,
@@ -98,9 +108,14 @@ def _evidence(candidates: list[CandidateRoute]) -> list[dict]:
     out = []
     for c in candidates:
         for src in c.representation.source_evidence:
-            out.append({"kind": "api", "ref": src,
-                        "platform": c.representation.platform.value,
-                        "token": c.representation.token_address})
+            out.append(
+                {
+                    "kind": "api",
+                    "ref": src,
+                    "platform": c.representation.platform.value,
+                    "token": c.representation.token_address,
+                }
+            )
     return out
 
 
@@ -109,4 +124,4 @@ def freshness_ok(sim_ts_iso: str, max_age_s: int) -> bool:
         age = time.time() - datetime.fromisoformat(sim_ts_iso).timestamp()
     except ValueError:
         return False
-    return age <= max_age_s
+    return 0 <= age <= max_age_s

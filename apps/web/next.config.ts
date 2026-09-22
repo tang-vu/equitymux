@@ -2,6 +2,7 @@ import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   output: "standalone",
   // workspace root — required so standalone traces the pnpm node_modules
   // (deps live outside apps/web; without this the image misses `next`).

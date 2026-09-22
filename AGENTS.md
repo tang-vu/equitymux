@@ -17,6 +17,13 @@ docker compose up --build          # containerized demo
 
 ## Hard rules
 
+- After each completed update, commit the changes on a branch, push it, create
+  a pull request, and enable auto-merge. This is standing user authorization;
+  do not ask again for routine PR creation or merging. Run the relevant checks,
+  resolve CI failures, and verify the final merge status. Respect branch
+  protections; never bypass required checks or reviews. If blocked, report
+  the PR link and the exact blocker rather than claiming it merged.
+
 - `EXECUTION_ENABLED=false` stays the default. Never enable mainnet
   execution without explicit user authorization.
 - The LLM interprets; the deterministic engine decides. Final transaction

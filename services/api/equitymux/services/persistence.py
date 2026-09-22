@@ -1,4 +1,5 @@
 """SQLite persistence for constitutions, receipts, transitions, audit log."""
+
 from __future__ import annotations
 
 import json
@@ -76,13 +77,15 @@ def _init_schema(c: sqlite3.Connection) -> None:
     cols = {r["name"] for r in c.execute("PRAGMA table_info(receipts)")}
     if "data_label" not in cols:
         c.execute("ALTER TABLE receipts ADD COLUMN data_label TEXT")
-        c.execute("UPDATE receipts SET data_label="
-                  "json_extract(receipt_json,'$.dataLabel') WHERE data_label IS NULL")
+        c.execute(
+            "UPDATE receipts SET data_label=json_extract(receipt_json,'$.dataLabel') WHERE data_label IS NULL"
+        )
     c.commit()  # callers may close() without a `with` — init must persist
 
 
-def save_constitution(nl_text: str, canonical: dict, compiler_version: str,
-                      chash: str, approved: bool) -> None:
+def save_constitution(
+    nl_text: str, canonical: dict, compiler_version: str, chash: str, approved: bool
+) -> None:
     now = datetime.now(UTC).isoformat()
     with _LOCK, _conn() as c:
         prev = c.execute("SELECT MAX(revision) r FROM constitutions").fetchone()["r"] or 0
@@ -91,9 +94,17 @@ def save_constitution(nl_text: str, canonical: dict, compiler_version: str,
         c.execute(
             "INSERT OR REPLACE INTO constitutions(hash,nl_text,canonical_json,compiler_version,approved_at,created_at,active,revision)"
             " VALUES(?,?,?,?,?,?,?,?)",
-            (chash, nl_text, json.dumps(canonical, sort_keys=True, default=str),
-             compiler_version, now if approved else None, now,
-             1 if approved else 0, prev + 1))
+            (
+                chash,
+                nl_text,
+                json.dumps(canonical, sort_keys=True, default=str),
+                compiler_version,
+                now if approved else None,
+                now,
+                1 if approved else 0,
+                prev + 1,
+            ),
+        )
 
 
 def active_constitution() -> dict | None:
@@ -106,9 +117,13 @@ def active_constitution() -> dict | None:
 
 def constitution_history() -> list[dict]:
     with _LOCK, _conn() as c:
-        return [dict(r) for r in c.execute(
-            "SELECT hash,compiler_version,approved_at,created_at,active,revision,nl_text"
-            " FROM constitutions ORDER BY revision DESC").fetchall()]
+        return [
+            dict(r)
+            for r in c.execute(
+                "SELECT hash,compiler_version,approved_at,created_at,active,revision,nl_text"
+                " FROM constitutions ORDER BY revision DESC"
+            ).fetchall()
+        ]
 
 
 def save_receipt(rec: dict) -> None:
@@ -117,46 +132,62 @@ def save_receipt(rec: dict) -> None:
         c.execute(
             "INSERT OR REPLACE INTO receipts(receipt_id,receipt_hash,state,intent_json,receipt_json,created_at,data_label)"
             " VALUES(?,?,?,?,?,?,?)",
-            (rec["receiptId"], rec["receiptHash"], rec["state"],
-             json.dumps(rec["intent"], default=str),
-             json.dumps(rec, default=str), now, rec.get("dataLabel")))
+            (
+                rec["receiptId"],
+                rec["receiptHash"],
+                rec["state"],
+                json.dumps(rec["intent"], default=str),
+                json.dumps(rec, default=str),
+                now,
+                rec.get("dataLabel"),
+            ),
+        )
         for t in rec.get("transitions", []):
-            c.execute("INSERT INTO transitions(receipt_id,state,at,note) VALUES(?,?,?,?)",
-                      (rec["receiptId"], t["state"], t["at"], t.get("note")))
+            c.execute(
+                "INSERT INTO transitions(receipt_id,state,at,note) VALUES(?,?,?,?)",
+                (rec["receiptId"], t["state"], t["at"], t.get("note")),
+            )
 
 
 def list_receipts(limit: int = 50) -> list[dict]:
     with _LOCK, _conn() as c:
-        return [dict(r) for r in c.execute(
-            "SELECT receipt_id,receipt_hash,state,created_at,intent_json,data_label"
-            " FROM receipts ORDER BY created_at DESC LIMIT ?", (limit,)).fetchall()]
+        return [
+            dict(r)
+            for r in c.execute(
+                "SELECT receipt_id,receipt_hash,state,created_at,intent_json,data_label"
+                " FROM receipts ORDER BY created_at DESC LIMIT ?",
+                (limit,),
+            ).fetchall()
+        ]
 
 
 def get_receipt(receipt_id: str) -> dict | None:
     with _LOCK, _conn() as c:
-        row = c.execute("SELECT receipt_json FROM receipts WHERE receipt_id=?",
-                        (receipt_id,)).fetchone()
+        row = c.execute("SELECT receipt_json FROM receipts WHERE receipt_id=?", (receipt_id,)).fetchone()
         return json.loads(row["receipt_json"]) if row else None
 
 
 def save_task(task_id: str, kind: str, inp: dict) -> None:
     with _LOCK, _conn() as c:
         c.execute(
-            "INSERT OR REPLACE INTO agent_tasks(task_id,kind,input_json,status,created_at)"
-            " VALUES(?,?,?,?,?)",
-            (task_id, kind, json.dumps(inp, default=str), "QUEUED",
-             datetime.now(UTC).isoformat()))
+            "INSERT OR REPLACE INTO agent_tasks(task_id,kind,input_json,status,created_at) VALUES(?,?,?,?,?)",
+            (task_id, kind, json.dumps(inp, default=str), "QUEUED", datetime.now(UTC).isoformat()),
+        )
 
 
 def finish_task(task_id: str, output: dict, status: str = "SUCCEEDED") -> None:
     with _LOCK, _conn() as c:
-        c.execute("UPDATE agent_tasks SET status=?, output_json=?, completed_at=? WHERE task_id=?",
-                  (status, json.dumps(output, default=str),
-                   datetime.now(UTC).isoformat(), task_id))
+        c.execute(
+            "UPDATE agent_tasks SET status=?, output_json=?, completed_at=? WHERE task_id=?",
+            (status, json.dumps(output, default=str), datetime.now(UTC).isoformat(), task_id),
+        )
 
 
 def list_tasks(limit: int = 50) -> list[dict]:
     with _LOCK, _conn() as c:
-        return [dict(r) for r in c.execute(
-            "SELECT * FROM agent_tasks ORDER BY created_at DESC LIMIT ?",
-            (limit,)).fetchall()]
+        return [
+            dict(r)
+            for r in c.execute(
+                "SELECT * FROM agent_tasks ORDER BY created_at DESC LIMIT ?", (limit,)
+            ).fetchall()
+        ]

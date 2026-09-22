@@ -12,8 +12,10 @@ token; agents must guess safely. Both are broken.
 EquityMux is the intent and execution router for tokenized stocks. Users
 express *exposure* ("buy $10 of NVDA"); EquityMux discovers all on-chain
 representations, collects evidence, applies a deterministic Portfolio
-Constitution, runs a route tournament, simulates, executes via the Agentic
-Wallet, verifies on-chain, and emits a cryptographic Execution Receipt.
+Constitution and compares normalized provider evidence. The decision desk emits
+a replayable decision receipt and exposes policy counterfactuals. The existing
+Agentic Wallet execution path remains blocked until exact transaction simulation,
+fresh reference evidence and authenticated approval are implemented and verified.
 
 ## Users
 
@@ -31,8 +33,8 @@ Wallet, verifies on-chain, and emits a cryptographic Execution Receipt.
 
 ## Success criteria (hackathon)
 
-1. `pnpm verify:live` green without credentials.
-2. Full pipeline produces receipts; one small mainnet tx after wallet auth.
+1. Recorded demo passes; live checks report current evidence honestly.
+2. Decisions replay independently; a small mainnet trade remains a release gate.
 3. Constitution visibly constrains execution (fail-closed demonstrations).
 4. Honest labels: VERIFIED / BLOCKED / RECORDED — zero fake claims.
 

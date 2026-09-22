@@ -8,6 +8,10 @@
 **/.ruff_cache
 **/broadcast
 **/cache
+**/.cache
+**/.pytest_cache
+**/test-results
+**/playwright-report
 .git
 .env
 .env.*

@@ -1,49 +1,34 @@
-# Project Roadmap
+﻿# Product roadmap
 
-## Done (verified in this repo)
+## Implemented
 
-- Live RWA discovery across Ondo / xStocks / bStock on BSC; **510
-  underlyings** indexed (`/api/underlyings`).
-- Canonical equity graph; Decimal normalization; multiplier-aware pricing;
-  **TTL cache + parallel enrichment** (~0.8 s full graph); **peer
-  reference fallback** with `peer:*` provenance.
-- Portfolio Constitution: NL compiler + deterministic engine + hashing.
-- Route tournament with per-rule reasons; fail-closed on missing evidence.
-- Execution state machine, simulation binding, stale-quote protection.
-- Canonical receipts, sha256; **client + server dual verification**;
-  cross-language parity test vector. Foundry notary contract (4 tests);
-  BSC testnet deploy dry-run (343,595 gas).
-- FastAPI surface + Next.js frontend (7 routes, build green; health
-  fingerprint guards the dev proxy).
-- Agentic Wallet CLI boundary; verify:live read-only command.
-- **Keeper**: canonical `bag` scaffold, `bag doctor` all-PASS, deterministic
-  `doWorkAndSubmit` → EquityMux API (no LLM in the paid path).
-- **x402** challenge surface (`/api/agent/tasks/paid`): 402 + `accepts`
-  when configured, honest 501 otherwise.
-- Dockerfiles (api+web verified), compose, `ci-local.sh`, CI with vitest +
-  keeper + secrets scan + demo-mode smoke test. Clean-checkout judge test
-  passed end-to-end.
-- **Kline reference fallback** — bStock-only tickers resolve a `kline:close`
-  reference when `stockInfo.price` is null and no peer exists.
-- Receipt provenance: `dataLabel` inside the hashed body (`verify:receipt`).
-- DX evidence pipeline: 9 recorded issues → `docs/dx-report.md`.
+- BSC discovery and multiplier-aware prices across Ondo, xStocks and bStock.
+- Deterministic decision desk with source labels and rejected alternatives.
+- Same-snapshot policy comparison and a liquidity-evidence challenge.
+- Self-contained receipts, browser hash verification and offline replay.
+- REST, CLI and read-only MCP using the same engine.
+- Execution state machine hardened against missing simulation, stale prices and absent risk context.
+- Foundry registry source and BNB Agent Studio integration scaffold.
 
-## Blocked on human action
+See [validation](validation.md) for actual results. Historical discovery counts,
+benchmark timings and dry-run gas estimates are not current production metrics.
 
-- Wallet sign-in (`baw auth signin`) → unlocks executable quote, simulation
-  probe, tiny mainnet proof tx (`pnpm verify:mainnet-execution`).
-- Receipt-registry **broadcast** → needs tBNB on the throwaway deployer
-  (`docs/deployment-guide.md` has the faucet + command).
-- Public deploy target choice → then ERC-8004 registration.
-- Agent Studio deploy → AWS/Azure creds (or 48 h `bnb` testnet trial).
+## Required before a live trade
 
-## Near-term
+1. Integrate authoritative reference observation times and executable depth.
+2. Bind exact sender, recipient, chain, calldata, value and quote expiry to simulation and approval.
+3. Authenticate execution requests, bind approval to the plan hash and prevent replay.
+4. Verify post-trade balance deltas against the intended position.
+5. Obtain explicit authorization for mainnet spend, then record a small real trade.
 
-- Receipt commit tx on the deployed registry (post-deploy).
-- x402 paid endpoint demo on the deployed keeper + facilitator wiring.
+Wallet login alone does not resolve these engineering requirements.
 
-## Later
+## Submission operations
 
-- Multi-underlying portfolio intents ("rebalance to 60/40 NVDA/AAPL").
-- Limit-order routes via `baw limit-order`.
-- Receipt anchoring cadence + public verification page.
+- Publish stable web/API deployments and record verified URLs.
+- Record the 2–4 minute demo and genuine developer-written DX report.
+- Deploy the receipt registry if on-chain anchoring adds demonstrable value.
+- Deploy Agent Studio and prove settlement before claiming completion of the special-prize integration.
+
+Multi-asset optimization, autonomous trading and payments are deferred until the
+single-exposure workflow has dependable execution evidence.

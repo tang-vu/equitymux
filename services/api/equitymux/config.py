@@ -4,6 +4,7 @@ Safety model: even a permissive user Constitution can never exceed the
 system-level ceilings defined here. EXECUTION_ENABLED defaults to False and indeed
 the default value of MAX_MAINNET_NOTIONAL_USD is small on purpose.
 """
+
 import os
 from functools import lru_cache
 from pathlib import Path
@@ -35,7 +36,9 @@ class Settings(BaseSettings):
     baw_timeout_s: float = 60.0
 
     # --- BSC RPC (read-only verification + simulation fallback) ---
-    bsc_rpc_urls: str = "https://bsc-dataseed.binance.org,https://bsc-dataseed1.defibit.io,https://bsc-dataseed1.ninicoin.io"
+    bsc_rpc_urls: str = (
+        "https://bsc-dataseed.binance.org,https://bsc-dataseed1.defibit.io,https://bsc-dataseed1.ninicoin.io"
+    )
 
     # --- x402 payment surface (keeper tasks) ---
     # When set, POST /api/agent/tasks/paid answers 402 with an x402 `accepts`

@@ -6,11 +6,18 @@ from equitymux.services.state_machine import ExecutionStateMachine, InvalidTrans
 
 def test_happy_path():
     sm = ExecutionStateMachine()
-    for s in (ExecState.INTENT_COMPILED, ExecState.DISCOVERING, ExecState.QUOTING,
-              ExecState.POLICY_EVALUATION, ExecState.SIMULATING,
-              ExecState.AWAITING_CONFIRMATION, ExecState.READY,
-              ExecState.EXECUTING, ExecState.PENDING_CONFIRMATION,
-              ExecState.CONFIRMED):
+    for s in (
+        ExecState.INTENT_COMPILED,
+        ExecState.DISCOVERING,
+        ExecState.QUOTING,
+        ExecState.POLICY_EVALUATION,
+        ExecState.SIMULATING,
+        ExecState.AWAITING_CONFIRMATION,
+        ExecState.READY,
+        ExecState.EXECUTING,
+        ExecState.PENDING_CONFIRMATION,
+        ExecState.CONFIRMED,
+    ):
         sm.transition(s)
     assert sm.terminal and len(sm.history) == 11
 

@@ -4,6 +4,7 @@ This is a deterministic rule-based compiler (no LLM required). An LLM MAY be
 used to draft the same JSON, but the compiled output is validated by pydantic
 and hashed — interpretation is frozen at approval time.
 """
+
 from __future__ import annotations
 
 import re
@@ -24,27 +25,44 @@ def _p(regex: str):
     def wrap(fn):
         _PATTERNS.append((re.compile(regex, re.IGNORECASE), fn))
         return fn
+
     return wrap
 
 
-@_p(r"(?:never spend (?:my )?last|keep at least|reserve(?: of)?|leave)\s*\$?" + _NUM + r"\s*(usdc|usdt|usd1|u|dollars)?")
+@_p(
+    r"(?:never spend (?:my )?last|keep at least|reserve(?: of)?|leave)\s*\$?"
+    + _NUM
+    + r"\s*(usdc|usdt|usd1|u|dollars)?"
+)
 def _reserve(c: PortfolioConstitution, m: re.Match):
     c.reserve.min_quote_reserve = Decimal(m.group(1))
     if m.group(2) and m.group(2).lower() != "dollars":
         c.reserve.quote_asset = m.group(2).upper()
 
 
-@_p(r"(?:no more than|never put more than|max(?:imum)?)\s*" + _NUM + r"\s*%\s*(?:of (?:the |my )?portfolio )?(?:in(?:to)?|per)\s*(?:one|a single|each)\s*(?:company|stock|ticker|underlying)")
+@_p(
+    r"(?:no more than|never put more than|max(?:imum)?)\s*"
+    + _NUM
+    + r"\s*%\s*(?:of (?:the |my )?portfolio )?(?:in(?:to)?|per)\s*(?:one|a single|each)\s*(?:company|stock|ticker|underlying)"
+)
 def _concentration(c: PortfolioConstitution, m: re.Match):
     c.concentration.max_single_underlying_pct = Decimal(m.group(1))
 
 
-@_p(r"(?:no more than|never put more than|max(?:imum)?)\s*" + _NUM + r"\s*%\s*(?:of (?:the |my )?portfolio )?(?:in(?:to)?|per)\s*(?:one|a single|each)\s*(?:platform|issuer|provider)")
+@_p(
+    r"(?:no more than|never put more than|max(?:imum)?)\s*"
+    + _NUM
+    + r"\s*%\s*(?:of (?:the |my )?portfolio )?(?:in(?:to)?|per)\s*(?:one|a single|each)\s*(?:platform|issuer|provider)"
+)
 def _concentration_platform(c: PortfolioConstitution, m: re.Match):
     c.concentration.max_single_platform_pct = Decimal(m.group(1))
 
 
-@_p(r"(?:never pay more than|pay no more than|max(?:imum)? premium(?: of)?|no more than)\s*" + _NUM + r"\s*(?:bps|basis points)\s*(?:over|above|premium)?")
+@_p(
+    r"(?:never pay more than|pay no more than|max(?:imum)? premium(?: of)?|no more than)\s*"
+    + _NUM
+    + r"\s*(?:bps|basis points)\s*(?:over|above|premium)?"
+)
 def _premium(c: PortfolioConstitution, m: re.Match):
     c.execution.max_premium_bps = Decimal(m.group(1))
 
@@ -54,7 +72,11 @@ def _slippage(c: PortfolioConstitution, m: re.Match):
     c.execution.max_slippage_bps = Decimal(m.group(1))
 
 
-@_p(r"when (?:the )?(?:underlying )?(?:stock )?market is closed[^.]*?max(?:imum)? premium\s*(?:of|is)?\s*" + _NUM + r"\s*(?:bps|basis points)")
+@_p(
+    r"when (?:the )?(?:underlying )?(?:stock )?market is closed[^.]*?max(?:imum)? premium\s*(?:of|is)?\s*"
+    + _NUM
+    + r"\s*(?:bps|basis points)"
+)
 def _closed_premium(c: PortfolioConstitution, m: re.Match):
     c.market_hours.max_premium_bps_when_closed = Decimal(m.group(1))
 
@@ -85,12 +107,17 @@ def _stale(c: PortfolioConstitution, m: re.Match):
     c.reference.max_reference_age_s = int(Decimal(m.group(1)) * mult)
 
 
-@_p(r"only trade (?:approved )?(?:platforms?|issuers?)\s*:?\s*([a-z,\s]+)"
-    r"|only\s+(?:(?:use|trade|on|via)\s+)?((?:ondo|xstocks?|bstocks?)\b[a-z,\s]*)")
+@_p(
+    r"only trade (?:approved )?(?:platforms?|issuers?)\s*:?\s*([a-z,\s]+)"
+    r"|only\s+(?:(?:use|trade|on|via)\s+)?((?:ondo|xstocks?|bstocks?)\b[a-z,\s]*)"
+)
 def _platforms(c: PortfolioConstitution, m: re.Match):
     src = m.group(1) or m.group(2)
-    names = [n.strip().lower() for n in re.split(r"[,\s]+and\s+|,\s*|\s+and\s+|\s+", src)
-             if n.strip().rstrip(".") in {"ondo", "xstocks", "xstock", "bstocks", "bstock"}]
+    names = [
+        n.strip().lower()
+        for n in re.split(r"[,\s]+and\s+|,\s*|\s+and\s+|\s+", src)
+        if n.strip().rstrip(".") in {"ondo", "xstocks", "xstock", "bstocks", "bstock"}
+    ]
     if names:
         norm = {"xstock": "xstocks", "bstock": "bstock", "bstocks": "bstock"}
         c.representation.allowed_platforms = sorted({norm.get(n, n) for n in names})
@@ -112,7 +139,10 @@ def _autonomous(c: PortfolioConstitution, m: re.Match):
     c.automation.allow_autonomous_rebalance = True
 
 
-@_p(r"(?:never spend more than|max(?:imum)?(?: single)? (?:transaction|trade|order)(?: size)?(?: of)?|per transaction)\s*\$?" + _NUM)
+@_p(
+    r"(?:never spend more than|max(?:imum)?(?: single)? (?:transaction|trade|order)(?: size)?(?: of)?|per transaction)\s*\$?"
+    + _NUM
+)
 def _max_notional(c: PortfolioConstitution, m: re.Match):
     c.execution.max_notional_usd = Decimal(m.group(1))
 
@@ -155,7 +185,7 @@ def uncovered_fragments(text: str) -> list[str]:
         if not s:
             continue
         idx = text.find(s)
-        if idx >= 0 and not any(covered[idx:idx + len(s)]):
+        if idx >= 0 and not any(covered[idx : idx + len(s)]):
             out.append(s)
     return out
 

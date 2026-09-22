@@ -1,5 +1,5 @@
-"""Execution state machine with validated transitions and persisted history.
-"""
+"""Execution state machine with validated transitions and persisted history."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
@@ -12,11 +12,14 @@ _ALLOWED: dict[ExecState, set[ExecState]] = {
     ExecState.AWAITING_POLICY_APPROVAL: {ExecState.DISCOVERING, ExecState.POLICY_REJECTED},
     ExecState.DISCOVERING: {ExecState.QUOTING, ExecState.NO_VALID_ROUTE},
     ExecState.QUOTING: {ExecState.POLICY_EVALUATION, ExecState.NO_VALID_ROUTE},
-    ExecState.POLICY_EVALUATION: {ExecState.SIMULATING, ExecState.NO_VALID_ROUTE,
-                                  ExecState.AWAITING_CONFIRMATION, ExecState.POLICY_REJECTED},
+    ExecState.POLICY_EVALUATION: {
+        ExecState.SIMULATING,
+        ExecState.NO_VALID_ROUTE,
+        ExecState.AWAITING_CONFIRMATION,
+        ExecState.POLICY_REJECTED,
+    },
     ExecState.NO_VALID_ROUTE: set(),
-    ExecState.SIMULATING: {ExecState.AWAITING_CONFIRMATION, ExecState.READY,
-                           ExecState.SIMULATION_FAILED},
+    ExecState.SIMULATING: {ExecState.AWAITING_CONFIRMATION, ExecState.READY, ExecState.SIMULATION_FAILED},
     ExecState.SIMULATION_FAILED: set(),
     ExecState.AWAITING_CONFIRMATION: {ExecState.READY, ExecState.POLICY_REJECTED},
     ExecState.READY: {ExecState.EXECUTING, ExecState.POLICY_REJECTED},
@@ -37,19 +40,19 @@ class InvalidTransition(Exception):
 class ExecutionStateMachine:
     def __init__(self):
         self.state = ExecState.INTENT_RECEIVED
-        self.history: list[dict] = [{
-            "state": self.state.value,
-            "at": datetime.now(UTC).isoformat(),
-            "note": "intent accepted",
-        }]
+        self.history: list[dict] = [
+            {
+                "state": self.state.value,
+                "at": datetime.now(UTC).isoformat(),
+                "note": "intent accepted",
+            }
+        ]
 
     def transition(self, to: ExecState, note: str = "") -> ExecState:
         if to not in _ALLOWED[self.state]:
             raise InvalidTransition(f"{self.state.value} -> {to.value} not allowed")
         self.state = to
-        self.history.append({"state": to.value,
-                             "at": datetime.now(UTC).isoformat(),
-                             "note": note})
+        self.history.append({"state": to.value, "at": datetime.now(UTC).isoformat(), "note": note})
         return to
 
     @property

@@ -11,8 +11,7 @@ from equitymux.domain.mathx import (
 
 
 def test_premium_bps_positive():
-    assert premium_bps(Decimal(181), Decimal(180)) == pytest.approx(
-        Decimal("55.55"), abs=Decimal("0.01"))
+    assert premium_bps(Decimal(181), Decimal(180)) == pytest.approx(Decimal("55.55"), abs=Decimal("0.01"))
 
 
 def test_premium_bps_discount():

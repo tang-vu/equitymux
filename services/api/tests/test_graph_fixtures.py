@@ -1,4 +1,5 @@
 """Contract tests against recorded live fixtures (fetched 2026-09-17)."""
+
 from pathlib import Path
 
 import pytest
@@ -13,8 +14,7 @@ def test_stock_list_fixture_shapes(fixture_payloads):
         d = fixture_payloads(f"stock-list-type{t}.json")
         assert d["code"] == "000000" and isinstance(d["data"], list)
         for item in d["data"]:
-            assert {"chainId", "contractAddress", "symbol", "ticker", "type",
-                    "multiplier"} <= set(item)
+            assert {"chainId", "contractAddress", "symbol", "ticker", "type", "multiplier"} <= set(item)
             assert item["type"] == t
 
 
@@ -22,8 +22,7 @@ def test_nvda_on_all_platforms(fixture_payloads):
     found = {}
     for t in (1, 2, 3):
         d = fixture_payloads(f"stock-list-type{t}.json")
-        nvda = [i for i in d["data"] if i["ticker"] == "NVDA"
-                and str(i["chainId"]) == "56"]
+        nvda = [i for i in d["data"] if i["ticker"] == "NVDA" and str(i["chainId"]) == "56"]
         if nvda:
             found[t] = nvda[0]["contractAddress"]
     # verified live on 2026-09-17
@@ -37,6 +36,7 @@ def test_multiplier_present_and_not_one(fixture_payloads):
     d = fixture_payloads("stock-list-type1.json")
     nvda = next(i for i in d["data"] if i["ticker"] == "NVDA")
     from decimal import Decimal
+
     assert Decimal(nvda["multiplier"]) != Decimal(1)
 
 

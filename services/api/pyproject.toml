@@ -10,10 +10,11 @@ dependencies = [
     "pydantic-settings>=2.5",
     "httpx>=0.28",
     "structlog>=24.4",
+    "mcp>=1.28,<2",
 ]
 
 [dependency-groups]
-# Installed by default on `uv sync`; skipped in images via `uv pip install .`
+# Installed by default on `uv sync`; images use `uv sync --frozen --no-dev`.
 dev = [
     "pytest>=8.3",
     "pytest-asyncio>=0.24",
