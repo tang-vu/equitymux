@@ -2,17 +2,17 @@
   {
     "width": 360,
     "route": "/",
-    "inspectionRoundtripMs": 142.60000000149012,
+    "inspectionRoundtripMs": 128.5,
     "layoutShift": 0.0003559027777777778,
-    "resources": 766854,
-    "domNodes": 598
+    "resources": 766866,
+    "domNodes": 596
   },
   {
     "width": 390,
     "route": "/",
-    "inspectionRoundtripMs": 261.8999999985099,
+    "inspectionRoundtripMs": 134.5,
     "layoutShift": 0,
-    "resources": 14887,
+    "resources": 14886,
     "domNodes": 600
   },
   {
@@ -20,7 +20,7 @@
     "route": "/explorer",
     "inspectionRoundtripMs": null,
     "layoutShift": 0.07924241051307092,
-    "resources": 94601,
+    "resources": 94600,
     "domNodes": 1540
   },
   {
@@ -28,7 +28,7 @@
     "route": "/constitution",
     "inspectionRoundtripMs": null,
     "layoutShift": 0.05543686634726673,
-    "resources": 13377,
+    "resources": 13375,
     "domNodes": 114
   },
   {
@@ -36,7 +36,7 @@
     "route": "/terminal",
     "inspectionRoundtripMs": null,
     "layoutShift": 0,
-    "resources": 14627,
+    "resources": 14625,
     "domNodes": 106
   },
   {
@@ -44,55 +44,55 @@
     "route": "/routes",
     "inspectionRoundtripMs": null,
     "layoutShift": 0,
-    "resources": 8586,
+    "resources": 8584,
     "domNodes": 87
   },
   {
     "width": 390,
     "route": "/receipts",
     "inspectionRoundtripMs": null,
-    "layoutShift": 0.08129663016381768,
-    "resources": 14275,
-    "domNodes": 141
+    "layoutShift": 0.10135683760683761,
+    "resources": 15829,
+    "domNodes": 169
   },
   {
     "width": 390,
     "route": "/agent",
     "inspectionRoundtripMs": null,
     "layoutShift": 0.02862991898148148,
-    "resources": 40063,
-    "domNodes": 169
+    "resources": 62501,
+    "domNodes": 177
   },
   {
     "width": 390,
     "route": "/dev",
     "inspectionRoundtripMs": null,
     "layoutShift": 0.01668093393874644,
-    "resources": 46619,
+    "resources": 46653,
     "domNodes": 930
   },
   {
     "width": 768,
     "route": "/",
-    "inspectionRoundtripMs": 138.79999999701977,
+    "inspectionRoundtripMs": 156,
     "layoutShift": 0,
-    "resources": 14887,
+    "resources": 14886,
     "domNodes": 600
   },
   {
     "width": 1024,
     "route": "/",
-    "inspectionRoundtripMs": 148.70000000298023,
+    "inspectionRoundtripMs": 159.20000000298023,
     "layoutShift": 0,
-    "resources": 14887,
+    "resources": 14886,
     "domNodes": 600
   },
   {
     "width": 1440,
     "route": "/",
-    "inspectionRoundtripMs": 185.39999999850988,
+    "inspectionRoundtripMs": 129.5,
     "layoutShift": 0,
-    "resources": 14887,
+    "resources": 14886,
     "domNodes": 600
   },
   {
@@ -100,7 +100,7 @@
     "route": "/explorer",
     "inspectionRoundtripMs": null,
     "layoutShift": 0.03438037712191358,
-    "resources": 94601,
+    "resources": 94600,
     "domNodes": 1540
   },
   {
@@ -108,7 +108,7 @@
     "route": "/constitution",
     "inspectionRoundtripMs": null,
     "layoutShift": 0.02547340675636574,
-    "resources": 10251,
+    "resources": 10249,
     "domNodes": 115
   },
   {
@@ -116,7 +116,7 @@
     "route": "/terminal",
     "inspectionRoundtripMs": null,
     "layoutShift": 0,
-    "resources": 7226,
+    "resources": 7224,
     "domNodes": 108
   },
   {
@@ -124,7 +124,7 @@
     "route": "/routes",
     "inspectionRoundtripMs": null,
     "layoutShift": 0,
-    "resources": 7226,
+    "resources": 7224,
     "domNodes": 88
   },
   {
@@ -132,23 +132,23 @@
     "route": "/receipts",
     "inspectionRoundtripMs": null,
     "layoutShift": 0,
-    "resources": 10652,
-    "domNodes": 142
+    "resources": 12206,
+    "domNodes": 170
   },
   {
     "width": 1440,
     "route": "/agent",
     "inspectionRoundtripMs": null,
     "layoutShift": 0,
-    "resources": 40063,
-    "domNodes": 169
+    "resources": 62501,
+    "domNodes": 177
   },
   {
     "width": 1440,
     "route": "/dev",
     "inspectionRoundtripMs": null,
     "layoutShift": 0.008226502218364198,
-    "resources": 44013,
+    "resources": 44011,
     "domNodes": 931
   }
 ]

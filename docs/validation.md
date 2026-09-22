@@ -27,9 +27,9 @@ partial verification, replay/download, explicit Constitution activation,
 bounded agent tasks, legacy rejection, long receipt identifiers and API failures
 across every route. Populated and empty workspaces were rendered and inspected.
 
-Measured local home inspection roundtrips were 139–262 ms, including Playwright
+Measured local home inspection roundtrips were 129–160 ms, including Playwright
 dispatch/assertion overhead (not field INP). Observed layout-shift sums were
-0–0.00036 on home and at most 0.082 across the measured routes. The cold first
+0–0.00036 on home and at most 0.102 across the measured routes. The cold first
 navigation transferred approximately 767 kB of resources, including self-hosted
 fonts; subsequent navigation sizes are cached and not comparable cold loads.
 See `docs/demo/browser-measurements.json` and `color-contrast.json` for exact
