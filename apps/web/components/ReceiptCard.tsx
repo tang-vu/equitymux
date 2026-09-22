@@ -22,7 +22,10 @@ export function ReceiptCard({ receipt }: { receipt: Receipt }) {
     setVerify({ status: "running" });
     const client = await verifyReceiptHash(
       receipt as unknown as Record<string, unknown>,
-    );
+    ).catch(() => ({
+      ok: false as const,
+      error: "Browser hashing unavailable",
+    }));
     let serverMatch: boolean | null = null;
     try {
       const s = await api<{ match: boolean }>(
@@ -51,7 +54,7 @@ export function ReceiptCard({ receipt }: { receipt: Receipt }) {
         <Row k="receipt" v={receipt.receiptId} />
         <Row k="hash" v={receipt.receiptHash} accent />
         <Row k="state" v={receipt.state} />
-        <Row k="data" v={receipt.dataLabel ?? "LIVE"} />
+        <Row k="data" v={receipt.dataLabel ?? "Unknown"} />
         <Row k="constitution" v={receipt.policy.constitutionHash} />
         <Row
           k="intent"
@@ -63,7 +66,12 @@ export function ReceiptCard({ receipt }: { receipt: Receipt }) {
         />
         {tx && <Row k="tx" v={tx} link={`https://bscscan.com/tx/${tx}`} />}
       </div>
-      <div className="mt-4 flex gap-2">
+      <p className="small-note mt-4">
+        An execution-pipeline record can describe a blocked attempt. Hash
+        integrity does not establish source authenticity or a completed stock
+        purchase.
+      </p>
+      <div className="mt-4 flex flex-wrap gap-2">
         <button
           className="text-xs px-3 py-1.5 rounded border border-[var(--color-edge)] hover:border-[var(--color-accent)]"
           onClick={() => navigator.clipboard.writeText(receipt.receiptHash)}
@@ -87,6 +95,7 @@ export function ReceiptCard({ receipt }: { receipt: Receipt }) {
             a.href = URL.createObjectURL(blob);
             a.download = `equitymux-receipt-${receipt.receiptId}.json`;
             a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
           }}
         >
           download JSON
@@ -162,13 +171,13 @@ function Row({
         <a
           href={link}
           target="_blank"
-          className="text-[var(--color-info)] truncate"
+          className="text-[var(--color-info)] break-all"
         >
           {v}
         </a>
       ) : (
         <span
-          className={`truncate ${accent ? "text-[var(--color-accent)]" : ""}`}
+          className={`break-all ${accent ? "text-[var(--color-accent)]" : ""}`}
         >
           {v}
         </span>

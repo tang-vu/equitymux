@@ -1,5 +1,7 @@
 "use client";
 
+import { WorkspaceIntro } from "@/components/WorkspaceIntro";
+
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { api, type ExploreResult } from "@/lib/api";
@@ -27,16 +29,13 @@ export default function Explorer() {
 
   const closed = data?.market?.openState === false;
   return (
-    <div className="space-y-6">
-      <header className="flex items-end justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Equity Explorer
-          </h1>
-          <p className="text-sm text-[var(--color-ink-2)] mt-1">
-            Every tokenized representation of an underlying, normalized.
-          </p>
-        </div>
+    <div className="workspace-page space-y-6">
+      <WorkspaceIntro
+        index="02 / ASSET UNIVERSE"
+        title="Every wrapper, in context."
+        description="Search the underlying. Inspect issuer units, source references and the limits of each observation."
+      >
+        {" "}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -45,6 +44,7 @@ export default function Explorer() {
           className="flex gap-2"
         >
           <input
+            aria-label="Underlying ticker"
             className="bg-transparent border border-[var(--color-edge)] rounded-lg px-3 py-2 text-sm w-32 mono uppercase"
             value={ticker}
             onChange={(e) => setTicker(e.target.value)}
@@ -53,23 +53,26 @@ export default function Explorer() {
             {isFetching ? "…" : "Explore"}
           </button>
         </form>
-      </header>
+      </WorkspaceIntro>
 
       {data?.market && (
         <div
           className={`panel p-4 flex items-center gap-4 ${closed ? "border-[var(--color-warn)]" : ""}`}
         >
-          <span className={`chip ${closed ? "chip-warn" : "chip-pass"}`}>
+          <span className={`chip ${closed ? "chip-warn" : "chip-info"}`}>
             {String(data.market.marketStatus ?? "unknown").toUpperCase()}
           </span>
           {closed && (
             <span className="text-sm text-[var(--color-warn)]">
-              Weekend/closed mode — reference price is the last close, not live.
+              Venue closed. Reference observation time and freshness are
+              unverified.
             </span>
           )}
           {!closed && (
             <span className="text-sm text-[var(--color-ink-2)]">
-              Underlying venue open. Reference price is live.
+              {data.market.openState === true
+                ? "Underlying venue open. Reference freshness is unverified."
+                : "Venue open status: Unknown. Reference freshness is unverified."}
             </span>
           )}
           {data.market.nextOpenTime != null && (
@@ -87,9 +90,30 @@ export default function Explorer() {
         </div>
       )}
 
-      <div className="grid md:grid-cols-3 gap-4">
+      <p className="small-note">
+        <strong>{data?.dataLabel ?? "Unknown provenance"}</strong>
+        {" · "}
+        Catalog observations are not executable quotes. Market cap, holders and
+        volume do not establish executable depth. Source links do not verify
+        legal rights or redemption.
+      </p>
+      {!isFetching && data?.representations.length === 0 && (
+        <p className="panel p-5">
+          No representations returned for {q}. Try another underlying.
+        </p>
+      )}
+      <div
+        className={
+          "grid md:grid-cols-3 gap-4" +
+          (isFetching && !data ? " catalog-loading" : "")
+        }
+      >
+        {isFetching && !data && <p>Loading issuer observations…</p>}
         {(data?.representations ?? []).map((r) => (
-          <div key={r.token_address} className="panel p-4 space-y-3">
+          <div
+            key={r.token_address}
+            className="panel catalog-card p-4 space-y-3"
+          >
             <div className="flex items-center justify-between">
               <div>
                 <span className="font-semibold">{r.token_symbol}</span>
@@ -110,8 +134,7 @@ export default function Explorer() {
                 k="reference"
                 v={
                   fmt(r.reference_price_usd) +
-                  (r.reference_price_source &&
-                  r.reference_price_source !== "stockInfo"
+                  (r.reference_price_source
                     ? ` (${r.reference_price_source})`
                     : "")
                 }
@@ -120,7 +143,7 @@ export default function Explorer() {
               <Field k="decimals" v={String(r.decimals)} />
               <Field
                 k="holders"
-                v={r.liquidity.holders?.toLocaleString() ?? "—"}
+                v={r.liquidity.holders?.toLocaleString() ?? "Unknown"}
               />
               <Field
                 k="mkt cap"
@@ -131,19 +154,20 @@ export default function Explorer() {
                         undefined,
                         { maximumFractionDigits: 0 },
                       )
-                    : "—"
+                    : "Unknown"
                 }
               />
             </div>
-            {r.attestation.supported && (
-              <a
-                className="text-xs text-[var(--color-info)] underline"
-                href={r.attestation.daily_url ?? "#"}
-                target="_blank"
-              >
-                attestation report ↗
-              </a>
-            )}
+            {r.attestation.supported &&
+              r.attestation.daily_url?.startsWith("https://") && (
+                <a
+                  className="text-xs text-[var(--color-info)] underline"
+                  href={r.attestation.daily_url}
+                  target="_blank"
+                >
+                  issuer report (backing unverified) ↗
+                </a>
+              )}
             <div className="text-[10px] text-[var(--color-ink-3)] mono">
               {r.source_evidence.join(" · ")}
             </div>
@@ -156,6 +180,7 @@ export default function Explorer() {
           <h2 className="font-medium text-sm">BSC Underlyings Index</h2>
           <input
             className="bg-transparent border border-[var(--color-edge)] rounded-lg px-3 py-1.5 text-xs w-56 mono"
+            aria-label="Filter catalog by ticker or company"
             placeholder="filter ticker / name…"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
@@ -241,5 +266,5 @@ function Field({ k, v }: { k: string; v: string }) {
 }
 
 function fmt(v: string | null): string {
-  return v == null ? "—" : "$" + Number(v).toFixed(2);
+  return v == null ? "Unknown" : "$" + Number(v).toFixed(2);
 }

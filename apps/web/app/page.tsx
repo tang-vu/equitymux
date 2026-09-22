@@ -2,23 +2,22 @@
 
 import { useEffect, useState } from "react";
 import {
-  ArrowDown,
   ArrowRight,
   ArrowUpRight,
-  Check,
   ChevronDown,
-  Download,
-  Fingerprint,
   LockKeyhole,
   SlidersHorizontal,
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { DecisionRecord } from "@/components/DecisionRecord";
+import { NormalizationScene } from "@/components/NormalizationScene";
 import { ParityMap } from "@/components/ParityMap";
 import { ProviderLedger } from "@/components/ProviderLedger";
 import { verifyReceiptHash } from "@/lib/canonical";
 import {
   DEFAULT_POLICY,
   formatNumber as fmt,
+  formatUsd as usd,
   type DecisionPolicy,
   type DecisionReceipt,
   type PolicyComparison,
@@ -60,6 +59,8 @@ export default function DecisionDesk() {
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState("");
   const [proof, setProof] = useState("");
+  const [inspected, setInspected] = useState<string | null>(null);
+  const [challengeActive, setChallengeActive] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -89,12 +90,14 @@ export default function DecisionDesk() {
     setBusy(true);
     setError("");
     setProof("");
-    setComparison(null);
     try {
       const next = await requestDecision(nextText, mode, policy);
       setReceipt(next);
+      setInspected(null);
+      setChallengeActive(false);
       setPolicy(next.policy);
       setBaseline(next.policy);
+      setComparison(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -102,7 +105,10 @@ export default function DecisionDesk() {
     }
   }
 
-  async function compare(nextPolicy: DecisionPolicy) {
+  async function compare(
+    nextPolicy: DecisionPolicy,
+    kind: "apply" | "challenge" | "restore" = "apply",
+  ) {
     if (!receipt) return;
     setBusy(true);
     setError("");
@@ -112,6 +118,9 @@ export default function DecisionDesk() {
         method: "POST",
         body: JSON.stringify({ receipt, policy: nextPolicy }),
       });
+      if (kind === "challenge" && !challengeActive) setBaseline(receipt.policy);
+      if (kind === "apply") setBaseline(next.receipt.policy);
+      setChallengeActive(kind === "challenge");
       setComparison(next);
       setReceipt(next.receipt);
       setPolicy(next.receipt.policy);
@@ -126,9 +135,16 @@ export default function DecisionDesk() {
     if (!receipt) return;
     setBusy(true);
     setError("");
+    setProof("PENDING · Browser integrity and server replay incomplete");
     try {
       const local = await verifyReceiptHash(
         receipt as unknown as Record<string, unknown>,
+      );
+      setProof(
+        (local.ok && local.match
+          ? "Browser SHA-256 MATCH"
+          : "Browser SHA-256 MISMATCH") +
+          " · Decision replay pending · Provenance pending",
       );
       const result = await api<{
         hashMatch: boolean;
@@ -192,20 +208,22 @@ export default function DecisionDesk() {
             EQUITY RESEARCH / BNB SMART CHAIN
           </p>
           <h1>
-            The exposure desk<span>.</span>
+            One company.
+            <br />
+            <span>Understand every wrapper.</span>
           </h1>
         </div>
         <p className="masthead-note">
-          A considered view of tokenized stocks.
+          Different units. A common basis.
           <br />
-          One intent. Every issuer. Evidence you can keep.
+          Compare the exposure. Keep the evidence.
         </p>
       </div>
 
       <section className="intent-station" aria-label="Exposure intent">
         <div className="intent-topline">
           <label htmlFor="intent" className="label">
-            WHAT DO YOU WANT TO OWN?
+            YOUR RESEARCH INTENT
           </label>
           <label className="source-control">
             <span>Source</span>
@@ -284,6 +302,16 @@ export default function DecisionDesk() {
         </div>
       ) : (
         <>
+          <a className="mobile-verdict-link" href="#research-verdict">
+            <span>
+              {selected
+                ? selected.symbol + " leads the shortlist"
+                : "No qualifying route"}
+            </span>
+            <span>
+              {passing}/{decision!.routes.length} pass · Research only ↓
+            </span>
+          </a>
           <section className="asset-heading" aria-label="Current exposure">
             <div className="asset-identity">
               <span className="asset-monogram" aria-hidden="true">
@@ -297,7 +325,7 @@ export default function DecisionDesk() {
             <div className="asset-stat">
               <span className="label">TARGET EXPOSURE</span>
               <strong>
-                ${fmt(receipt.intent.notional)}
+                {usd(receipt.intent.notional)}
                 <small>{receipt.intent.quote_asset}</small>
               </strong>
             </div>
@@ -320,22 +348,88 @@ export default function DecisionDesk() {
               </span>
               <span>
                 {busy
-                  ? "Updating evidence…"
+                  ? "Request pending · previous evidence shown"
                   : "Prices are observations, not quotes."}
               </span>
             </div>
           </section>
 
+          <div className="instrument-layout">
+            <NormalizationScene
+              receipt={receipt}
+              inspected={inspected ?? decision!.selected}
+              onInspect={setInspected}
+            />
+            <section
+              id="research-verdict"
+              className={
+                "decision-verdict decision-memo " +
+                (selected ? "memo-ready" : "memo-stop")
+              }
+              aria-live="polite"
+            >
+              <div className="memo-topline">
+                <span className="label">THE RESEARCH VERDICT</span>
+                <span className="memo-count">
+                  {passing}/{decision!.routes.length} pass
+                </span>
+              </div>
+              {selected ? (
+                <>
+                  <h3>{selected.symbol}</h3>
+                  <p className="memo-subtitle">leads the research shortlist</p>
+                  <div className="memo-price">
+                    {usd(selected.sharePriceUsd)}
+                    <span>/ underlying share</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h3>
+                    No qualifying
+                    <br />
+                    route.
+                  </h3>
+                  <p className="memo-subtitle">
+                    The right decision is to stop.
+                  </p>
+                </>
+              )}
+              <p className="memo-state">{decision!.state}</p>
+              {!selected && (
+                <p className="decisive-reason">
+                  {Array.from(
+                    new Set(
+                      decision!.routes.flatMap((r) =>
+                        r.checks
+                          .filter((c) => c.status === "FAIL")
+                          .map((c) => c.detail),
+                      ),
+                    ),
+                  ).join(" · ")}
+                </p>
+              )}
+              <p className="memo-explanation">{decision!.explanation}</p>
+              <div className="memo-boundary">
+                <LockKeyhole size={14} />
+                <span>Research only. Execution is locked.</span>
+              </div>
+            </section>
+          </div>
           <div
             className={"research-layout" + (busy ? " research-busy" : "")}
             aria-busy={busy}
           >
             <section className="market-research" aria-label="Market comparison">
               <ProviderLedger
+                inspected={inspected}
+                onInspect={setInspected}
                 routes={decision!.routes}
                 selected={decision!.selected}
               />
               <ParityMap
+                inspected={inspected}
+                onInspect={setInspected}
                 routes={decision!.routes}
                 dispersion={decision!.dispersionBps}
               />
@@ -352,9 +446,12 @@ export default function DecisionDesk() {
                   </p>
                   <button
                     className="text-action"
-                    disabled={busy}
+                    disabled={busy || challengeActive}
                     onClick={() =>
-                      compare({ ...policy, min_liquidity_usd: "100000" })
+                      compare(
+                        { ...receipt.policy, min_liquidity_usd: "100000" },
+                        "challenge",
+                      )
                     }
                   >
                     Require liquidity evidence <ArrowRight size={15} />
@@ -362,7 +459,22 @@ export default function DecisionDesk() {
                 </div>
                 {comparison && (
                   <div className="comparison-result" aria-live="polite">
-                    <strong>Same snapshot. Only the policy changed.</strong>
+                    <strong>
+                      {comparison.sameSnapshot
+                        ? "Same snapshot. Only the policy changed."
+                        : "Snapshot consistency not confirmed."}
+                    </strong>
+                    <div className="snapshot-invariant">
+                      <span className="label">UNCHANGED EVIDENCE</span>
+                      {decision!.routes.map((r) => (
+                        <div key={r.tokenAddress}>
+                          <span>{r.symbol}</span>
+                          <span>{fmt(r.sharePriceUsd)} USD/share</span>
+                          <span>Depth: Unknown</span>
+                        </div>
+                      ))}
+                      <span className="label">CHANGED POLICY OUTCOMES</span>
+                    </div>
                     {comparison.changes.length ? (
                       comparison.changes.map((c) => (
                         <p key={c.symbol}>
@@ -387,7 +499,7 @@ export default function DecisionDesk() {
                     <button
                       className="text-action"
                       disabled={busy}
-                      onClick={() => compare(baseline)}
+                      onClick={() => compare(baseline, "restore")}
                     >
                       Restore baseline policy <ArrowRight size={14} />
                     </button>
@@ -397,48 +509,6 @@ export default function DecisionDesk() {
             </section>
 
             <aside className="decision-column" aria-label="Decision and policy">
-              <section
-                className={
-                  "decision-verdict decision-memo " +
-                  (selected ? "memo-ready" : "memo-stop")
-                }
-                aria-live="polite"
-              >
-                <div className="memo-topline">
-                  <span className="label">THE RESEARCH VERDICT</span>
-                  <span className="memo-count">
-                    {passing}/{decision!.routes.length} pass
-                  </span>
-                </div>
-                {selected ? (
-                  <>
-                    <h3>{selected.symbol}</h3>
-                    <p className="memo-subtitle">
-                      leads the research shortlist
-                    </p>
-                    <div className="memo-price">
-                      ${fmt(selected.sharePriceUsd)}
-                      <span>/ underlying share</span>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <h3>
-                      No qualifying
-                      <br />
-                      route.
-                    </h3>
-                    <p className="memo-subtitle">
-                      The right decision is to stop.
-                    </p>
-                  </>
-                )}
-                <p className="memo-explanation">{decision!.explanation}</p>
-                <div className="memo-boundary">
-                  <LockKeyhole size={14} />
-                  <span>Research only. Execution is locked.</span>
-                </div>
-              </section>
               <details className="policy-editor" id="risk-policy">
                 <summary>
                   <SlidersHorizontal size={16} />
@@ -578,93 +648,13 @@ export default function DecisionDesk() {
             </aside>
           </div>
 
-          <section className="decision-record" aria-label="Decision receipt">
-            <div className="record-intro">
-              <span className="label">THE PAPER TRAIL</span>
-              <h2>
-                A decision you can
-                <br />
-                <em>account for.</em>
-              </h2>
-              <p>
-                Snapshot, policy and every alternative, together in one portable
-                record.
-              </p>
-              <a
-                href="#receipt-actions"
-                className="record-anchor"
-                aria-label="Go to receipt verification"
-              >
-                <ArrowDown size={19} />
-              </a>
-            </div>
-            <div className="receipt-paper">
-              <div className="receipt-topline">
-                <span className="receipt-wordmark">
-                  equitymux / decision record
-                </span>
-                <span className="label">{receipt.dataLabel}</span>
-              </div>
-              <div className="receipt-facts">
-                <div>
-                  <span>Underlying</span>
-                  <strong>{ticker}</strong>
-                </div>
-                <div>
-                  <span>Policy outcome</span>
-                  <strong>
-                    {passing} of {decision!.routes.length} shortlisted
-                  </strong>
-                </div>
-                <div>
-                  <span>Execution</span>
-                  <strong>NOT EXECUTED</strong>
-                </div>
-              </div>
-              <div className="receipt-hash">
-                <Fingerprint size={20} />
-                <div>
-                  <span className="label">SHA-256 / CANONICAL RECEIPT</span>
-                  <code>{receipt.receiptHash}</code>
-                </div>
-              </div>
-              <div className="receipt-actions" id="receipt-actions">
-                <button
-                  className="primary-action"
-                  disabled={busy}
-                  onClick={verify}
-                >
-                  <Check size={15} />
-                  Verify & replay
-                </button>
-                <button
-                  className="text-action"
-                  disabled={busy}
-                  onClick={download}
-                >
-                  <Download size={15} />
-                  Download receipt
-                </button>
-              </div>
-              {proof && (
-                <p
-                  className={
-                    "verification-result " +
-                    (proof.startsWith("MATCH")
-                      ? "verification-pass"
-                      : "verification-fail")
-                  }
-                  role="status"
-                >
-                  {proof}
-                </p>
-              )}
-              <p className="receipt-disclaimer">
-                Replay proves internal consistency. It does not authenticate the
-                source, verify backing, or prove an onchain trade.
-              </p>
-            </div>
-          </section>
+          <DecisionRecord
+            receipt={receipt}
+            busy={busy}
+            proof={proof}
+            verify={verify}
+            download={download}
+          />
           <details className="evidence-limits">
             <summary>
               How to read this evidence <ChevronDown size={14} />

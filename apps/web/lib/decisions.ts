@@ -92,3 +92,11 @@ export function formatNumber(
     minimumFractionDigits: digits,
   });
 }
+
+export function formatUsd(
+  value: string | null | undefined,
+  digits = 2,
+): string {
+  const formatted = formatNumber(value, digits);
+  return formatted === "Unknown" ? formatted : "$" + formatted;
+}

@@ -1,5 +1,7 @@
 "use client";
 
+import { WorkspaceIntro } from "@/components/WorkspaceIntro";
+
 import { useQuery } from "@tanstack/react-query";
 import { api, type Config, type DxEvent, type Health } from "@/lib/api";
 
@@ -18,16 +20,44 @@ export default function DevPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Developer / API status
-        </h1>
-        <p className="text-sm text-[var(--color-ink-2)] mt-1">
-          Internal diagnostics — never exposes secrets.
-        </p>
-      </header>
+    <div className="workspace-page space-y-6">
+      <WorkspaceIntro
+        index="07 / SYSTEM OBSERVATORY"
+        title="Know what is connected."
+        description="Check the API fingerprint, execution ceilings and diagnostic events. Missing responses remain unknown."
+      ></WorkspaceIntro>
 
+      {(health.error || config.error || events.error) && (
+        <p role="alert" className="api-error">
+          {(health.error || config.error || events.error)?.message}
+        </p>
+      )}
+      <div className="diagnostic-facts">
+        <div>
+          <span>API fingerprint</span>
+          <strong>{health.data?.service ?? "Unknown"}</strong>
+        </div>
+        <div>
+          <span>Execution switch</span>
+          <strong>
+            {health.data
+              ? health.data.executionEnabled
+                ? "Enabled"
+                : "Disabled"
+              : "Unknown"}
+          </strong>
+        </div>
+        <div>
+          <span>Evidence mode</span>
+          <strong>
+            {health.data
+              ? health.data.demoMode
+                ? "RECORDED"
+                : "LIVE"
+              : "Unknown"}
+          </strong>
+        </div>
+      </div>
       {health.data && health.data.service !== "equitymux-api" && (
         <div className="panel p-4 border-[var(--color-fail)] text-sm text-[var(--color-fail)]">
           Proxy warning: <code>/api/health</code> did not identify as{" "}
@@ -38,21 +68,67 @@ export default function DevPage() {
       <div className="grid md:grid-cols-2 gap-5">
         <div className="panel p-5">
           <h2 className="text-sm font-medium mb-3">Health</h2>
-          <pre className="text-[11px] mono overflow-auto max-h-72 bg-[var(--color-bg)] rounded-lg p-3">
-            {JSON.stringify(health.data ?? {}, null, 2)}
-          </pre>
+          <dl className="support-facts">
+            <dt>Wallet adapter</dt>
+            <dd>{health.data?.agenticWallet?.status ?? "Unknown"}</dd>
+            <dt>BSC RPC</dt>
+            <dd>
+              {health.data?.bscRpc?.status ??
+                (health.data?.bscRpc
+                  ? health.data.bscRpc.ok
+                    ? "Responding"
+                    : "Unavailable"
+                  : "Unknown")}
+            </dd>
+            <dt>Market feed</dt>
+            <dd>{health.data?.binanceRwa?.marketStatus ?? "Unknown"}</dd>
+          </dl>
+          <details>
+            <summary>Inspect response fields</summary>
+            <pre className="text-[11px] mono overflow-auto max-h-72 bg-[var(--color-bg)] rounded-lg p-3">
+              {JSON.stringify(health.data ?? {}, null, 2)}
+            </pre>
+          </details>
         </div>
         <div className="panel p-5">
           <h2 className="text-sm font-medium mb-3">
             Safety config (system ceilings)
           </h2>
-          <pre className="text-[11px] mono overflow-auto max-h-72 bg-[var(--color-bg)] rounded-lg p-3">
-            {JSON.stringify(config.data ?? {}, null, 2)}
-          </pre>
+          <dl className="support-facts">
+            <dt>Notional ceiling</dt>
+            <dd>
+              {config.data
+                ? "$" + config.data.maxMainnetNotionalUsd
+                : "Unknown"}
+            </dd>
+            <dt>Premium ceiling</dt>
+            <dd>
+              {config.data ? config.data.maxPremiumBpsHard + " bps" : "Unknown"}
+            </dd>
+            <dt>Slippage ceiling</dt>
+            <dd>
+              {config.data
+                ? config.data.maxSlippageBpsHard + " bps"
+                : "Unknown"}
+            </dd>
+            <dt>Simulation required</dt>
+            <dd>
+              {config.data ? String(config.data.requireSimulation) : "Unknown"}
+            </dd>
+          </dl>
+          <details>
+            <summary>Inspect response fields</summary>
+            <pre className="text-[11px] mono overflow-auto max-h-72 bg-[var(--color-bg)] rounded-lg p-3">
+              {JSON.stringify(config.data ?? {}, null, 2)}
+            </pre>
+          </details>
         </div>
       </div>
 
       <div className="panel p-5">
+        {events.data?.events.length === 0 && (
+          <p className="small-note">No diagnostic events recorded.</p>
+        )}
         <h2 className="text-sm font-medium mb-3">
           DX evidence — integration events (JSONL)
         </h2>

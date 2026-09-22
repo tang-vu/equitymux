@@ -3,9 +3,13 @@ import { formatNumber as fmt, type DecisionRoute } from "@/lib/decisions";
 export function ParityMap({
   routes,
   dispersion,
+  inspected,
+  onInspect,
 }: {
   routes: DecisionRoute[];
   dispersion: string | null;
+  inspected: string | null;
+  onInspect: (address: string) => void;
 }) {
   const values = routes
     .flatMap((r) => (r.premiumBps == null ? [] : [Number(r.premiumBps)]))
@@ -25,7 +29,7 @@ export function ParityMap({
         </div>
       </div>
       <div
-        role="img"
+        role="group"
         aria-label="Provider parity comparison. Negative values are discounts, positive values are premiums to each underlying reference."
       >
         {routes.map((r) => {
@@ -33,7 +37,13 @@ export function ParityMap({
           const x = value == null ? 50 : 50 + (value / bound) * 45;
           return (
             <div key={r.tokenAddress} className="parity-row">
-              <span className="parity-row-name">{r.symbol}</span>
+              <button
+                className="parity-row-name"
+                aria-pressed={inspected === r.tokenAddress}
+                onClick={() => onInspect(r.tokenAddress)}
+              >
+                {r.symbol}
+              </button>
               <div className="parity-track">
                 <span className="parity-zero" />
                 {value != null && (
@@ -57,18 +67,25 @@ export function ParityMap({
               </div>
               <span className="parity-row-value">
                 {fmt(r.premiumBps, 1)} bps
+                <small>
+                  {r.referenceSource ?? "Unknown basis"} ?{" "}
+                  {r.referencePriceUsd == null
+                    ? "Unknown"
+                    : "$" + fmt(r.referencePriceUsd)}
+                </small>
               </span>
             </div>
           );
         })}
         <div className="parity-axis">
-          <span>Discount</span>
-          <span>Reference</span>
-          <span>Premium</span>
+          <span>?{fmt(String(bound), 1)} bps</span>
+          <span>0</span>
+          <span>+{fmt(String(bound), 1)} bps</span>
         </div>
       </div>
       <p className="parity-caption">
-        Each point uses its own underlying reference. Rust indicates a policy
+        Horizontal axis: deviation in basis points from each named reference.
+        Negative is discount; positive is premium. Coral indicates a policy
         rejection. This is price parity, not executable spread.
       </p>
     </section>

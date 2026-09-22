@@ -1,5 +1,7 @@
 "use client";
 
+import { WorkspaceIntro } from "@/components/WorkspaceIntro";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { api, AgentIdentity, TaskResult, X402Info } from "@/lib/api";
@@ -34,7 +36,7 @@ const LAYERS = [
 
 export default function AgentOps() {
   const qc = useQueryClient();
-  const { data } = useQuery({
+  const { data, error } = useQuery({
     queryKey: ["agent"],
     queryFn: () => api<AgentIdentity>("/agent/identity"),
   });
@@ -69,26 +71,41 @@ export default function AgentOps() {
 
   const agent = data?.agent;
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Agent Ops</h1>
-        <p className="text-sm text-[var(--color-ink-2)] mt-1">
-          Autonomous within bounds.
-        </p>
-      </header>
+    <div className="workspace-page space-y-6">
+      <WorkspaceIntro
+        index="04 / AGENT WORKSPACE"
+        title="Bounded by design."
+        description="Run ANALYZE_EXPOSURE tasks through the same deterministic service. Inspect real results, integration status and task history."
+      ></WorkspaceIntro>
 
-      <div className="grid lg:grid-cols-2 gap-5">
+      {(error || x402.error) && (
+        <p role="alert" className="api-error">
+          {(error || x402.error)?.message}
+        </p>
+      )}
+      <div className="workspace-boundary">
+        <strong>ANALYZE_EXPOSURE ONLY</strong>
+        <p>
+          No signing, funding or payment authority. Agent Studio supplies a
+          scaffold and task hook; hosted identity and paid settlement remain
+          separate integrations.
+        </p>
+      </div>
+      <div className="grid lg:grid-cols-2 gap-5 items-start">
         <div className="panel p-5">
           <h2 className="text-sm font-medium mb-3">EquityMux Keeper</h2>
           <div className="space-y-2 text-xs mono">
             <Row k="name" v={agent?.name ?? "EquityMux Keeper"} />
             <Row
               k="erc-8004"
-              v={agent?.erc8004 ?? "not registered (local runtime)"}
+              v={
+                agent?.erc8004 ??
+                (data ? "not registered (local runtime)" : "Unknown")
+              }
             />
-            <Row k="network" v={agent?.network ?? "bsc-mainnet (56)"} />
-            <Row k="endpoint" v={agent?.endpoint ?? "local"} />
-            <Row k="status" v={agent?.status ?? "local-runtime"} />
+            <Row k="network" v={agent?.network ?? "Unknown"} />
+            <Row k="endpoint" v={agent?.endpoint ?? "Unknown"} />
+            <Row k="status" v={agent?.status ?? "Unknown"} />
           </div>
           <div className="mt-4">
             <div className="text-xs text-[var(--color-ink-3)] mb-1.5">
@@ -96,6 +113,7 @@ export default function AgentOps() {
             </div>
             <div className="flex gap-2">
               <input
+                aria-label="ANALYZE_EXPOSURE task JSON"
                 className="flex-1 bg-transparent border border-[var(--color-edge)] rounded-lg px-3 py-2 text-xs mono"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -131,9 +149,11 @@ export default function AgentOps() {
               <Row
                 k="payTo"
                 v={
-                  x402.data?.x402?.payToConfigured
-                    ? "configured"
-                    : "not configured"
+                  !x402.data
+                    ? "Unknown"
+                    : x402.data.x402.payToConfigured
+                      ? "configured"
+                      : "not configured"
                 }
               />
             </div>
@@ -200,7 +220,11 @@ export default function AgentOps() {
             </div>
           ))}
           {(!data?.tasks || data.tasks.length === 0) && (
-            <p className="text-[var(--color-ink-3)]">No tasks yet.</p>
+            <p className="text-[var(--color-ink-3)]">
+              {data
+                ? "No tasks yet. Submit a bounded analysis to begin the history."
+                : "Task history unavailable while identity loads."}
+            </p>
           )}
         </div>
       </div>
