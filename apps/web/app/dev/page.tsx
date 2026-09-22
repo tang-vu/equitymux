@@ -132,8 +132,13 @@ export default function DevPage() {
         <h2 className="text-sm font-medium mb-3">
           DX evidence — integration events (JSONL)
         </h2>
-        <div className="overflow-auto max-h-96">
-          <table className="w-full text-[11px] mono">
+        <div
+          className="overflow-auto max-h-96"
+          role="region"
+          aria-label="Diagnostic events"
+          tabIndex={0}
+        >
+          <table className="w-full min-w-[900px] text-[11px] mono">
             <thead>
               <tr className="text-left text-[var(--color-ink-3)] border-b border-[var(--color-edge)]">
                 <th className="py-1.5 pr-3">time</th>

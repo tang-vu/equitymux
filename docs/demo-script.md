@@ -7,6 +7,7 @@ when available. No wallet is needed. Keep the RECORDED badge visible throughout.
 |---|---|---|
 | 0:00–0:25 | Open decision desk | “Buying NVIDIA exposure should not require choosing a wrapper. These issuers represent the same company differently.” |
 | 0:25–0:50 | Run `Buy $10 of NVDA` in recorded mode | Three real recorded representations, normalized by shares per token. No fabricated quotes. |
+| Optional | Select an issuer sleeve; open **Explain normalization** | Token price divided by shares per token resolves to the service's USD/share observation. The sleeve, ledger inspector and parity reference stay aligned. |
 | 0:50–1:20 | Expand the research lead and a rejected alternative | Show raw token price, multiplier, underlying share price, parity and exact policy checks. A shortlist is not a trade. |
 | 1:20–1:50 | Click **Require liquidity evidence** | The same snapshot now fails the depth requirement. “Market cap is not liquidity. Unknown is not safe.” |
 | 1:50–2:15 | Restore baseline; toggle an issuer or tighten premium; apply to same snapshot | Only the policy changes. Explain the revised shortlist and rejected alternatives. |

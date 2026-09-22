@@ -1,5 +1,54 @@
 # Validation record — 2026-09-22
 
+## Exposure instrument campaign (latest)
+
+Starting commit: `c4dca23`. This campaign upgrades all eight workspaces while
+preserving the API contracts, Decimal calculations, canonical hash behavior and
+disabled execution default. No deployment or funded transaction was performed.
+
+| Check | Current result |
+|---|---|
+| `pnpm lint` | PASS; ESLint and Ruff |
+| `pnpm typecheck` | PASS; TypeScript and 33 Python source files |
+| `pnpm test:api` | PASS; 107 tests, two existing upstream deprecation warnings |
+| `pnpm test:web` | PASS; 16 tests across six files |
+| `pnpm format:check` | PASS; Prettier and 50 Python files |
+| `pnpm build` | PASS; 12 static pages, home first-load JS 113 kB |
+| `pnpm test:e2e` | PASS; 14 Chromium tests, isolated API/web ports 8037/3037 |
+| `pnpm demo` | PASS; strict liquidity policy produces NO_VALID_ROUTE on the same snapshot, both receipts replay |
+| Foundry | PASS; four tests including 256 fuzz cases |
+| Responsive capture | All eight routes at 390/1440 px; home also at 360/768/1024 px; no document overflow |
+| Palette contrast | 10 primary text/surface combinations, 5.83:1 to 14.57:1 |
+
+The browser suite covers recorded initialization, keyboard inspection and
+chapters, synchronized issuer selection, custom same-snapshot baseline restore,
+strict rejection, failed LIVE preservation, unknown/unplotted observations,
+partial verification, replay/download, explicit Constitution activation,
+bounded agent tasks, legacy rejection, long receipt identifiers and API failures
+across every route. Populated and empty workspaces were rendered and inspected.
+
+Measured local home inspection roundtrips were 139–262 ms, including Playwright
+dispatch/assertion overhead (not field INP). Observed layout-shift sums were
+0–0.00036 on home and at most 0.082 across the measured routes. The cold first
+navigation transferred approximately 767 kB of resources, including self-hosted
+fonts; subsequent navigation sizes are cached and not comparable cold loads.
+See `docs/demo/browser-measurements.json` and `color-contrast.json` for exact
+observations. These are local lab measurements, not cross-device performance
+or full WCAG certification.
+
+Windows dependency restoration was slow and the inherited `.next` had invalid
+symlinks. Windows build/lint/typecheck processes stopped progressing and were
+terminated; the full checks completed in `/tmp/equitymux-instrument` under WSL,
+with Node, pnpm 11.24.0 and Python 3.12. Native Windows build reliability remains
+unverified. This isolated directory is separate from `/root/services/equitymux`,
+the production hosting directory. Reference captures used Playwright because the
+connected CUA browser was unavailable. No reference artwork ships in the app.
+
+Earlier validation and hosting history follows; it does not mean those network
+or deployment actions were repeated for this design campaign.
+
+---
+
 These results apply to the working tree for the decision-desk upgrade. No
 mainnet transaction, registry deployment, paid settlement or public deployment
 was performed during this validation.
