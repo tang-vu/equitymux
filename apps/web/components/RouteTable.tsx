@@ -33,7 +33,12 @@ export function RouteTable({
 }) {
   const [open, setOpen] = useState<string | null>(null);
   return (
-    <div className="panel overflow-hidden">
+    <div
+      className="panel overflow-auto"
+      role="region"
+      aria-label="Legacy route comparison"
+      tabIndex={0}
+    >
       <table className="w-full text-sm">
         <thead>
           <tr className="text-left text-xs uppercase tracking-wider text-[var(--color-ink-3)] border-b border-[var(--color-edge)]">
@@ -57,16 +62,24 @@ export function RouteTable({
             return (
               <Fragment key={rep.token_address}>
                 <tr
-                  onClick={() =>
-                    setOpen(
-                      open === rep.token_address ? null : rep.token_address,
-                    )
-                  }
                   className={`border-b border-[var(--color-edge)] cursor-pointer transition-colors hover:bg-[var(--color-panel-2)] ${isSel ? "bg-[var(--color-panel-2)]" : ""}`}
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{rep.token_symbol}</span>
+                      <button
+                        aria-expanded={open === rep.token_address}
+                        aria-label={"Inspect " + rep.token_symbol + " route"}
+                        onClick={() =>
+                          setOpen(
+                            open === rep.token_address
+                              ? null
+                              : rep.token_address,
+                          )
+                        }
+                        className="font-medium underline underline-offset-4"
+                      >
+                        {rep.token_symbol}
+                      </button>
                       <span className="chip">
                         {PLATFORM_LABEL[rep.platform] ?? rep.platform}
                       </span>
@@ -86,7 +99,10 @@ export function RouteTable({
                   </td>
                   <td
                     className={`px-3 py-3 table-num mono ${
-                      c.premium_bps && Number(c.premium_bps) > 40
+                      c.policy?.results.some(
+                        (r) =>
+                          r.status === "FAIL" && r.rule.includes("premium"),
+                      )
                         ? "text-[var(--color-fail)]"
                         : "text-[var(--color-pass)]"
                     }`}
@@ -183,9 +199,15 @@ export function RouteTable({
                         </div>
                         <div>
                           <div className="text-[var(--color-ink-3)] uppercase tracking-wider mb-1">
-                            Evidence & score
+                            Reasons, evidence & score
                           </div>
                           <div className="space-y-1 text-[var(--color-ink-2)]">
+                            {c.reason_codes.map((code) => (
+                              <p key={code}>
+                                {code.toLowerCase().replaceAll("_", " ")}{" "}
+                                <code>({code})</code>
+                              </p>
+                            ))}
                             {rep.source_evidence.map((e) => (
                               <div key={e} className="mono">
                                 · {e}

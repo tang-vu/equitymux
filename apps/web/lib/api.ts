@@ -104,6 +104,7 @@ export interface Candidate {
 
 export interface ExploreResult {
   ticker: string;
+  dataLabel?: "LIVE" | "RECORDED";
   market: Record<string, unknown> & {
     marketStatus?: string;
     openState?: boolean;
@@ -149,7 +150,7 @@ export interface Health {
   version?: string;
   demoMode: boolean;
   executionEnabled: boolean;
-  bscRpc?: { ok: boolean; chainId?: number; block?: number };
+  bscRpc?: { ok: boolean; chainId?: number; block?: number; status?: string };
   agenticWallet?: { installed: boolean; status?: string };
   binanceRwa?: { ok: boolean; marketStatus?: string };
 }

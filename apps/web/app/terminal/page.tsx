@@ -1,5 +1,7 @@
 "use client";
 
+import { WorkspaceIntro } from "@/components/WorkspaceIntro";
+
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { api, type RunResult, type Health } from "@/lib/api";
@@ -34,28 +36,31 @@ export default function Terminal() {
   const needsConfirm = result?.state === "AWAITING_CONFIRMATION";
 
   return (
-    <div className="space-y-8">
-      <section className="pt-10 pb-4 text-center">
-        <h1 className="text-4xl font-semibold tracking-tight">
-          Own the stock exposure,{" "}
-          <span className="text-[var(--color-accent)]">
-            not the wrapper complexity
-          </span>
-          .
-        </h1>
-        <p className="mt-3 text-[var(--color-ink-2)] max-w-2xl mx-auto">
-          Tell EquityMux what exposure you want and the constraints you care
-          about. It compares tokenized representations, verifies market context,
-          simulates execution, and routes only when your policy allows it.
+    <div className="workspace-page space-y-8">
+      <WorkspaceIntro
+        index="05 / EXECUTION PIPELINE"
+        title="Research meets its boundary."
+        description="Inspect the legacy intent pipeline, from discovery to policy checks. The current wallet adapter cannot bind swap simulation to the submitted transaction; execution fails closed."
+      />
+      <div className="workspace-boundary">
+        <strong>BOUND SWAP SIMULATION · BLOCKED</strong>
+        <p>
+          A quote or balance probe is not transaction-bound simulation. A
+          confirmation boolean is not authentication. The execution kill switch
+          remains off by default.
         </p>
-      </section>
+      </div>
 
       <section className="panel p-5">
-        <label className="text-xs uppercase tracking-widest text-[var(--color-ink-3)]">
+        <label
+          htmlFor="terminal-intent"
+          className="text-xs uppercase tracking-widest text-[var(--color-ink-3)]"
+        >
           What exposure do you want?
         </label>
         <div className="mt-2 flex gap-3">
           <input
+            id="terminal-intent"
             className="flex-1 bg-transparent border border-[var(--color-edge)] rounded-lg px-4 py-3 text-lg"
             placeholder="Buy $10 of NVIDIA exposure under my Constitution"
             value={text}
@@ -116,8 +121,8 @@ export default function Terminal() {
                 <span className="chip chip-warn mr-2">
                   confirmation required
                 </span>
-                Policy or wallet boundary requires explicit confirmation for
-                this route.
+                This legacy confirmation flag is not authenticated authorization
+                and cannot bypass execution blockers.
               </div>
               <button
                 className="px-5 py-2 rounded-lg bg-[var(--color-accent)] text-[var(--color-accent-ink)] font-semibold text-sm"
@@ -128,7 +133,10 @@ export default function Terminal() {
               </button>
             </div>
           )}
-          <ReceiptCard receipt={result.receipt} />
+          <ReceiptCard
+            key={result.receipt.receiptHash}
+            receipt={result.receipt}
+          />
         </section>
       )}
 
@@ -143,7 +151,7 @@ export default function Terminal() {
           />
           <Stat
             label="Agentic Wallet"
-            value={health.agenticWallet?.status ?? "not installed"}
+            value={health.agenticWallet?.status ?? "Unknown"}
             warn={health.agenticWallet?.status !== "CONNECTED"}
           />
           <Stat

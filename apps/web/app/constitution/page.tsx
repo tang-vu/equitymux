@@ -1,5 +1,7 @@
 "use client";
 
+import { WorkspaceIntro } from "@/components/WorkspaceIntro";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { api, CompiledConstitution, ConstitutionRevision } from "@/lib/api";
@@ -68,16 +70,27 @@ export default function ConstitutionPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Portfolio Constitution
-        </h1>
-        <p className="text-sm text-[var(--color-ink-2)] mt-1">
-          Your money follows rules, not prompts.
-        </p>
-      </header>
+    <div className="workspace-page space-y-6">
+      <WorkspaceIntro
+        index="03 / AUTHORIZATION"
+        title="Rules before capital."
+        description="Compile, inspect, then explicitly activate your Portfolio Constitution. This execution policy is separate from the research shortlist."
+      ></WorkspaceIntro>
 
+      {(active.error || history.error || compile.error) && (
+        <p role="alert" className="api-error">
+          {(active.error || history.error || compile.error)?.message}
+        </p>
+      )}
+      {active.isPending && (
+        <p className="workspace-boundary">Loading active Constitution…</p>
+      )}
+      {active.data && !active.data.active && (
+        <p className="workspace-boundary">
+          No active Constitution. Compile a draft and review its supported rules
+          before activation.
+        </p>
+      )}
       {active.data?.active && (
         <div className="panel p-4">
           <div className="flex items-center justify-between">
@@ -106,16 +119,25 @@ export default function ConstitutionPage() {
         <div className="panel p-5">
           <h2 className="text-sm font-medium mb-2">Natural language</h2>
           <textarea
+            disabled={compile.isPending || approve.isPending}
+            aria-label="Constitution instructions"
             className="w-full h-72 bg-transparent border border-[var(--color-edge)] rounded-lg p-3 text-sm mono"
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              setText(e.target.value);
+              setDraft(null);
+            }}
           />
           <div className="mt-2 flex flex-wrap gap-1.5">
             {EXAMPLES.map((e) => (
               <button
                 key={e}
+                disabled={compile.isPending || approve.isPending}
                 className="text-[11px] px-2 py-1 rounded-full border border-[var(--color-edge)] text-[var(--color-ink-3)] hover:text-ink"
-                onClick={() => setText((t) => t + "\n" + e + ".")}
+                onClick={() => {
+                  setText((t) => t + "\n" + e + ".");
+                  setDraft(null);
+                }}
               >
                 + {e}
               </button>
@@ -140,9 +162,20 @@ export default function ConstitutionPage() {
           )}
           {draft && (
             <>
-              <pre className="text-[11px] mono overflow-auto max-h-64 bg-[var(--color-bg)] rounded-lg p-3">
-                {JSON.stringify(draft.constitution, null, 2)}
-              </pre>
+              <div className="compiled-rules">
+                <h3>Supported rules</h3>
+                <ul>
+                  {draft.matchedRules.map((rule) => (
+                    <li key={rule}>{rule.replaceAll("_", " ")}</li>
+                  ))}
+                </ul>
+              </div>
+              <details>
+                <summary>Exact compiled policy ? JSON</summary>
+                <pre className="text-[11px] mono overflow-auto max-h-64 bg-[var(--color-bg)] rounded-lg p-3">
+                  {JSON.stringify(draft.constitution, null, 2)}
+                </pre>
+              </details>
               {draft.uncompiledSentences?.length > 0 && (
                 <div className="mt-3 text-xs">
                   <span className="chip chip-warn">not compiled</span>

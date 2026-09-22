@@ -48,6 +48,9 @@ export function PipelineStages({
   ].includes(state);
   return (
     <div className="panel p-4">
+      <p className="small-note mb-3">
+        Recorded transitions only. Unvisited stages are not completed work.
+      </p>
       <div className="flex items-center gap-1 overflow-x-auto">
         {ORDER.map((s, i) => {
           const seen = visited.has(s);
@@ -87,6 +90,21 @@ export function PipelineStages({
           {transitions.length} transitions recorded in receipt
         </span>
       </div>
+      <details className="mt-3">
+        <summary>Transition details & reason codes</summary>
+        <ol className="transition-log">
+          {transitions.map((t, i) => (
+            <li key={i}>
+              <strong>
+                {LABEL[t.state] ?? t.state.toLowerCase().replaceAll("_", " ")}
+              </strong>
+              <time>{t.at}</time>
+              <p>{t.note ?? "No additional detail recorded."}</p>
+              <code>{t.state}</code>
+            </li>
+          ))}
+        </ol>
+      </details>
     </div>
   );
 }

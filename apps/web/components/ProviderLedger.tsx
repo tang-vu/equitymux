@@ -1,8 +1,12 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { ArrowUpRight, Check, ChevronDown, X } from "lucide-react";
-import { formatNumber as fmt, type DecisionRoute } from "@/lib/decisions";
+import {
+  formatNumber as fmt,
+  formatUsd as usd,
+  type DecisionRoute,
+} from "@/lib/decisions";
 
 const names: Record<string, string> = {
   ondo: "Ondo",
@@ -13,11 +17,14 @@ const names: Record<string, string> = {
 export function ProviderLedger({
   routes,
   selected,
+  inspected,
+  onInspect,
 }: {
   routes: DecisionRoute[];
   selected: string | null;
+  inspected: string | null;
+  onInspect: (address: string | null) => void;
 }) {
-  const [expanded, setExpanded] = useState<string | null>(null);
   return (
     <div className="ledger">
       <div className="section-heading">
@@ -43,12 +50,16 @@ export function ProviderLedger({
         </thead>
         <tbody>
           {routes.map((r) => {
-            const open = expanded === r.tokenAddress;
+            const open = inspected === r.tokenAddress;
             const lead = r.tokenAddress === selected;
             return (
               <Fragment key={r.tokenAddress}>
                 <tr
-                  className={"route-evidence" + (lead ? " route-selected" : "")}
+                  className={
+                    "route-evidence" +
+                    (lead ? " route-selected" : "") +
+                    (open ? " route-inspected" : "")
+                  }
                 >
                   <td className="issuer-cell">
                     <span className="issuer-mark" data-issuer={r.platform}>
@@ -60,7 +71,7 @@ export function ProviderLedger({
                     </div>
                   </td>
                   <td data-label="Share price" className="ledger-price">
-                    ${fmt(r.sharePriceUsd)}
+                    {usd(r.sharePriceUsd)}
                   </td>
                   <td data-label="vs. reference" className="mono">
                     {fmt(r.premiumBps, 1)} <span className="unit">bps</span>
@@ -93,7 +104,7 @@ export function ProviderLedger({
                       aria-label={"Inspect " + r.symbol + " evidence"}
                       aria-expanded={open}
                       aria-controls={"evidence-" + r.tokenAddress}
-                      onClick={() => setExpanded(open ? null : r.tokenAddress)}
+                      onClick={() => onInspect(open ? null : r.tokenAddress)}
                     >
                       <ChevronDown size={16} />
                     </button>
@@ -106,13 +117,13 @@ export function ProviderLedger({
                         <div className="normalization-proof">
                           <span className="label">THE NORMALIZATION</span>
                           <p>
-                            <strong>${fmt(r.tokenPriceUsd)}</strong>
+                            <strong>{usd(r.tokenPriceUsd)}</strong>
                             <span>token price</span>
                             <span className="math-symbol">÷</span>
                             <strong>{fmt(r.sharesPerToken, 6)}</strong>
                             <span>shares / token</span>
                             <span className="math-symbol">=</span>
-                            <strong>${fmt(r.sharePriceUsd)}</strong>
+                            <strong>{usd(r.sharePriceUsd)}</strong>
                             <span>per share</span>
                           </p>
                         </div>
@@ -127,7 +138,13 @@ export function ProviderLedger({
                                   ) : (
                                     <X size={14} className="fail-icon" />
                                   )}
-                                  <span>{check.detail}</span>
+                                  <span>
+                                    <strong>
+                                      {check.status} ? {check.rule}
+                                    </strong>
+                                    <br />
+                                    {check.detail}
+                                  </span>
                                 </li>
                               ))}
                             </ul>
@@ -136,13 +153,13 @@ export function ProviderLedger({
                             <span className="label">SOURCE NOTES</span>
                             <p>
                               Reference{" "}
-                              <strong>${fmt(r.referencePriceUsd)}</strong> from{" "}
+                              <strong>{usd(r.referencePriceUsd)}</strong> from{" "}
                               <code>{r.referenceSource ?? "unavailable"}</code>.
                               Observation time is unverified.
                             </p>
                             <p>
-                              24h turnover: ${fmt(r.volume24hUsd)}. This does
-                              not establish executable liquidity.
+                              24h turnover: {usd(r.volume24hUsd)}. This does not
+                              establish executable liquidity.
                             </p>
                             <p>
                               Indicative exposure: {fmt(r.indicativeShares, 6)}{" "}

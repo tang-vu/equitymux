@@ -1,0 +1,62 @@
+[
+  {
+    "name": "primary on pine",
+    "foreground": "#E5EBE4",
+    "background": "#081C18",
+    "ratio": 14.57
+  },
+  {
+    "name": "secondary on graphite",
+    "foreground": "#B4C2B8",
+    "background": "#131D1A",
+    "ratio": 9.32
+  },
+  {
+    "name": "muted on graphite",
+    "foreground": "#A8B9AE",
+    "background": "#131D1A",
+    "ratio": 8.38
+  },
+  {
+    "name": "action on citron",
+    "foreground": "#081C18",
+    "background": "#D4F36C",
+    "ratio": 14.15
+  },
+  {
+    "name": "verdict on citron",
+    "foreground": "#263E25",
+    "background": "#D4F36C",
+    "ratio": 9.36
+  },
+  {
+    "name": "pass on graphite",
+    "foreground": "#9CDBB7",
+    "background": "#131D1A",
+    "ratio": 10.86
+  },
+  {
+    "name": "reject on graphite",
+    "foreground": "#FFAD9C",
+    "background": "#131D1A",
+    "ratio": 9.61
+  },
+  {
+    "name": "warning on graphite",
+    "foreground": "#E8CC8B",
+    "background": "#131D1A",
+    "ratio": 11.03
+  },
+  {
+    "name": "receipt secondary",
+    "foreground": "#47594B",
+    "background": "#E5EBE4",
+    "ratio": 6.19
+  },
+  {
+    "name": "sleeve secondary",
+    "foreground": "#BDC8BF",
+    "background": "#30473A",
+    "ratio": 5.83
+  }
+]

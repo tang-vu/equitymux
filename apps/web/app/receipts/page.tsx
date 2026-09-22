@@ -1,12 +1,14 @@
 "use client";
 
+import { WorkspaceIntro } from "@/components/WorkspaceIntro";
+
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { api, type Receipt, type ReceiptRow } from "@/lib/api";
 import { ReceiptCard } from "@/components/ReceiptCard";
 
 export default function ReceiptsPage() {
-  const { data } = useQuery({
+  const { data, error, isPending } = useQuery({
     queryKey: ["receipts"],
     queryFn: () => api<{ receipts: ReceiptRow[] }>("/receipts"),
   });
@@ -18,13 +20,24 @@ export default function ReceiptsPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Receipts</h1>
-        <p className="text-sm text-[var(--color-ink-2)] mt-1">
-          Every execution should explain itself — hash-verifiable, replayable.
+    <div className="workspace-page space-y-6">
+      <WorkspaceIntro
+        index="06 / EXECUTION ARCHIVE"
+        title="Keep the whole trail."
+        description="Execution-pipeline receipts record attempted transitions, including blocked runs. Home-page exposure decisions are separate, downloadable research records."
+      ></WorkspaceIntro>
+      {(error || detail.error) && (
+        <p role="alert" className="api-error">
+          {(error || detail.error)?.message}
         </p>
-      </header>
+      )}
+      <p className="small-note">
+        {isPending
+          ? "Loading execution archive…"
+          : data
+            ? `${data.receipts.length} execution-pipeline records`
+            : "Archive unavailable"}
+      </p>
       <div className="grid lg:grid-cols-5 gap-5">
         <div className="lg:col-span-2 panel p-4">
           {data?.receipts?.length === 0 && (
@@ -80,10 +93,12 @@ export default function ReceiptsPage() {
         </div>
         <div className="lg:col-span-3">
           {detail.data ? (
-            <ReceiptCard receipt={detail.data} />
+            <ReceiptCard key={detail.data.receiptHash} receipt={detail.data} />
           ) : (
             <div className="panel p-8 text-sm text-[var(--color-ink-3)] text-center">
-              Select a receipt
+              {detail.isFetching
+                ? "Loading selected receipt…"
+                : "Select an execution receipt to inspect its policy, transitions and integrity."}
             </div>
           )}
         </div>
