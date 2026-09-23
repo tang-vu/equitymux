@@ -1,0 +1,8 @@
+{
+  "navigationLoadMs": 210.30000001192093,
+  "transferBytes": 817040,
+  "frameMedianMs": 16.700000000000273,
+  "frameP95Ms": 50,
+  "framesOver50Ms": 2,
+  "sampleFrames": 120
+}

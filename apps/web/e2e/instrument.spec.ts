@@ -1,6 +1,72 @@
 import { expect, test } from "@playwright/test";
 import { writeFile } from "node:fs/promises";
 
+test("aperture chapters move persistent geometry and reverse on seek", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  await expect(page.locator(".aperture-object")).toHaveCount(3);
+  const first = page.locator(".aperture-object").first();
+  const address = await first.getAttribute("data-address");
+  const observe = await first.evaluate(
+    (element) => getComputedStyle(element).transform,
+  );
+  await page.getByRole("button", { name: "02 / Normalize" }).click();
+  await expect(page.locator(".aperture-passage")).toHaveAttribute(
+    "data-chapter",
+    "1",
+  );
+  await page.waitForTimeout(900);
+  const normalized = await first.evaluate(
+    (element) => getComputedStyle(element).transform,
+  );
+  expect(normalized).not.toBe(observe);
+  await page.getByRole("button", { name: "03 / Apply policy" }).click();
+  await page.waitForTimeout(900);
+  const policy = await first.evaluate(
+    (element) => getComputedStyle(element).transform,
+  );
+  expect(policy).not.toBe(normalized);
+  await page.getByRole("button", { name: "01 / Observe" }).click();
+  await page.waitForTimeout(900);
+  expect(await first.getAttribute("data-address")).toBe(address);
+  await expect(page.locator(".aperture-passage")).toHaveAttribute(
+    "data-chapter",
+    "0",
+  );
+});
+
+test("policy shutters keep the old snapshot while comparison is pending", async ({
+  page,
+}) => {
+  await page.route("**/api/decisions/compare", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 700));
+    const response = await route.fetch();
+    await route.fulfill({ response });
+  });
+  await page.goto("/");
+  await expect(page.locator(".policy-shutter-scene")).toContainText(
+    "$219.26 / share",
+  );
+  await page
+    .getByRole("button", { name: "Require liquidity evidence" })
+    .click();
+  await expect(page.locator(".policy-shutter-scene")).toContainText(
+    "COMPARISON PENDING",
+  );
+  await expect(page.locator(".policy-shutter-scene")).toContainText(
+    "$219.26 / share",
+  );
+  await expect(page.locator(".policy-shutter-scene")).toContainText(
+    "NO_VALID_ROUTE",
+  );
+  await expect(page.locator(".policy-shutter-scene")).toContainText(
+    "REQUIRED MINIMUM UNAVAILABLE",
+  );
+});
+
 test("missing observations are readable and never plotted", async ({
   page,
 }) => {
@@ -319,6 +385,10 @@ test("all workspaces fit mobile and desktop, with captures and runtime measureme
         path: `../../docs/demo/instrument-${route === "/" ? "home" : route.slice(1)}-${width}.png`,
         fullPage: true,
       });
+      if (route === "/" && [390, 768, 1440].includes(width))
+        await page.locator(".aperture-stage").screenshot({
+          path: `../../docs/demo/motion/responsive-${width}.png`,
+        });
       let inspectionRoundtripMs: number | null = null;
       if (route === "/") {
         const start = await page.evaluate(() => performance.now());

@@ -1,5 +1,12 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowDown, Check, Download, Fingerprint } from "lucide-react";
 import { formatNumber as fmt, type DecisionReceipt } from "@/lib/decisions";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export function DecisionRecord({
   receipt,
@@ -7,20 +14,72 @@ export function DecisionRecord({
   proof,
   verify,
   download,
+  lanes,
 }: {
   receipt: DecisionReceipt;
   busy: boolean;
   proof: string;
   verify: () => void;
   download: () => void;
+  lanes: [
+    "idle" | "pending" | "pass" | "fail",
+    "idle" | "pending" | "pass" | "fail",
+    "idle" | "pending" | "pass" | "fail",
+  ];
 }) {
+  const scene = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (
+      !scene.current ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
+      return;
+    const context = gsap.context(() => {
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(
+        ".record-plane",
+        { y: 90, rotateX: 25, opacity: 0 },
+        {
+          y: 0,
+          rotateX: 0,
+          opacity: 1,
+          duration: 1.1,
+          stagger: 0.12,
+          ease: "power3.out",
+        },
+      )
+        .fromTo(
+          ".receipt-paper",
+          { y: 55, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.7, ease: "power2.out" },
+          0.55,
+        )
+        .fromTo(
+          ".receipt-hash code",
+          { clipPath: "inset(0 100% 0 0)" },
+          { clipPath: "inset(0 0% 0 0)", duration: 0.6 },
+          1,
+        );
+      ScrollTrigger.create({
+        trigger: scene.current,
+        start: "top 80%",
+        once: true,
+        onEnter: () => tl.play(),
+      });
+    }, scene);
+    return () => context.revert();
+  }, [receipt.receiptHash]);
   const decision = receipt.decision;
   const ticker = receipt.intent.ticker;
   const passing = decision.routes.filter(
     (r) => r.status === "SHORTLISTED",
   ).length;
   return (
-    <section className="decision-record" aria-label="Decision receipt">
+    <section
+      ref={scene}
+      className="decision-record"
+      aria-label="Decision receipt"
+    >
       <div className="record-intro">
         <span className="label">THE PAPER TRAIL</span>
         <h2>
@@ -39,6 +98,23 @@ export function DecisionRecord({
         >
           <ArrowDown size={19} />
         </a>
+      </div>
+      <div className="record-assembly" aria-hidden="true">
+        <span className="record-plane">
+          01 / SNAPSHOT
+          <br />
+          {ticker}
+        </span>
+        <span className="record-plane">
+          02 / APPLIED POLICY
+          <br />
+          {receipt.policy.max_premium_bps} BPS
+        </span>
+        <span className="record-plane">
+          03 / ALTERNATIVES
+          <br />
+          {decision.routes.length} ROUTES
+        </span>
       </div>
       <div className="receipt-paper">
         <div className="receipt-topline">
@@ -121,6 +197,30 @@ export function DecisionRecord({
             {proof}
           </p>
         )}
+        <div className="verification-lanes" aria-label="Verification checks">
+          {(
+            [
+              "Browser integrity",
+              "Server replay",
+              "Provenance consistency",
+            ] as const
+          ).map((name, i) => (
+            <div key={name} data-status={lanes[i]}>
+              <span>
+                {String(i + 1).padStart(2, "0")} / {name}
+              </span>
+              <strong>
+                {lanes[i] === "pass"
+                  ? "✓ VERIFIED"
+                  : lanes[i] === "fail"
+                    ? "FAILED · RETRY"
+                    : lanes[i] === "pending"
+                      ? "CHECKING"
+                      : "AWAITING CHECK"}
+              </strong>
+            </div>
+          ))}
+        </div>
         <p className="receipt-disclaimer">
           Replay proves internal consistency. It does not authenticate the
           source, verify backing, or prove an onchain trade.
