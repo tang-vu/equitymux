@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -13,6 +13,7 @@ import { DecisionRecord } from "@/components/DecisionRecord";
 import { NormalizationScene } from "@/components/NormalizationScene";
 import { ParityMap } from "@/components/ParityMap";
 import { ProviderLedger } from "@/components/ProviderLedger";
+import { PolicyShutters } from "@/components/PolicyShutters";
 import { verifyReceiptHash } from "@/lib/canonical";
 import {
   DEFAULT_POLICY,
@@ -57,8 +58,17 @@ export default function DecisionDesk() {
   const [receipt, setReceipt] = useState<DecisionReceipt | null>(null);
   const [comparison, setComparison] = useState<PolicyComparison | null>(null);
   const [busy, setBusy] = useState(true);
+  const [comparisonPending, setComparisonPending] = useState(false);
   const [error, setError] = useState("");
   const [proof, setProof] = useState("");
+  const [verificationLanes, setVerificationLanes] = useState<
+    [
+      "idle" | "pending" | "pass" | "fail",
+      "idle" | "pending" | "pass" | "fail",
+      "idle" | "pending" | "pass" | "fail",
+    ]
+  >(["idle", "idle", "idle"]);
+  const requestVersion = useRef(0);
   const [inspected, setInspected] = useState<string | null>(null);
   const [challengeActive, setChallengeActive] = useState(false);
 
@@ -87,11 +97,14 @@ export default function DecisionDesk() {
   }, []);
 
   async function run(nextText = text) {
+    const version = ++requestVersion.current;
     setBusy(true);
     setError("");
     setProof("");
+    setVerificationLanes(["idle", "idle", "idle"]);
     try {
       const next = await requestDecision(nextText, mode, policy);
+      if (version !== requestVersion.current) return;
       setReceipt(next);
       setInspected(null);
       setChallengeActive(false);
@@ -99,9 +112,10 @@ export default function DecisionDesk() {
       setBaseline(next.policy);
       setComparison(null);
     } catch (e) {
+      if (version !== requestVersion.current) return;
       setError(e instanceof Error ? e.message : String(e));
     } finally {
-      setBusy(false);
+      if (version === requestVersion.current) setBusy(false);
     }
   }
 
@@ -111,8 +125,10 @@ export default function DecisionDesk() {
   ) {
     if (!receipt) return;
     setBusy(true);
+    setComparisonPending(true);
     setError("");
     setProof("");
+    setVerificationLanes(["idle", "idle", "idle"]);
     try {
       const next = await api<PolicyComparison>("/decisions/compare", {
         method: "POST",
@@ -127,6 +143,7 @@ export default function DecisionDesk() {
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
+      setComparisonPending(false);
       setBusy(false);
     }
   }
@@ -136,10 +153,16 @@ export default function DecisionDesk() {
     setBusy(true);
     setError("");
     setProof("PENDING · Browser integrity and server replay incomplete");
+    setVerificationLanes(["pending", "pending", "pending"]);
     try {
       const local = await verifyReceiptHash(
         receipt as unknown as Record<string, unknown>,
       );
+      setVerificationLanes([
+        local.ok && local.match ? "pass" : "fail",
+        "pending",
+        "pending",
+      ]);
       setProof(
         (local.ok && local.match
           ? "Browser SHA-256 MATCH"
@@ -154,6 +177,11 @@ export default function DecisionDesk() {
         method: "POST",
         body: JSON.stringify({ receipt }),
       });
+      setVerificationLanes([
+        local.ok && local.match ? "pass" : "fail",
+        result.hashMatch && result.decisionMatch ? "pass" : "fail",
+        result.provenanceMatch ? "pass" : "fail",
+      ]);
       setProof(
         local.ok &&
           local.match &&
@@ -164,6 +192,7 @@ export default function DecisionDesk() {
           : "MISMATCH · Receipt verification failed",
       );
     } catch (e) {
+      setVerificationLanes((current) => [current[0], "fail", "fail"]);
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(false);
@@ -457,6 +486,7 @@ export default function DecisionDesk() {
                     Require liquidity evidence <ArrowRight size={15} />
                   </button>
                 </div>
+                <PolicyShutters receipt={receipt} busy={comparisonPending} />
                 {comparison && (
                   <div className="comparison-result" aria-live="polite">
                     <strong>
@@ -654,6 +684,7 @@ export default function DecisionDesk() {
             proof={proof}
             verify={verify}
             download={download}
+            lanes={verificationLanes}
           />
           <details className="evidence-limits">
             <summary>

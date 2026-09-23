@@ -2,25 +2,25 @@
   {
     "width": 360,
     "route": "/",
-    "inspectionRoundtripMs": 128.5,
-    "layoutShift": 0.0003559027777777778,
-    "resources": 766866,
-    "domNodes": 596
+    "inspectionRoundtripMs": 159.29999999701977,
+    "layoutShift": 0,
+    "resources": 817010,
+    "domNodes": 699
   },
   {
     "width": 390,
     "route": "/",
-    "inspectionRoundtripMs": 134.5,
+    "inspectionRoundtripMs": 135.20000000298023,
     "layoutShift": 0,
-    "resources": 14886,
-    "domNodes": 600
+    "resources": 14887,
+    "domNodes": 705
   },
   {
     "width": 390,
     "route": "/explorer",
     "inspectionRoundtripMs": null,
     "layoutShift": 0.07924241051307092,
-    "resources": 94600,
+    "resources": 94646,
     "domNodes": 1540
   },
   {
@@ -28,7 +28,7 @@
     "route": "/constitution",
     "inspectionRoundtripMs": null,
     "layoutShift": 0.05543686634726673,
-    "resources": 13375,
+    "resources": 13422,
     "domNodes": 114
   },
   {
@@ -36,7 +36,7 @@
     "route": "/terminal",
     "inspectionRoundtripMs": null,
     "layoutShift": 0,
-    "resources": 14625,
+    "resources": 14672,
     "domNodes": 106
   },
   {
@@ -44,7 +44,7 @@
     "route": "/routes",
     "inspectionRoundtripMs": null,
     "layoutShift": 0,
-    "resources": 8584,
+    "resources": 8631,
     "domNodes": 87
   },
   {
@@ -52,55 +52,55 @@
     "route": "/receipts",
     "inspectionRoundtripMs": null,
     "layoutShift": 0.10135683760683761,
-    "resources": 15829,
-    "domNodes": 169
+    "resources": 20544,
+    "domNodes": 253
   },
   {
     "width": 390,
     "route": "/agent",
     "inspectionRoundtripMs": null,
     "layoutShift": 0.02862991898148148,
-    "resources": 62501,
-    "domNodes": 177
+    "resources": 107428,
+    "domNodes": 193
   },
   {
     "width": 390,
     "route": "/dev",
     "inspectionRoundtripMs": null,
     "layoutShift": 0.01668093393874644,
-    "resources": 46653,
+    "resources": 46700,
     "domNodes": 930
   },
   {
     "width": 768,
     "route": "/",
-    "inspectionRoundtripMs": 156,
+    "inspectionRoundtripMs": 160.5,
     "layoutShift": 0,
-    "resources": 14886,
-    "domNodes": 600
+    "resources": 14887,
+    "domNodes": 705
   },
   {
     "width": 1024,
     "route": "/",
-    "inspectionRoundtripMs": 159.20000000298023,
+    "inspectionRoundtripMs": 195.29999999701977,
     "layoutShift": 0,
-    "resources": 14886,
-    "domNodes": 600
+    "resources": 14887,
+    "domNodes": 705
   },
   {
     "width": 1440,
     "route": "/",
-    "inspectionRoundtripMs": 129.5,
+    "inspectionRoundtripMs": 190.80000001192093,
     "layoutShift": 0,
-    "resources": 14886,
-    "domNodes": 600
+    "resources": 14887,
+    "domNodes": 705
   },
   {
     "width": 1440,
     "route": "/explorer",
     "inspectionRoundtripMs": null,
     "layoutShift": 0.03438037712191358,
-    "resources": 94600,
+    "resources": 94646,
     "domNodes": 1540
   },
   {
@@ -108,7 +108,7 @@
     "route": "/constitution",
     "inspectionRoundtripMs": null,
     "layoutShift": 0.02547340675636574,
-    "resources": 10249,
+    "resources": 10296,
     "domNodes": 115
   },
   {
@@ -116,7 +116,7 @@
     "route": "/terminal",
     "inspectionRoundtripMs": null,
     "layoutShift": 0,
-    "resources": 7224,
+    "resources": 7271,
     "domNodes": 108
   },
   {
@@ -124,7 +124,7 @@
     "route": "/routes",
     "inspectionRoundtripMs": null,
     "layoutShift": 0,
-    "resources": 7224,
+    "resources": 7271,
     "domNodes": 88
   },
   {
@@ -132,23 +132,23 @@
     "route": "/receipts",
     "inspectionRoundtripMs": null,
     "layoutShift": 0,
-    "resources": 12206,
-    "domNodes": 170
+    "resources": 16921,
+    "domNodes": 254
   },
   {
     "width": 1440,
     "route": "/agent",
     "inspectionRoundtripMs": null,
     "layoutShift": 0,
-    "resources": 62501,
-    "domNodes": 177
+    "resources": 107428,
+    "domNodes": 193
   },
   {
     "width": 1440,
     "route": "/dev",
     "inspectionRoundtripMs": null,
-    "layoutShift": 0.008226502218364198,
-    "resources": 44011,
+    "layoutShift": 0.009738995587384261,
+    "resources": 44058,
     "domNodes": 931
   }
 ]

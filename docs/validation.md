@@ -1,3 +1,49 @@
+# Validation record — 2026-09-23
+
+## Authored product motion
+
+Starting checkout: `c1a0dd116ec922db29b44ef1a1931c40aa9079c5` on
+`design/exposure-instrument`, with a clean working tree. Reviewed main was
+`873d27c28672bb6dba672f9acbd7dea5b65f7b6b`. The motion implementation
+uses repository-owned procedural CSS 3D geometry and GSAP ScrollTrigger. The
+same token-address keyed issuer evidence feeds the aperture, policy shutters,
+ledger and receipt. No backend contract, canonical hash, Decimal calculation or
+execution switch changed.
+
+| Surface | Version / result |
+|---|---|
+| Source | This campaign's commit is recorded in git and the PR; starting HEAD above |
+| Isolated production build | Next 15.5.25, build ID `T2aoCBhen4ONtrlKJhq0S`, 12 routes, home first-load JS 160 kB |
+| Local production preview | `http://127.0.0.1:3051`, API `:8051`; `/api/health` returned `service=equitymux-api`, `demoMode=true`, `executionEnabled=false` |
+| Public deployment | Reachable at `equitymux.tangvu.dev`, but still an older build: public home chunk `page-84bf7cfec291dba0.js` versus preview `page-dcfe5ff7f930d890.js`; deployed source SHA/build ID are not exposed |
+| Frontend lint / typecheck | PASS in isolated WSL source; Next build also completed its lint and type phase |
+| Frontend unit tests | PASS, 16 tests |
+| API tests | PASS, 107 tests; two existing upstream deprecation warnings |
+| Ruff / mypy / format | PASS; 33 Python source files checked by mypy, 50 formatted files checked by Ruff |
+| Production Chromium E2E | PASS, 16-test full run on isolated ports 8049/3049, plus a targeted pending-comparison test on 8052/3052; covers geometry reversal, challenge, restore, replay, keyboard, errors and responsive 390/768/1440 review |
+| Deterministic demo | PASS; same-snapshot depth challenge yields `NO_VALID_ROUTE`, both receipts replay |
+
+The running app produced [six scene frames](demo/motion/), responsive aperture
+captures at 390/768/1440 px and a [30.64 second recording](demo/motion/equitymux-motion.webm).
+The local Chromium navigation load event was 210 ms with about 817 kB resource
+transfer. In a 120-frame sample during the entrance, median frame interval was
+16.7 ms, p95 was 50 ms and two intervals exceeded 50 ms. These are local lab
+observations while other browser tests were active, not field performance.
+Exact values are in [motion measurements](demo/motion/measurements.json) and
+[responsive measurements](demo/browser-measurements.json).
+
+The connected reference browser was unavailable. Published reference pages and
+the earlier browser study in [design.md](design.md) informed the direction; no
+reference assets were copied. Native Windows pnpm build/lint/typecheck/API
+commands stalled in this checkout, matching the earlier validation note. The
+same source passed the isolated WSL checks and production browser journey. The
+public hostname initially failed DNS resolution, then recovered; its API health
+reported `demoMode=true` and `executionEnabled=false`. Its distinct home chunk
+confirms this campaign is not deployed there. No mainnet action, paid settlement
+or public host update occurred.
+
+---
+
 # Validation record — 2026-09-22
 
 ## Exposure instrument campaign (latest)

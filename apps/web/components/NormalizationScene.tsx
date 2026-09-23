@@ -3,30 +3,27 @@
 import { useState } from "react";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { formatNumber as fmt, type DecisionReceipt } from "@/lib/decisions";
+import { ExposureAperture } from "./ExposureAperture";
 
 const names: Record<string, string> = {
   ondo: "Ondo",
   xstocks: "xStocks",
   bstock: "bStocks",
 };
-const chapters = [
+const chapterCopy = [
   [
-    "Observe",
     "Different wrappers. Different units.",
     "Each sleeve contains the observed token price and its shares-per-token multiplier. Legal rights, backing and redemption terms remain issuer-specific.",
   ],
   [
-    "Normalize",
     "One explicit basis: USD / share.",
     "Divide token price by shares per token. The service supplies the normalized result using Decimal arithmetic. A common unit makes comparison possible; it does not make prices equal.",
   ],
   [
-    "Apply policy",
     "Evidence passes through your policy.",
     "Issuer, reference, premium and market checks narrow the shortlist. Requiring unavailable executable depth rejects a route. Volume cannot fill that gap.",
   ],
   [
-    "Keep evidence",
     "A decision travels with its inputs.",
     "The record carries the snapshot, policy, alternatives and reasons. NOT_EXECUTED is the boundary: replay checks consistency, never a completed purchase.",
   ],
@@ -41,7 +38,7 @@ export function NormalizationScene({
   inspected: string | null;
   onInspect: (address: string) => void;
 }) {
-  const [chapter, setChapter] = useState(1);
+  const [chapter, setChapter] = useState(0);
   const routes = receipt.decision.routes;
   const prices = routes.flatMap((r) =>
     r.sharePriceUsd !== null && Number.isFinite(Number(r.sharePriceUsd))
@@ -58,6 +55,12 @@ export function NormalizationScene({
         <span className="label">01 / ALIGN THE UNITS</span>
         <span className="label">BSC · USD / UNDERLYING SHARE</span>
       </div>
+      <ExposureAperture
+        receipt={receipt}
+        inspected={inspected}
+        onInspect={onInspect}
+        onChapterChange={setChapter}
+      />
       <div className="instrument-body">
         <div className="instrument-asset">
           <span className="label">SELECTED UNDERLYING</span>
@@ -183,20 +186,9 @@ export function NormalizationScene({
         <summary>
           Explain normalization <span>Four chapters, at your pace +</span>
         </summary>
-        <div className="chapter-buttons" aria-label="Normalization chapters">
-          {chapters.map(([name], i) => (
-            <button
-              key={name}
-              aria-pressed={chapter === i}
-              onClick={() => setChapter(i)}
-            >
-              {String(i + 1).padStart(2, "0")} / {name}
-            </button>
-          ))}
-        </div>
         <div className="chapter-copy" aria-live="polite">
-          <h3>{chapters[chapter][1]}</h3>
-          <p>{chapters[chapter][2]}</p>
+          <h3>{chapterCopy[chapter][0]}</h3>
+          <p>{chapterCopy[chapter][1]}</p>
         </div>
       </details>
     </section>
