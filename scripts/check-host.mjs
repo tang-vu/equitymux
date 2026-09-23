@@ -35,7 +35,7 @@ for (const route of [
 }
 assert.equal((await request("/api/dx/events")).status, 403);
 const html = await (await request("/")).text();
-assert.ok(html.includes("The exposure desk"));
+assert.ok(html.includes("Understand every wrapper."));
 console.log(
   JSON.stringify({
     origin: base,
