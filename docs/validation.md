@@ -12,10 +12,10 @@ execution switch changed.
 
 | Surface | Version / result |
 |---|---|
-| Source | This campaign's commit is recorded in git and the PR; starting HEAD above |
+| Source | Motion PR #5 merged as `0115649f5655dfaa70348624f8a050274db94ebb`; starting HEAD above |
 | Isolated production build | Next 15.5.25, build ID `T2aoCBhen4ONtrlKJhq0S`, 12 routes, home first-load JS 160 kB |
 | Local production preview | `http://127.0.0.1:3051`, API `:8051`; `/api/health` returned `service=equitymux-api`, `demoMode=true`, `executionEnabled=false` |
-| Public deployment | Reachable at `equitymux.tangvu.dev`, but still an older build: public home chunk `page-84bf7cfec291dba0.js` versus preview `page-dcfe5ff7f930d890.js`; deployed source SHA/build ID are not exposed |
+| Public deployment | Deployed 2026-09-23 from merged source `0115649f5655dfaa70348624f8a050274db94ebb`; public HTML reports build ID `ye8jlyeNn6b9plIb_tMsQ` and home chunk `page-65d47fdbabff4304.js`; API health reports `demoMode=true`, `executionEnabled=false` |
 | Frontend lint / typecheck | PASS in isolated WSL source; Next build also completed its lint and type phase |
 | Frontend unit tests | PASS, 16 tests |
 | API tests | PASS, 107 tests; two existing upstream deprecation warnings |
@@ -31,6 +31,15 @@ transfer. In a 120-frame sample during the entrance, median frame interval was
 observations while other browser tests were active, not field performance.
 Exact values are in [motion measurements](demo/motion/measurements.json) and
 [responsive measurements](demo/browser-measurements.json).
+
+Public deployment verification on 2026-09-23: the WSL runtime retained its
+`data/` and `dx/` directories and its prior build for rollback. The production
+build from merge `0115649` was installed under `/root/services/equitymux`, and
+only `equitymux-web` was restarted under Windows PM2. Public `/api/health`
+identified `equitymux-api` with demo mode on and execution off. The public
+Chromium journey passed compare, liquidity challenge, baseline restoration and
+receipt replay without a browser error. The host smoke test's homepage text
+assertion was updated for the new heading; its API checks had already passed.
 
 The connected reference browser was unavailable. Published reference pages and
 the earlier browser study in [design.md](design.md) informed the direction; no
